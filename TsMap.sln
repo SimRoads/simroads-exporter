@@ -10,6 +10,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsMap.Canvas.WinForms", "Ts
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsMap.Canvas.Gtk", "TsMap.Canvas.Gtk\TsMap.Canvas.Gtk.csproj", "{417F6DF2-0C7D-4908-8850-AD6DE56A929E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{0B0AEEF8-C13B-4957-B183-D290075DD750}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{524B9927-94AE-4EA5-A8E4-9D907CC19162}"
+	ProjectSection(SolutionItems) = preProject
+		build.yml = build.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +60,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{524B9927-94AE-4EA5-A8E4-9D907CC19162} = {0B0AEEF8-C13B-4957-B183-D290075DD750}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7454CED4-27F8-402E-BA11-575A05BB0952}

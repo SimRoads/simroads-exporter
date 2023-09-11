@@ -1,0 +1,81 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  release:
+    types: [ published ]
+
+env:
+  app_name: TsMap.Canvas
+  publish_folder: publish
+
+jobs:
+  build-windows:
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: Windows,
+            os: windows-latest,
+            project: Wpf,
+            runtime: win-x86,
+            framework: net7.0-windows,
+            is_single_file: "false",
+            build_type: Release
+          }
+        - {
+            name: Linux,
+            os: ubuntu-latest,
+            project: Gtk,
+            runtime: linux-x64,
+            framework: net7.0,
+            is_single_file: "true",
+            build_type: Release
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 7.0.x
+         
+      - name: Clean
+        run: dotnet clean && dotnet nuget locals all --clear
+
+      - name: Publish
+        run: dotnet publish ${{ env.app_name }}/${{ env.app_name }}.${{ matrix.config.project }}/${{ env.app_name }}.${{ matrix.config.project }}.csproj
+          --configuration ${{ matrix.config.build_type }}
+          --output ${{ env.publish_folder }}
+          --self-contained true
+          -p:PublishSingleFile=${{ matrix.config.is_single_file }}
+          --runtime ${{ matrix.config.runtime }}
+          --framework ${{ matrix.config.framework }}
+
+      - name: Create Package
+        shell: bash
+        run: |
+            filename=${{ env.app_name }}-${{ matrix.config.runtime }}
+            if [[ "${{ runner.os }}" == 'Windows' ]]; then
+              7z a $filename.zip ./${{ env.publish_folder }}/*
+            else
+              zip --junk-paths $filename ./${{ env.publish_folder }}/*
+            fi
+
+      - uses: actions/upload-artifact@v2
+        with:
+            name: ${{ matrix.config.runtime }} ${{ matrix.config.build_type }}
+            path: ${{ env.app_name }}-${{ matrix.config.runtime }}.zip
+
+      - name: List Build Directory
+        if: always()
+        shell: bash
+        run: |
+          git status
+          ls -lR ${{ env.publish_folder }}
