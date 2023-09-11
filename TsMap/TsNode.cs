@@ -22,7 +22,7 @@ namespace TsMap
             var rZ = MemoryHelper.ReadSingle(sector.Stream, fileOffset + 0x08);
 
             var rot = Math.PI - Math.Atan2(rZ, rX);
-            Rotation = (float) (rot % Math.PI * 2);
+            Rotation = (float)(rot % Math.PI * 2);
         }
     }
 }

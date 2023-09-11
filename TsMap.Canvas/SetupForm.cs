@@ -1,13 +1,13 @@
 using Eto.Forms;
-using System.IO;
 using System;
-using System.Linq;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 
 namespace TsMap.Canvas
 {
-	public partial class SetupForm : Form
-	{
+    public partial class SetupForm : Form
+    {
         private string gamePath;
         private string modPath;
         private ObservableCollection<Mod> _mods = new ObservableCollection<Mod>();
@@ -187,5 +187,5 @@ namespace TsMap.Canvas
             UpdateModList();
         }
 
-	}
+    }
 }

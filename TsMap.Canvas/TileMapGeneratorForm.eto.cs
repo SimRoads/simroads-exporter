@@ -1,6 +1,4 @@
-﻿using Eto.Forms;
-
-namespace TsMap.Canvas
+﻿namespace TsMap.Canvas
 {
     partial class TileMapGeneratorForm
     {

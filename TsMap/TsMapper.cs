@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -175,7 +174,7 @@ namespace TsMap
                         if (prefab.Token != 0 && !_prefabLookup.ContainsKey(prefab.Token))
                         {
                             _prefabLookup.Add(prefab.Token, prefab);
-                        } 
+                        }
 
                         token = 0;
                         path = "";
@@ -461,7 +460,7 @@ namespace TsMap
                 if (exportFlags.IsActive(ExportFlags.CityLocalizedNames))
                 {
                     cityJObj["LocalizedNames"] = new JObject();
-                    foreach(var locale in Localization.GetLocales())
+                    foreach (var locale in Localization.GetLocales())
                     {
                         var locCityName = Localization.GetLocaleValue(city.City.LocalizationToken, locale);
                         if (locCityName != null)

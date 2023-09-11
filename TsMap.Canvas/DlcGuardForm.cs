@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using TsMap.Common;
 
 namespace TsMap.Canvas
@@ -15,7 +14,7 @@ namespace TsMap.Canvas
         {
             InitializeComponent();
             this.dlcGuards.Clear();
-            dlcGuards.ForEach(dlc => this.dlcGuards.Add(dlc)); 
+            dlcGuards.ForEach(dlc => this.dlcGuards.Add(dlc));
         }
 
         public delegate void UpdateDlcGuardsEvent();

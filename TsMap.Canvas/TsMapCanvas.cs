@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
 using Eto.Drawing;
 using Eto.Forms;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -93,7 +93,7 @@ namespace TsMap.Canvas
         private void LoadCities()
         {
             CitySubMenuItem.Items.Clear();
-            CitySubMenuItem.Items.AddRange(_mapper.Cities.Where(x => !x.Hidden).OrderBy(x => x.ToString()).Select(x => new Command((s,e) => FocusCity(x)) { MenuText = x.ToString() }));
+            CitySubMenuItem.Items.AddRange(_mapper.Cities.Where(x => !x.Hidden).OrderBy(x => x.ToString()).Select(x => new Command((s, e) => FocusCity(x)) { MenuText = x.ToString() }));
         }
 
         private void FocusCity(TsCityItem city)
@@ -188,7 +188,7 @@ namespace TsMap.Canvas
 
                 for (int z = startZoomLevel; z <= endZoomLevel; z++) // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
                 {
-                    ZoomOutAndCenterMap((int) Math.Pow(2, z) * tileSize, (int) Math.Pow(2, z) * tileSize,
+                    ZoomOutAndCenterMap((int)Math.Pow(2, z) * tileSize, (int)Math.Pow(2, z) * tileSize,
                         out PointF pos, out float zoom); // get zoom and start coords for current tile level
 
                     for (int x = 0; x < Math.Pow(2, z); x++)
@@ -255,7 +255,7 @@ namespace TsMap.Canvas
                 {
                     e.Graphics.RestoreTransform();
                     e.Graphics.FillRectangle(Brushes.Black, new Rectangle(0, 0, (int)e.ClipRectangle.Width, (int)e.ClipRectangle.Height));
-                    e.Graphics.DrawText( font,
+                    e.Graphics.DrawText(font,
                         Brushes.CornflowerBlue, 10, 10, $"Generating Tile Map, current tile: {_currentGeneratedTile}/{_totalTileCount}");
 
                     if (_totalTileCount == 0)

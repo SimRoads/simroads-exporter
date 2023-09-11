@@ -1,5 +1,5 @@
-﻿using System;
-using Eto.Forms;
+﻿using Eto.Forms;
+using System;
 
 namespace TsMap.Canvas.Winforms
 {

@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using Eto.Forms;
+﻿using Eto.Forms;
 
 namespace TsMap.Canvas
 {

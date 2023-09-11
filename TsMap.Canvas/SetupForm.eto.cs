@@ -1,13 +1,13 @@
-using Eto.Forms;
 using Eto.Drawing;
+using Eto.Forms;
 using System;
 
 namespace TsMap.Canvas
 {
     partial class SetupForm : Form
-	{
-		void InitializeComponent()
-        { 
+    {
+        void InitializeComponent()
+        {
             this.GameFolderBrowserDialog = new SelectFolderDialog();
             this.NextBtn = new Button();
             this.loadMods = new CheckBox();
@@ -20,7 +20,7 @@ namespace TsMap.Canvas
             this.PrioDown = new Button();
             this.SelectAll = new Button();
             this.PrioUp = new Button();
-            this.modList = new GridView<Mod>() { DataStore = this._mods};
+            this.modList = new GridView<Mod>() { DataStore = this._mods };
             this.BrowseModBtn = new Button();
             this.ModFolderBrowserDialog = new SelectFolderDialog();
 
@@ -139,7 +139,7 @@ namespace TsMap.Canvas
 
             this.modPanel = new DynamicLayout();
             this.modPanel.Visible = false;
-            this.modPanel.BeginVertical(5, new Size(5,5));
+            this.modPanel.BeginVertical(5, new Size(5, 5));
             this.modPanel.Add(SelectedModPathLabel);
             this.modPanel.Add(BrowseModBtn);
             this.modPanel.Add(modList);
@@ -171,9 +171,9 @@ namespace TsMap.Canvas
                     NextBtn,
                 },
                 Spacing = new Size(5, 5)
-			};
+            };
 
-		}
+        }
 
         private SelectFolderDialog GameFolderBrowserDialog;
         private Button NextBtn;

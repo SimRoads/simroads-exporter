@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Eto.Drawing;
+﻿using Eto.Drawing;
+using System.Collections.Generic;
 
 namespace TsMap
 {

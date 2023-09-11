@@ -1,6 +1,6 @@
+using Eto.Drawing;
 using System;
 using System.Collections.Generic;
-using Eto.Drawing;
 using System.Linq;
 using TsMap.Common;
 using TsMap.Helpers;
@@ -53,7 +53,7 @@ namespace TsMap
             var ferryStartTime = DateTime.Now.Ticks;
             if (renderFlags.IsActive(RenderFlags.FerryConnections))
             {
-                var ferryPen = new Pen(palette.FerryLines, 50) {DashStyle = new DashStyle(0, new[]{10f, 10f})};
+                var ferryPen = new Pen(palette.FerryLines, 50) { DashStyle = new DashStyle(0, new[] { 10f, 10f }) };
 
                 foreach (var ferryConnection in _mapper.FerryConnections)
                 {
@@ -376,9 +376,9 @@ namespace TsMap
 
                         for (var i = 0; i < 8; i++)
                         {
-                            var s = i / (float) (8 - 1);
-                            var x = (float) TsRoadLook.Hermite(s, sx, ex, tanSx, tanEx);
-                            var z = (float) TsRoadLook.Hermite(s, sz, ez, tanSz, tanEz);
+                            var s = i / (float)(8 - 1);
+                            var x = (float)TsRoadLook.Hermite(s, sx, ex, tanSx, tanEx);
+                            var z = (float)TsRoadLook.Hermite(s, sz, ez, tanSz, tanEz);
                             newPoints.Add(new PointF(x, z));
                         }
                         road.AddPoints(newPoints);

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Linq;
-using Eto.Forms;
-
-namespace TsMap.Canvas
+﻿namespace TsMap.Canvas
 {
     // https://www.codeproject.com/Articles/202435/Tri-State-Tree-View
     /*public class TriStateTreeView : TreeView

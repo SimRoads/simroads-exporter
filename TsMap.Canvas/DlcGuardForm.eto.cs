@@ -8,7 +8,7 @@ namespace TsMap.Canvas
     {
         private void InitializeComponent()
         {
-            this.DlcGuardCheckedListBox = new CheckBoxList() { DataStore = this.dlcGuards};
+            this.DlcGuardCheckedListBox = new CheckBoxList() { DataStore = this.dlcGuards };
             this.DlcGuardCheckedListBox.Size = new Size(204, 244);
             this.DlcGuardCheckedListBox.TabIndex = 0;
             this.DlcGuardCheckedListBox.SelectedKeysChanged += new EventHandler<EventArgs>(this.DlcGuardCheckedListBox_ItemCheck);

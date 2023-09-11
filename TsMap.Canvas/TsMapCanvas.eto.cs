@@ -1,6 +1,6 @@
-﻿using Eto.Forms;
+﻿using Eto.Drawing;
+using Eto.Forms;
 using System;
-using Eto.Drawing;
 
 namespace TsMap.Canvas
 {
