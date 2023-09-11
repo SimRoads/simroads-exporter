@@ -175,7 +175,7 @@ namespace TsMap
                         if (prefab.Token != 0 && !_prefabLookup.ContainsKey(prefab.Token))
                         {
                             _prefabLookup.Add(prefab.Token, prefab);
-                        }
+                        } 
 
                         token = 0;
                         path = "";
@@ -415,7 +415,7 @@ namespace TsMap
                 mapItem.Update();
             }
 
-            var invalidFerryConnections = _ferryConnectionLookup.Where(x => x.StartPortLocation == PointF.Empty || x.EndPortLocation == PointF.Empty).ToList();
+            var invalidFerryConnections = _ferryConnectionLookup.Where(x => x.StartPortLocation.IsZero || x.EndPortLocation.IsZero).ToList();
             foreach (var invalidFerryConnection in invalidFerryConnections)
             {
                 _ferryConnectionLookup.Remove(invalidFerryConnection);
@@ -552,7 +552,7 @@ namespace TsMap
 
                 overlaysJArr.Add(overlayJObj);
                 if (saveAsPNG && !File.Exists(Path.Combine(overlayPath, $"{mapOverlay.OverlayName}.png")))
-                    b.Save(Path.Combine(overlayPath, $"{mapOverlay.OverlayName}.png"));
+                    b.Save(Path.Combine(overlayPath, $"{mapOverlay.OverlayName}.png"), Eto.Drawing.ImageFormat.Png);
             }
 
             File.WriteAllText(Path.Combine(path, "Overlays.json"), overlaysJArr.ToString(Formatting.Indented));

@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
+using Eto.Drawing;
+using Eto.Forms;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using TsMap.TsItem;
 
 namespace TsMap.Canvas
@@ -50,7 +49,7 @@ namespace TsMap.Canvas
 
             _mapper.Parse();
 
-            CityStripComboBox.Items.AddRange(_mapper.Cities.Where(x => !x.Hidden).ToArray());
+            LoadCities();
 
             if (!_mapper.IsEts2) _startPoint = new PointF(-105000, 15000);
             else _startPoint = new PointF(-1000, -4000);
@@ -60,7 +59,7 @@ namespace TsMap.Canvas
             MapPanel.MouseDown += (s, e) =>
             {
                 _dragging = true;
-                _lastPoint = new PointF(e.X, e.Y);
+                _lastPoint = new PointF(e.Location.X, e.Location.Y);
             };
             MapPanel.MouseUp += (s, e) => _dragging = false;
             MapPanel.MouseMove += (s, e) =>
@@ -68,20 +67,20 @@ namespace TsMap.Canvas
                 if (_dragging)
                 {
                     RedrawMap();
-                    _startPoint.X -= (e.X - _lastPoint.X) / _scale;
-                    _startPoint.Y -= (e.Y - _lastPoint.Y) / _scale;
+                    _startPoint.X -= (e.Location.X - _lastPoint.X) / _scale;
+                    _startPoint.Y -= (e.Location.Y - _lastPoint.Y) / _scale;
                 }
-                _lastPoint = new PointF(e.X, e.Y);
+                _lastPoint = new PointF(e.Location.X, e.Location.Y);
             };
 
             MapPanel.MouseWheel += (s, e) =>
             {
-                _scale += (e.Delta > 0 ? 1 : -1) * 0.05f * _scale;
+                _scale += (e.Delta.Height > 0 ? 1 : -1) * 0.05f * _scale;
                 _scale = Math.Max(_scale, 0.0005f);
                 RedrawMap();
             };
 
-            MapPanel.Resize += TsMapCanvas_Resize;
+            MapPanel.SizeChanged += TsMapCanvas_Resize;
 
             Closed += (s, e) =>
             {
@@ -89,6 +88,19 @@ namespace TsMap.Canvas
                 _tileMapGeneratorForm?.Close();
             };
 
+        }
+
+        private void LoadCities()
+        {
+            CitySubMenuItem.Items.Clear();
+            CitySubMenuItem.Items.AddRange(_mapper.Cities.Where(x => !x.Hidden).OrderBy(x => x.ToString()).Select(x => new Command((s,e) => FocusCity(x)) { MenuText = x.ToString() }));
+        }
+
+        private void FocusCity(TsCityItem city)
+        {
+            _scale = 0.2f;
+            _startPoint = new PointF(city.X - 1000, city.Z - 1000);
+            RedrawMap();
         }
 
         private void RedrawMap(bool force = false)
@@ -102,8 +114,8 @@ namespace TsMap.Canvas
 
         private void SaveTileImage(int z, int x, int y, PointF pos, float zoom, string exportPath, RenderFlags renderFlags) // z = zoomLevel; x = row tile index; y = column tile index
         {
-            using (var bitmap = new Bitmap(tileSize, tileSize))
-            using (var g = Graphics.FromImage(bitmap))
+            using (var bitmap = new Bitmap(tileSize, tileSize, Eto.Drawing.PixelFormat.Format32bppRgba))
+            using (var g = new Graphics(bitmap))
             {
                 pos.X = (x == 0) ? pos.X : pos.X + (bitmap.Width / zoom) * x; // get tile start coords
                 pos.Y = (y == 0) ? pos.Y : pos.Y + (bitmap.Height / zoom) * y;
@@ -193,12 +205,9 @@ namespace TsMap.Canvas
             {
                 _isGeneratingTileMap = false;
                 RedrawMap();
-                Invoke((Action)(() =>
-                {
-                    Activate(); // Bring form to front if minimized
-                    MessageBox.Show("Tile map has been generated!", "TsMap - Tile Map Generation Finished",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }));
+                this.BringToFront(); // Bring form to front if minimized
+                MessageBox.Show("Tile map has been generated!", "TsMap - Tile Map Generation Finished",
+                        MessageBoxButtons.OK, MessageBoxType.Information);
             });
         }
 
@@ -209,7 +218,7 @@ namespace TsMap.Canvas
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            Application.Instance.Quit();
         }
 
         private void ItemVisibilityToolStripMenuItem_Click(object sender, EventArgs e)
@@ -244,11 +253,10 @@ namespace TsMap.Canvas
                 using (var font = new Font("Arial", 20.0f, FontStyle.Bold))
                 using (var pen = new Pen(Brushes.CadetBlue, 4f))
                 {
-
-                    e.Graphics.ResetTransform();
-                    e.Graphics.FillRectangle(Brushes.Black, new Rectangle(0, 0, e.ClipRectangle.Width, e.ClipRectangle.Height));
-                    e.Graphics.DrawString( $"Generating Tile Map, current tile: {_currentGeneratedTile}/{_totalTileCount}", font,
-                        Brushes.CornflowerBlue, 10, 10);
+                    e.Graphics.RestoreTransform();
+                    e.Graphics.FillRectangle(Brushes.Black, new Rectangle(0, 0, (int)e.ClipRectangle.Width, (int)e.ClipRectangle.Height));
+                    e.Graphics.DrawText( font,
+                        Brushes.CornflowerBlue, 10, 10, $"Generating Tile Map, current tile: {_currentGeneratedTile}/{_totalTileCount}");
 
                     if (_totalTileCount == 0)
                     {
@@ -262,7 +270,7 @@ namespace TsMap.Canvas
 
                 return;
             }
-            _renderer.Render(e.Graphics, e.ClipRectangle, _scale, _startPoint, _palette, _renderFlags);
+            _renderer.Render(e.Graphics, new Rectangle(e.ClipRectangle), _scale, _startPoint, _palette, _renderFlags);
         }
 
         private void localizationSettingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -275,8 +283,7 @@ namespace TsMap.Canvas
             {
 
                 _mapper.Localization.ChangeLocalization(localeName);
-                CityStripComboBox.Items.Clear();
-                CityStripComboBox.Items.AddRange(_mapper.Cities.Where(x => !x.Hidden).ToArray());
+                LoadCities();
                 _localizationSettingsForm.Close();
                 RedrawMap();
             };
@@ -288,7 +295,7 @@ namespace TsMap.Canvas
             {
                 return;
             }
-            if (_tileMapGeneratorForm == null || _tileMapGeneratorForm.IsDisposed) _tileMapGeneratorForm = new TileMapGeneratorForm(_appSettings.LastTileMapPath, _renderFlags);
+            /*if (_tileMapGeneratorForm == null || _tileMapGeneratorForm.IsDisposed) _tileMapGeneratorForm = new TileMapGeneratorForm(_appSettings.LastTileMapPath, _renderFlags);
             _tileMapGeneratorForm.Show();
             _tileMapGeneratorForm.BringToFront();
 
@@ -308,7 +315,7 @@ namespace TsMap.Canvas
                 }
 
                 GenerateTileMap(startZoomLevel, endZoomLevel, exportPath, createTiles, (exportFlags & ExportFlags.TileMapInfo) == ExportFlags.TileMapInfo, renderFlags);
-            };
+            };*/
         }
 
         private void FullMapToolStripMenuItem_Click(object sender, EventArgs e)
@@ -324,26 +331,14 @@ namespace TsMap.Canvas
             RedrawMap();
         }
 
-        private void CityStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var city = (TsCityItem)((ToolStripComboBox)sender).SelectedItem;
-            _scale = 0.2f;
-            _startPoint = new PointF(city.X - 1000, city.Z - 1000);
-            RedrawMap();
-        }
-
         private void dLCGuardToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_dlcGuardForm == null || _dlcGuardForm.IsDisposed) _dlcGuardForm = new DlcGuardForm(_mapper.GetDlcGuardsForCurrentGame());
             _dlcGuardForm.Show();
             _dlcGuardForm.BringToFront();
 
-            _dlcGuardForm.UpdateDlcGuards += (index, enabled) =>
+            _dlcGuardForm.UpdateDlcGuards += () =>
             {
-                var guards = _mapper.GetDlcGuardsForCurrentGame();
-
-                var guard = guards.Find(x => x.Index == index);
-                guard.Enabled = enabled;
                 RedrawMap();
             };
         }

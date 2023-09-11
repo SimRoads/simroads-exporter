@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
+using Eto.Drawing;
 using System.Linq;
 using TsMap.Common;
 using TsMap.Helpers;
@@ -28,18 +27,18 @@ namespace TsMap
         public void Render(Graphics g, Rectangle clip, float scale, PointF startPoint, MapPalette palette, RenderFlags renderFlags = RenderFlags.All)
         {
             var startTime = DateTime.Now.Ticks;
-            g.ResetTransform();
             g.FillRectangle(palette.Background, new Rectangle(0, 0, clip.Width, clip.Height));
+            g.SaveTransform();
 
             g.ScaleTransform(scale, scale);
             g.TranslateTransform(-startPoint.X, -startPoint.Y);
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.ImageInterpolation = ImageInterpolation.None;
             g.PixelOffsetMode = PixelOffsetMode.None;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.AntiAlias = true;
 
             if (_mapper == null)
             {
-                g.DrawString("Map object not initialized", _defaultFont, palette.Error, 5, 5);
+                g.DrawText(_defaultFont, palette.Error, 5, 5, "Map object not initialized");
                 return;
             }
 
@@ -54,7 +53,7 @@ namespace TsMap
             var ferryStartTime = DateTime.Now.Ticks;
             if (renderFlags.IsActive(RenderFlags.FerryConnections))
             {
-                var ferryPen = new Pen(palette.FerryLines, 50) {DashPattern = new[] {10f, 10f}};
+                var ferryPen = new Pen(palette.FerryLines, 50) {DashStyle = new DashStyle(0, new[]{10f, 10f})};
 
                 foreach (var ferryConnection in _mapper.FerryConnections)
                 {
@@ -74,13 +73,14 @@ namespace TsMap
                             conn.StartPortLocation.Y, startYaw, conn.Connections[0].X, conn.Connections[0].Z,
                             conn.Connections[0].Rotation);
 
-                        var bezierPoints = new List<PointF>
-                        {
-                            new PointF(conn.StartPortLocation.X, conn.StartPortLocation.Y), // start
-                            new PointF(conn.StartPortLocation.X + bezierNodes.Item1.X, conn.StartPortLocation.Y + bezierNodes.Item1.Y), // control1
-                            new PointF(conn.Connections[0].X - bezierNodes.Item2.X, conn.Connections[0].Z - bezierNodes.Item2.Y), // control2
-                            new PointF(conn.Connections[0].X, conn.Connections[0].Z)
-                        };
+                        var bezierPoints = new GraphicsPath();
+                        PointF last = new PointF(conn.Connections[0].X, conn.Connections[0].Z);
+                        bezierPoints.AddBezier(
+                            new PointF(conn.StartPortLocation.X, conn.StartPortLocation.Y),
+                            new PointF(conn.StartPortLocation.X + bezierNodes.Item1.X, conn.StartPortLocation.Y + bezierNodes.Item1.Y),
+                            new PointF(conn.Connections[0].X - bezierNodes.Item2.X, conn.Connections[0].Z - bezierNodes.Item2.Y),
+                            last
+                        );
 
                         for (var i = 0; i < conn.Connections.Count - 1; i++) // loop all extra nodes
                         {
@@ -90,9 +90,12 @@ namespace TsMap
                             bezierNodes = RenderHelper.GetBezierControlNodes(ferryPoint.X, ferryPoint.Z, ferryPoint.Rotation,
                                 nextFerryPoint.X, nextFerryPoint.Z, nextFerryPoint.Rotation);
 
-                            bezierPoints.Add(new PointF(ferryPoint.X + bezierNodes.Item1.X, ferryPoint.Z + bezierNodes.Item1.Y)); // control1
-                            bezierPoints.Add(new PointF(nextFerryPoint.X - bezierNodes.Item2.X, nextFerryPoint.Z - bezierNodes.Item2.Y)); // control2
-                            bezierPoints.Add(new PointF(nextFerryPoint.X, nextFerryPoint.Z)); // end
+                            bezierPoints.AddBezier(
+                                last,
+                                new PointF(ferryPoint.X + bezierNodes.Item1.X, ferryPoint.Z + bezierNodes.Item1.Y),
+                                new PointF(nextFerryPoint.X - bezierNodes.Item2.X, nextFerryPoint.Z - bezierNodes.Item2.Y),
+                                last = new PointF(nextFerryPoint.X, nextFerryPoint.Z)
+                            );
                         }
 
                         var lastFerryPoint = conn.Connections[conn.Connections.Count - 1];
@@ -103,11 +106,14 @@ namespace TsMap
                             lastFerryPoint.Z, lastFerryPoint.Rotation, conn.EndPortLocation.X, conn.EndPortLocation.Y,
                             endYaw);
 
-                        bezierPoints.Add(new PointF(lastFerryPoint.X + bezierNodes.Item1.X, lastFerryPoint.Z + bezierNodes.Item1.Y)); // control1
-                        bezierPoints.Add(new PointF(conn.EndPortLocation.X - bezierNodes.Item2.X, conn.EndPortLocation.Y - bezierNodes.Item2.Y)); // control2
-                        bezierPoints.Add(new PointF(conn.EndPortLocation.X, conn.EndPortLocation.Y)); // end
+                        bezierPoints.AddBezier(
+                            last,
+                                new PointF(lastFerryPoint.X + bezierNodes.Item1.X, lastFerryPoint.Z + bezierNodes.Item1.Y),
+                                new PointF(conn.EndPortLocation.X - bezierNodes.Item2.X, conn.EndPortLocation.Y - bezierNodes.Item2.Y),
+                                new PointF(conn.EndPortLocation.X, conn.EndPortLocation.Y)
+                            );
 
-                        g.DrawBeziers(ferryPen, bezierPoints.ToArray());
+                        g.DrawPath(ferryPen, bezierPoints);
                     }
                 }
                 ferryPen.Dispose();
@@ -384,7 +390,7 @@ namespace TsMap
                     {
                         if (zoomIndex < 3)
                         {
-                            roadPen = new Pen(palette.Road, roadWidth) {DashPattern = new[] {1f, 1f}};
+                            roadPen = new Pen(palette.Road, roadWidth) { DashStyle = new DashStyle(0, new[] { 1f, 1f }) };
                         }
                         else // zoomed out with DashPattern causes OutOfMemory Exception
                         {
@@ -395,7 +401,10 @@ namespace TsMap
                     {
                         roadPen = new Pen(palette.Road, roadWidth);
                     }
-                    g.DrawCurve(roadPen, road.GetPoints()?.ToArray());
+
+                    var curvePoints = new GraphicsPath();
+                    curvePoints.AddCurve(road.GetPoints()?.ToArray());
+                    g.DrawPath(roadPen, curvePoints);
                     roadPen.Dispose();
                 }
             }
@@ -443,29 +452,27 @@ namespace TsMap
                         coords.Y += city.City.YOffsets[zoomIndex] / (scale * zoomCaps[zoomIndex]);
                     }
 
-                    var textSize = g.MeasureString(name, cityFont);
-                    g.DrawString(name, cityFont, _cityShadowColor, coords.X + 2, coords.Y + 2);
-                    g.DrawString(name, cityFont, palette.CityName, coords.X, coords.Y);
+                    var textSize = g.MeasureString(cityFont, name);
+                    g.DrawText(cityFont, _cityShadowColor, coords.X + 2, coords.Y + 2, name);
+                    g.DrawText(cityFont, palette.CityName, coords.X, coords.Y, name);
                 }
                 cityFont.Dispose();
             }
             var cityTime = DateTime.Now.Ticks - cityStartTime;
 
-            g.ResetTransform();
+            g.RestoreTransform();
             var elapsedTime = DateTime.Now.Ticks - startTime;
             if (renderFlags.IsActive(RenderFlags.TextOverlay))
             {
-                g.DrawString(
-                    $"DrawTime: {elapsedTime / TimeSpan.TicksPerMillisecond} ms, x: {startPoint.X}, y: {startPoint.Y}, scale: {scale}",
-                    _defaultFont, Brushes.WhiteSmoke, 5, 5);
+                g.DrawText(_defaultFont, Brushes.WhiteSmoke, 5, 5, $"DrawTime: {elapsedTime / TimeSpan.TicksPerMillisecond} ms, x: {startPoint.X}, y: {startPoint.Y}, scale: {scale}");
 
                 //g.FillRectangle(new SolidBrush(Color.FromArgb(100, 0, 0, 0)), 5, 20, 150, 150);
-                //g.DrawString($"Road: {roadTime / TimeSpan.TicksPerMillisecond}ms", _defaultFont, Brushes.White, 10, 40);
-                //g.DrawString($"Prefab: {prefabTime / TimeSpan.TicksPerMillisecond}ms", _defaultFont, Brushes.White, 10, 55);
-                //g.DrawString($"Ferry: {ferryTime / TimeSpan.TicksPerMillisecond}ms", _defaultFont, Brushes.White, 10, 70);
-                //g.DrawString($"MapOverlay: {mapOverlayTime / TimeSpan.TicksPerMillisecond}ms", _defaultFont, Brushes.White, 10, 85);
-                //g.DrawString($"MapArea: {mapAreaTime / TimeSpan.TicksPerMillisecond}ms", _defaultFont, Brushes.White, 10, 115);
-                //g.DrawString($"City: {cityTime / TimeSpan.TicksPerMillisecond}ms", _defaultFont, Brushes.White, 10, 130);
+                //g.DrawString(_defaultFont, Brushes.White, 10, 40, $"Road: {roadTime / TimeSpan.TicksPerMillisecond}ms");
+                //g.DrawString(_defaultFont, Brushes.White, 10, 55, $"Prefab: {prefabTime / TimeSpan.TicksPerMillisecond}ms");
+                //g.DrawString(_defaultFont, Brushes.White, 10, 70, $"Ferry: {ferryTime / TimeSpan.TicksPerMillisecond}ms");
+                //g.DrawString(_defaultFont, Brushes.White, 10, 85, $"MapOverlay: {mapOverlayTime / TimeSpan.TicksPerMillisecond}ms");
+                //g.DrawString(_defaultFont, Brushes.White, 10, 115, $"MapArea: {mapAreaTime / TimeSpan.TicksPerMillisecond}ms");
+                //g.DrawString(_defaultFont, Brushes.White, 10, 130, $"City: {cityTime / TimeSpan.TicksPerMillisecond}ms");
             }
 
         }

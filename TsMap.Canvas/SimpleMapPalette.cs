@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using Eto.Drawing;
 
 namespace TsMap.Canvas
 {
@@ -15,7 +15,7 @@ namespace TsMap.Canvas
 
             CityName = Brushes.LightCoral;
 
-            FerryLines = new SolidBrush(Color.FromArgb(80, 255, 255, 255));
+            FerryLines = new SolidBrush(Color.FromArgb(255, 255, 255, 80));
 
             Error = Brushes.LightCoral;
         }

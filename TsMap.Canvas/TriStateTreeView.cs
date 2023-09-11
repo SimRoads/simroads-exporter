@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
+using Eto.Forms;
 
 namespace TsMap.Canvas
 {
     // https://www.codeproject.com/Articles/202435/Tri-State-Tree-View
-    public class TriStateTreeView : TreeView
+    /*public class TriStateTreeView : TreeView
     {
         public enum CheckedState
         {
@@ -171,5 +170,5 @@ namespace TsMap.Canvas
             if (node == null) return false;
             return node.Checked;
         }
-    }
+    }*/
 }

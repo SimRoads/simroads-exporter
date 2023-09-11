@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
+using Eto.Drawing;
 using System.Runtime.InteropServices;
 using TsMap.FileSystem;
 using TsMap.Helpers;
@@ -32,16 +31,15 @@ namespace TsMap.Map.Overlays
         {
             if (_bitmap == null)
             {
-                _bitmap = new Bitmap((int) Width, (int) Height, PixelFormat.Format32bppArgb);
+                _bitmap = new Bitmap((int) Width, (int) Height, PixelFormat.Format32bppRgba);
 
-                var bd = _bitmap.LockBits(new Rectangle(0, 0, _bitmap.Width, _bitmap.Height), ImageLockMode.WriteOnly,
-                    PixelFormat.Format32bppArgb);
+                var bd = _bitmap.Lock();
 
-                var ptr = bd.Scan0;
+                var ptr = bd.Data;
 
-                Marshal.Copy(GetData(), 0, ptr, bd.Width * bd.Height * 0x4);
+                Marshal.Copy(GetData(), 0, ptr, _bitmap.Width * _bitmap.Height * 0x4);
 
-                _bitmap.UnlockBits(bd);
+                bd.Dispose();
             }
 
             return _bitmap;

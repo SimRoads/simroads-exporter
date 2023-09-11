@@ -1,31 +1,34 @@
-﻿using System.Collections.Generic;
-using System.Windows.Forms;
+﻿using Eto.Forms;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using TsMap.Common;
 
 namespace TsMap.Canvas
 {
     public partial class DlcGuardForm : Form
     {
-        private bool _addingItems;
+        private ObservableCollection<DlcGuard> dlcGuards = new ObservableCollection<DlcGuard>();
 
         public DlcGuardForm(List<DlcGuard> dlcGuards)
         {
             InitializeComponent();
-            _addingItems = true;
-            foreach (var dlcGuard in dlcGuards) DlcGuardCheckedListBox.Items.Add(dlcGuard, dlcGuard.Enabled);
-
-            _addingItems = false;
+            this.dlcGuards.Clear();
+            dlcGuards.ForEach(dlc => this.dlcGuards.Add(dlc)); 
         }
 
-        public delegate void UpdateDlcGuardsEvent(byte index, bool enabled);
-
+        public delegate void UpdateDlcGuardsEvent();
         public UpdateDlcGuardsEvent UpdateDlcGuards;
 
-        private void DlcGuardCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void DlcGuardCheckedListBox_ItemCheck(object sender, EventArgs e)
         {
-            if (_addingItems || !(DlcGuardCheckedListBox.Items[e.Index] is DlcGuard dlcGuard)) return;
+            foreach (var item in DlcGuardCheckedListBox.SelectedValues)
+            {
+                ((DlcGuard)item).Enabled = true;
+            }
 
-            UpdateDlcGuards?.Invoke(dlcGuard.Index, e.NewValue == CheckState.Checked);
+            UpdateDlcGuards.Invoke();
         }
     }
 }

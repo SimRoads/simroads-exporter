@@ -39,7 +39,15 @@ namespace TsMap.FileSystem.Hash
 
                     using (var ds = new DeflateStream(ms, CompressionMode.Decompress))
                     {
-                        ds.Read(inflatedBytes, 0, (int)Size);
+                        // DeflateStream doesn't work with long lengths...
+                        var totalRead = 0;
+                        var byteRead = 0;
+                        while (totalRead < inflatedBytes.Length)
+                        {
+                            byteRead = ds.Read(inflatedBytes, totalRead, inflatedBytes.Length - totalRead);
+                            if (byteRead == 0) break;
+                            totalRead += byteRead;
+                        }
 
                         return inflatedBytes;
                     }

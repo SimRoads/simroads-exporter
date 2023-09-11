@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Windows.Forms;
+using Eto.Forms;
 
 namespace TsMap.Canvas
 {
     public partial class TileMapGeneratorForm : Form
     {
-        public delegate void GenerateTileMapEvent(string exportPath, int startZoomLevel, int endZoomLevel,
+        /*public delegate void GenerateTileMapEvent(string exportPath, int startZoomLevel, int endZoomLevel,
             bool createTiles, ExportFlags exportFlags, RenderFlags renderFlags);
 
         public GenerateTileMapEvent GenerateTileMap;
@@ -101,6 +101,6 @@ namespace TsMap.Canvas
         private void BusStopOverlayCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (BusStopOverlayCheckBox.Checked) MapOverlaysCheckBox.Checked = true;
-        }
+        }*/
     }
 }

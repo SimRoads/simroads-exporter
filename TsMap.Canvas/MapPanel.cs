@@ -1,17 +1,14 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.Design;
-using System.Windows.Forms;
+﻿using Eto.Forms;
 
 namespace TsMap.Canvas
 {
-    [Designer("System.Windows.Forms.Design.ParentControlDesigner, System.Design", typeof(IDesigner))]
-    public class MapPanel : Panel
+    public class MapPanel : Drawable
     {
         public MapPanel()
         {
-            SetStyle(ControlStyles.UserPaint, true);
+            /*SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);*/
         }
     }
 }
