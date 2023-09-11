@@ -6,6 +6,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TsMap.Canvas", "TsMap.Canva
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TsMap", "TsMap\TsMap.csproj", "{E458D6D9-6A9C-4214-92A2-46E5678EDDDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsMap.Canvas.WinForms", "TsMap.Canvas.WinForms\TsMap.Canvas.WinForms.csproj", "{AE419AD6-2963-4C69-8453-E58DC9C7555C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TsMap.Canvas.Gtk", "TsMap.Canvas.Gtk\TsMap.Canvas.Gtk.csproj", "{417F6DF2-0C7D-4908-8850-AD6DE56A929E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +34,22 @@ Global
 		{E458D6D9-6A9C-4214-92A2-46E5678EDDDA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E458D6D9-6A9C-4214-92A2-46E5678EDDDA}.Release|x64.ActiveCfg = Release|Any CPU
 		{E458D6D9-6A9C-4214-92A2-46E5678EDDDA}.Release|x64.Build.0 = Release|Any CPU
+		{AE419AD6-2963-4C69-8453-E58DC9C7555C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE419AD6-2963-4C69-8453-E58DC9C7555C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE419AD6-2963-4C69-8453-E58DC9C7555C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AE419AD6-2963-4C69-8453-E58DC9C7555C}.Debug|x64.Build.0 = Debug|Any CPU
+		{AE419AD6-2963-4C69-8453-E58DC9C7555C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE419AD6-2963-4C69-8453-E58DC9C7555C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE419AD6-2963-4C69-8453-E58DC9C7555C}.Release|x64.ActiveCfg = Release|Any CPU
+		{AE419AD6-2963-4C69-8453-E58DC9C7555C}.Release|x64.Build.0 = Release|Any CPU
+		{417F6DF2-0C7D-4908-8850-AD6DE56A929E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{417F6DF2-0C7D-4908-8850-AD6DE56A929E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{417F6DF2-0C7D-4908-8850-AD6DE56A929E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{417F6DF2-0C7D-4908-8850-AD6DE56A929E}.Debug|x64.Build.0 = Debug|Any CPU
+		{417F6DF2-0C7D-4908-8850-AD6DE56A929E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{417F6DF2-0C7D-4908-8850-AD6DE56A929E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{417F6DF2-0C7D-4908-8850-AD6DE56A929E}.Release|x64.ActiveCfg = Release|Any CPU
+		{417F6DF2-0C7D-4908-8850-AD6DE56A929E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

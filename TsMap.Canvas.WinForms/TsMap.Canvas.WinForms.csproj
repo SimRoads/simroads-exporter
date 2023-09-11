@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\TsMap.Canvas\TsMap.Canvas.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Eto.Platform.Windows" Version="2.8.0" />
+  </ItemGroup>
+
+</Project>

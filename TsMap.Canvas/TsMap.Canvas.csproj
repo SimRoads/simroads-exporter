@@ -1,4 +1,4 @@
-﻿<Project Sdk="Eto.Forms/2.7.5">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Platforms>AnyCPU</Platforms>
@@ -32,11 +32,6 @@
     <ProjectReference Include="..\TsMap\TsMap.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Eto.Forms" Version="2.7.5" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="Eto.Forms" Version="2.8.0" />
   </ItemGroup>
-  <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(SolutionDir)docs\custom_resources.zip" "$(TargetDir)custom_resources.zip"</PostBuildEvent>
-  </PropertyGroup>
 </Project>
