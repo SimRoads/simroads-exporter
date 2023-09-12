@@ -49,7 +49,7 @@ jobs:
         run: dotnet publish ${{ env.ProjectName }}/${{ env.ProjectName }}.csproj --configuration Release
 
       - name: Permissions & Rename
-        run: (for f in artifacts/publish/*.linux-x64;do mv $f $f.bin;done) && chmod u+x artifacts/publish/${{ env.ProjectName }}.bin
+        run: (for f in artifacts/publish/*.linux-x64;do mv $f $f.bin;done) && chmod u+x artifacts/publish/${{ env.ProjectName }}.linux-x64.bin
 
       - uses: actions/upload-artifact@v3
         with:
