@@ -23,10 +23,31 @@ jobs:
         run: dotnet clean && dotnet nuget locals all --clear
 
       - name: Publish
-        run: dotnet publish --configuration Release
+        run: dotnet publish TsMap.Canvas --configuration Release
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
-            name: Windows Executable
+            name: tsmap.canvas-win-x86
             path: artifacts/publish/TsMap.Canvas.Exe
+  
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+         
+      - name: Clean
+        run: dotnet clean && dotnet nuget locals all --clear
+
+      - name: Publish
+        run: dotnet publish TsMap.Canvas --configuration Release
+
+      - uses: actions/upload-artifact@v3
+        with:
+            name: tsmap.canvas-linux-x64
+            path: artifacts/publish/*
 
