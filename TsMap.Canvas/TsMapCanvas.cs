@@ -15,7 +15,7 @@ namespace TsMap.Canvas
         private readonly TsMapRenderer _renderer;
         private Settings _appSettings;
 
-        private TileMapGeneratorForm _tileMapGeneratorForm;
+        //private TileMapGeneratorForm _tileMapGeneratorForm;
         private ItemVisibilityForm _itemVisibilityForm;
         private DlcGuardForm _dlcGuardForm;
         private PaletteEditorForm _paletteEditorForm;
@@ -85,7 +85,7 @@ namespace TsMap.Canvas
             Closed += (s, e) =>
             {
                 f.Close();
-                _tileMapGeneratorForm?.Close();
+                //_tileMapGeneratorForm?.Close();
             };
 
         }
