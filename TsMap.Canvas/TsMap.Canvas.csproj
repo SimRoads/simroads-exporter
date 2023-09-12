@@ -2,7 +2,6 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <AssemblyTitle>TsMap.Canvas</AssemblyTitle>
-    <AssemblyDescription>TsMap.Canvas</AssemblyDescription>
   </PropertyGroup>
   
   <ItemGroup>
@@ -60,5 +59,9 @@
     <TargetFramework>net7.0</TargetFramework>
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <DefineConstants>LINUX</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>TsMap.Canvas.$(RuntimeIdentifier)</AssemblyName>
   </PropertyGroup>
 </Project>

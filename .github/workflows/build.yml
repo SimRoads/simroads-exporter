@@ -3,10 +3,12 @@ name: Build
 on:
   push:
     branches: [ master ]
+    tags: ["*"]
   pull_request:
     branches: [ master ]
-  release:
-    types: [ published ]
+
+env:
+  ProjectName: "TsMap.Canvas"
 
 jobs:
   build-windows:
@@ -23,12 +25,12 @@ jobs:
         run: dotnet clean && dotnet nuget locals all --clear
 
       - name: Publish
-        run: dotnet publish TsMap.Canvas --configuration Release
+        run: dotnet publish ${{ env.ProjectName }} --configuration Release
 
       - uses: actions/upload-artifact@v3
         with:
-            name: tsmap.canvas-win-x86
-            path: artifacts/publish/TsMap.Canvas.Exe
+            name: ${{ env.ProjectName }}-windows
+            path: artifacts/publish/*
   
   build-linux:
     runs-on: ubuntu-latest
@@ -44,10 +46,34 @@ jobs:
         run: dotnet clean && dotnet nuget locals all --clear
 
       - name: Publish
-        run: dotnet publish TsMap.Canvas --configuration Release
+        run: dotnet publish ${{ env.ProjectName }}/${{ env.ProjectName }}.csproj --configuration Release
+
+      - name: Permissions & Rename
+        run: rename 's/(.*).linux-x64$/$1.linux-x64.bin/' artifacts/publish/* && chmod u+x artifacts/publish/${{ env.ProjectName }}.bin
 
       - uses: actions/upload-artifact@v3
         with:
-            name: tsmap.canvas-linux-x64
+            name: ${{ env.ProjectName }}-linux
             path: artifacts/publish/*
 
+  update-release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+    steps:
+      - id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+
+      - id: get_release
+        uses: bruceadams/get-release@v1.2.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/download-artifact@v2
+
+      - uses: softprops/action-gh-release@v1
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          files: |
+            **/*.bin
+            **/*.exe
