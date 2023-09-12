@@ -60,7 +60,5 @@
     <TargetFramework>net7.0</TargetFramework>
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <DefineConstants>LINUX</DefineConstants>
-    <TrimMode>Link</TrimMode>
-    <PublishTrimmed>True</PublishTrimmed>
   </PropertyGroup>
 </Project>

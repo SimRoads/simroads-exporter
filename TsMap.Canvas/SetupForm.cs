@@ -78,7 +78,7 @@ namespace TsMap.Canvas
                 modPanel.Visible = true;
                 if (modPath == null) NextBtn.Enabled = false;
                 UpdateModList();
-                this.Size = new Eto.Drawing.Size(-1, 400);
+                this.Height = Math.Max(this.Height, 400);
             }
             else
             {

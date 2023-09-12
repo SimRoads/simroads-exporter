@@ -11,13 +11,16 @@ namespace TsMap.Canvas
         [STAThread]
         private static void Main()
         {
-            var platform = Platforms.WinForms;
+            string platform = "";
 
 #if LINUX
             platform = Platforms.Gtk;
+#elif WINDOWS
+            platform = Platforms.WinForms;
 #endif
 
-            new Eto.Forms.Application(platform).Run(new SetupForm());
+            if (platform.Equals("")) new Eto.Forms.Application().Run(new SetupForm());
+            else new Eto.Forms.Application(platform).Run(new SetupForm());
         }
     }
 }
