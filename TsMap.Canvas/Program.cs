@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Eto;
+using System;
 
 namespace TsMap.Canvas
 {
@@ -10,7 +11,13 @@ namespace TsMap.Canvas
         [STAThread]
         private static void Main()
         {
-            new Eto.Forms.Application().Run(new SetupForm());
+            var platform = Platforms.WinForms;
+
+#if LINUX
+            platform = Platforms.Gtk;
+#endif
+
+            new Eto.Forms.Application(platform).Run(new SetupForm());
         }
     }
 }

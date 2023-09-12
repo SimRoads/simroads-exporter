@@ -51,6 +51,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>
     <UseWindowsForms>True</UseWindowsForms>
+    <DefineConstants>WINDOWS</DefineConstants>
     <IncludeNativeLibrariesForSelfExtract>True</IncludeNativeLibrariesForSelfExtract>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
   </PropertyGroup>
@@ -58,6 +59,7 @@
   <PropertyGroup Condition="$(BuildTarget) == 'Linux'">
     <TargetFramework>net7.0</TargetFramework>
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <DefineConstants>LINUX</DefineConstants>
     <TrimMode>Link</TrimMode>
     <PublishTrimmed>True</PublishTrimmed>
   </PropertyGroup>
