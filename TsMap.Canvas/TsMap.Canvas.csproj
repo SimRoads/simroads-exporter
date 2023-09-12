@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Platforms>AnyCPU</Platforms>
+    <OutputType>WinExe</OutputType>
+    <AssemblyTitle>TsMap.Canvas</AssemblyTitle>
+    <AssemblyDescription>TsMap.Canvas</AssemblyDescription>
   </PropertyGroup>
+  
   <ItemGroup>
     <Compile Update="MapPanel.cs" />
     <Compile Update="SetupForm.eto.cs">
@@ -28,10 +30,35 @@
     </Compile>
     <Compile Update="TriStateTreeView.cs" />
   </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\TsMap\TsMap.csproj" />
   </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Eto.Forms" Version="2.8.0" />
+    <PackageReference Include="Eto.Platform.Gtk" Version="2.8.0" Condition="$(BuildTarget) == 'Linux'" />
+    <PackageReference Include="Eto.Platform.Windows" Version="2.8.0" Condition="$(BuildTarget) == 'Windows'" />
   </ItemGroup>
+
+  <PropertyGroup Condition="$(Configuration) == 'Release'">
+    <PublishSingleFile>True</PublishSingleFile>
+    <EnableCompressionInSingleFile>True</EnableCompressionInSingleFile>
+    <SelfContained>True</SelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(BuildTarget) == 'Windows'">
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+    <UseWindowsForms>True</UseWindowsForms>
+    <IncludeNativeLibrariesForSelfExtract>True</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(BuildTarget) == 'Linux'">
+    <TargetFramework>net7.0</TargetFramework>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <TrimMode>Link</TrimMode>
+    <PublishTrimmed>True</PublishTrimmed>
+  </PropertyGroup>
 </Project>
