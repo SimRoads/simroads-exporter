@@ -6,13 +6,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TsMap.Canvas", "TsMap.Canva
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TsMap", "TsMap\TsMap.csproj", "{E458D6D9-6A9C-4214-92A2-46E5678EDDDA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{0B0AEEF8-C13B-4957-B183-D290075DD750}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{524B9927-94AE-4EA5-A8E4-9D907CC19162}"
-	ProjectSection(SolutionItems) = preProject
-		build.yml = build.yml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,9 +33,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{524B9927-94AE-4EA5-A8E4-9D907CC19162} = {0B0AEEF8-C13B-4957-B183-D290075DD750}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7454CED4-27F8-402E-BA11-575A05BB0952}
