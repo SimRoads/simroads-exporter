@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <AssemblyTitle>TsMap.Canvas</AssemblyTitle>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Update="MapPanel.cs" />
+    <Compile Update="SetupForm.eto.cs">
+      <DependentUpon>SetupForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="DlcGuardForm.eto.cs">
+      <DependentUpon>DlcGuardForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="ItemVisibilityForm.eto.cs">
+      <DependentUpon>ItemVisibilityForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="LocalizationSettingsForm.eto.cs">
+      <DependentUpon>LocalizationSettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="PaletteEditorForm.eto.cs">
+      <DependentUpon>PaletteEditorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="TileMapGeneratorForm.eto.cs">
+      <DependentUpon>TileMapGeneratorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="TsMapCanvas.eto.cs">
+      <DependentUpon>TsMapCanvas.cs</DependentUpon>
+    </Compile>
+    <Compile Update="TriStateTreeView.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\TsMap\TsMap.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Eto.Forms" Version="2.8.0" />
+    <PackageReference Include="Eto.Platform.Gtk" Version="2.8.0" Condition="$(BuildTarget) == 'Linux'" />
+    <PackageReference Include="Eto.Platform.Windows" Version="2.8.0" Condition="$(BuildTarget) == 'Windows'" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="$(Configuration) == 'Release'">
+    <PublishSingleFile>True</PublishSingleFile>
+    <EnableCompressionInSingleFile>True</EnableCompressionInSingleFile>
+    <SelfContained>True</SelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(BuildTarget) == 'Windows'">
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+    <UseWindowsForms>True</UseWindowsForms>
+    <DefineConstants>WINDOWS</DefineConstants>
+    <IncludeNativeLibrariesForSelfExtract>True</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(BuildTarget) == 'Linux'">
+    <TargetFramework>net7.0</TargetFramework>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <DefineConstants>LINUX</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>TsMap.Canvas.$(RuntimeIdentifier)</AssemblyName>
+  </PropertyGroup>
+</Project>
