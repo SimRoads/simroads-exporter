@@ -48,7 +48,7 @@
             CheckBoxes = false;
 
             _updating = true;
-            UpdateChildState(Nodes, (int) CheckedState.Unchecked, false, true);
+            UpdateChildState(Nodes, (int)CheckedState.Unchecked, false, true);
             _updating = false;
         }
         protected override void OnAfterCheck(TreeViewEventArgs e)
@@ -59,7 +59,7 @@
             _updating = true;
             var node = e.Node;
 
-            node.StateImageIndex = node.Checked ? (int) CheckedState.Checked : (int) CheckedState.Unchecked;
+            node.StateImageIndex = node.Checked ? (int)CheckedState.Checked : (int)CheckedState.Unchecked;
             UpdateChildState(node.Nodes, node.StateImageIndex, node.Checked);
             UpdateParentState(node.Parent);
             ItemChecked(node);
@@ -117,15 +117,15 @@
         protected void UpdateParentState(TreeNode node)
         {
             if (node == null) return;
-            var checkedChildren = node.Nodes.Cast<TreeNode>().Count(childNode => childNode.StateImageIndex == (int) CheckedState.Checked);
+            var checkedChildren = node.Nodes.Cast<TreeNode>().Count(childNode => childNode.StateImageIndex == (int)CheckedState.Checked);
 
             if (checkedChildren == node.Nodes.Count)
             {
-                node.StateImageIndex = (int) CheckedState.Checked;
+                node.StateImageIndex = (int)CheckedState.Checked;
                 node.Checked = true;
             }
             else
-                node.StateImageIndex = (int) CheckedState.Mixed;
+                node.StateImageIndex = (int)CheckedState.Mixed;
         }
 
         public TreeNode GetNodeByName(TreeNode rootNode, string name)
@@ -156,7 +156,7 @@
         {
             var node = GetNodeByName(name);
             if (node == null) return CheckedState.Unchecked;
-            return (CheckedState) node.StateImageIndex;
+            return (CheckedState)node.StateImageIndex;
         }
 
         public bool GetCheckedByNodeName(string name)
