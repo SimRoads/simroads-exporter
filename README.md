@@ -2,16 +2,12 @@
 
 This Application reads ATS/ETS2 files to draw roads, prefabs, map overlays, ferry lines and city names.
 
+⚠️ Map exporting not implemented at this time.
+
 ![Preview of the map](/docs/preview.jpg "Preview of the map")
 
 ### **Support for 1.48.5**
 
-## Export Maps
-Can now export maps as a tiled web map.
-
-[Example with a max zoom level of 4](https://dariowouters.github.io/ts-tile-map-example/)
-
-##### [Source](https://github.com/dariowouters/ts-tile-map-example)
 ## Map mod support
 It can now load map mods.
 
