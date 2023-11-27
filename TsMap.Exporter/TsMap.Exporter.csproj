@@ -1,44 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <AssemblyTitle>TsMap.Canvas</AssemblyTitle>
+    <TargetFramework>net7.0</TargetFramework>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <Compile Update="MapPanel.cs" />
-    <Compile Update="SetupForm.eto.cs">
-      <DependentUpon>SetupForm.cs</DependentUpon>
-    </Compile>
-    <Compile Update="DlcGuardForm.eto.cs">
-      <DependentUpon>DlcGuardForm.cs</DependentUpon>
-    </Compile>
-    <Compile Update="ItemVisibilityForm.eto.cs">
-      <DependentUpon>ItemVisibilityForm.cs</DependentUpon>
-    </Compile>
-    <Compile Update="LocalizationSettingsForm.eto.cs">
-      <DependentUpon>LocalizationSettingsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Update="PaletteEditorForm.eto.cs">
-      <DependentUpon>PaletteEditorForm.cs</DependentUpon>
-    </Compile>
-    <Compile Update="TileMapGeneratorForm.eto.cs">
-      <DependentUpon>TileMapGeneratorForm.cs</DependentUpon>
-    </Compile>
-    <Compile Update="TsMapCanvas.eto.cs">
-      <DependentUpon>TsMapCanvas.cs</DependentUpon>
-    </Compile>
-    <Compile Update="TriStateTreeView.cs" />
+    <Compile Remove="NavExporter.cs" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <ProjectReference Include="..\TsMap.Exporter\TsMap.Exporter.csproj" />
-    <ProjectReference Include="..\TsMap\TsMap.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
+    <PackageReference Include="Emgu.CV" Version="4.8.1.5350" />
+    <PackageReference Include="Google.Protobuf" Version="3.25.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.5.0" />
+    <PackageReference Include="NetTopologySuite.IO.VectorTiles.Mapbox" Version="1.0.0" />
     <PackageReference Include="Eto.Forms" Version="2.8.0" />
     <PackageReference Include="Eto.Platform.Gtk" Version="2.8.0" Condition="$(BuildTarget) == 'Linux'" />
     <PackageReference Include="Eto.Platform.Windows" Version="2.8.0" Condition="$(BuildTarget) == 'Windows'" />
+    <PackageReference Include="Emgu.CV.runtime.ubuntu-x64" Version="4.8.1.5350" Condition="$(BuildTarget) == 'Linux'" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.8.1.5350" Condition="$(BuildTarget) == 'Windows'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TsMap\TsMap.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
+  <ItemGroup>
   </ItemGroup>
 
   <PropertyGroup Condition="$(Configuration) == 'Release'">
@@ -63,6 +54,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AssemblyName>TsMap.Canvas.$(RuntimeIdentifier)</AssemblyName>
+    <AssemblyName>TsMap.Exporter.$(RuntimeIdentifier)</AssemblyName>
   </PropertyGroup>
 </Project>

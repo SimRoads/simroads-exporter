@@ -7,7 +7,7 @@ using TsMap.Helpers.Logger;
 
 namespace TsMap.Map.Overlays
 {
-    internal class OverlayImage
+    public class OverlayImage
     {
         private Bitmap _bitmap;
 
@@ -21,11 +21,11 @@ namespace TsMap.Map.Overlays
             FilePath = filePath;
         }
 
-        internal bool Valid { get; private set; }
-        internal uint Width { get; private set; }
-        internal uint Height { get; private set; }
+        public bool Valid { get; private set; }
+        public uint Width { get; private set; }
+        public uint Height { get; private set; }
 
-        internal string FilePath { get; }
+        public string FilePath { get; }
 
         public Bitmap GetBitmap()
         {

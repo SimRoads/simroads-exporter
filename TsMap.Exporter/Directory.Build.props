@@ -1,0 +1,15 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="$(BuildTarget) == ''">
+    <BuildTarget Condition="$([MSBuild]::IsOSPlatform(Windows))">Windows</BuildTarget>
+    <BuildTarget Condition="$([MSBuild]::IsOSPlatform(OSX))">Mac</BuildTarget>
+    <BuildTarget Condition="$([MSBuild]::IsOSPlatform(Linux))">Linux</BuildTarget>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <BasePath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../'))</BasePath>
+    <ArtifactsDir>$(BasePath)artifacts\</ArtifactsDir>
+    
+    <PublishDir Condition="$(PublishDir) == ''">$(ArtifactsDir)publish</PublishDir>
+  </PropertyGroup>
+
+</Project>

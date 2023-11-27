@@ -324,5 +324,40 @@ namespace TsMap.TsItem
                 }
             }
         }
+
+        public TsRoadItem GetNextRoad(ulong uidNode)
+        {
+            if (!Sector.Mapper.Nodes.ContainsKey(uidNode)) return null;
+            TsNode n = Sector.Mapper.Nodes[uidNode];
+            ulong nextItemUid = n.BackwardItemUid != this.Uid ? n.BackwardItemUid : n.ForwardItemUid;
+            TsItem item = Sector.Mapper.GetItemByUid(nextItemUid);
+            if (item == null) return null;
+
+            var visitedItems = new HashSet<ulong>();
+            var stack = new Stack<TsItem>();
+            stack.Push(item);
+
+            while (stack.Count > 0)
+            {
+                item = stack.Pop();
+                visitedItems.Add(item.Uid);
+                if (item.Hidden) continue;
+                if (item is TsRoadItem) return (TsRoadItem)item;
+
+                if (item is TsPrefabItem)
+                {
+                    var prefab = (TsPrefabItem)item;
+                    foreach (var pUidNode in prefab.Nodes)
+                    {
+                        if (!Sector.Mapper.Nodes.ContainsKey(pUidNode)) continue;
+                        n = Sector.Mapper.Nodes[pUidNode];
+                        nextItemUid = n.BackwardItemUid != prefab.Uid ? n.BackwardItemUid : n.ForwardItemUid;
+                        var nextItem = Sector.Mapper.GetItemByUid(nextItemUid);
+                        if (nextItem != null && !visitedItems.Contains(nextItemUid)) stack.Push(nextItem);
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

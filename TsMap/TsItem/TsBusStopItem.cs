@@ -48,7 +48,7 @@ namespace TsMap.TsItem
 
         internal override void Update()
         {
-            var prefab = Sector.Mapper.Prefabs.FirstOrDefault(x => x.Uid == _prefabUid);
+            var prefab = Sector.Mapper.Prefabs.Values.FirstOrDefault(x => x.Uid == _prefabUid);
 
             if (prefab == null) return; // invalid or hidden prefab
 

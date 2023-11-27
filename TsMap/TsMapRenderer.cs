@@ -66,7 +66,7 @@ namespace TsMap
             {
                 var ferryPen = new Pen(palette.FerryLines, 50) { DashStyle = new DashStyle(0, new[] { 10f, 10f }) };
 
-                foreach (var ferryConnection in _mapper.FerryConnections)
+                foreach (var ferryConnection in _mapper.FerryConnections.Values)
                 {
                     var connections = _mapper.LookupFerryConnection(ferryConnection.FerryPortId);
 
@@ -135,7 +135,7 @@ namespace TsMap
             if (renderFlags.IsActive(RenderFlags.MapAreas))
             {
                 var drawingQueue = new List<TsPrefabPolyLook>();
-                foreach (var mapArea in _mapper.MapAreas)
+                foreach (var mapArea in _mapper.MapAreas.Values)
                 {
                     if (!activeDlcGuards.Contains(mapArea.DlcGuard) ||
                         mapArea.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
@@ -191,7 +191,7 @@ namespace TsMap
             {
                 List<TsPrefabLook> drawingQueue = new List<TsPrefabLook>();
 
-                foreach (var prefabItem in _mapper.Prefabs)
+                foreach (var prefabItem in _mapper.Prefabs.Values)
                 {
                     if (!activeDlcGuards.Contains(prefabItem.DlcGuard) ||
                         prefabItem.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
@@ -356,7 +356,7 @@ namespace TsMap
             var roadStartTime = DateTime.Now.Ticks;
             if (renderFlags.IsActive(RenderFlags.Roads))
             {
-                foreach (var road in _mapper.Roads)
+                foreach (var road in _mapper.Roads.Values)
                 {
                     if (!activeDlcGuards.Contains(road.DlcGuard) ||
                         road.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
@@ -462,7 +462,7 @@ namespace TsMap
             {
                 var cityFont = new Font("Arial", 100 + zoomCaps[zoomIndex] / 100, FontStyle.Bold);
 
-                foreach (var city in _mapper.Cities)
+                foreach (var city in _mapper.Cities.Values)
                 {
                     var name = _mapper.Localization.GetLocaleValue(city.City.LocalizationToken) ?? city.City.Name;
                     var node = _mapper.GetNodeByUid(city.NodeUid);

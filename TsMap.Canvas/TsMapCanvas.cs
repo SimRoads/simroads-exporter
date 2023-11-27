@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TsMap.Exporter;
 using TsMap.TsItem;
 
 namespace TsMap.Canvas
@@ -44,7 +45,7 @@ namespace TsMap.Canvas
 
             JsonHelper.SaveSettings(_appSettings);
 
-            _mapper = new TsMapper(path, mods);
+            _mapper = new Exporter.TsMapper(path, mods);
             _palette = new SimpleMapPalette();
 
             _mapper.Parse();
@@ -93,7 +94,7 @@ namespace TsMap.Canvas
         private void LoadCities()
         {
             CitySubMenuItem.Items.Clear();
-            CitySubMenuItem.Items.AddRange(_mapper.Cities.Where(x => !x.Hidden).OrderBy(x => x.ToString()).Select(x => new Command((s, e) => FocusCity(x)) { MenuText = x.ToString() }));
+            CitySubMenuItem.Items.AddRange(_mapper.Cities.Values.Where(x => !x.Hidden).OrderBy(x => x.ToString()).Select(x => new Command((s, e) => FocusCity(x)) { MenuText = x.ToString() }));
         }
 
         private void FocusCity(TsCityItem city)
@@ -289,33 +290,14 @@ namespace TsMap.Canvas
             };
         }
 
-        private void GenerateTileMapToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExportMapMenuItem_Click(object sender, EventArgs e)
         {
-            if (_isGeneratingTileMap)
+            var folderDialog = new SelectFolderDialog() { Title = "Select the folder to export files"};
+            if (folderDialog.ShowDialog(this) == DialogResult.Ok)
             {
-                return;
+                var exp = new MvtExporter((Exporter.TsMapper)_mapper);
+                exp.ExportMap(folderDialog.Directory, 1);
             }
-            /*if (_tileMapGeneratorForm == null || _tileMapGeneratorForm.IsDisposed) _tileMapGeneratorForm = new TileMapGeneratorForm(_appSettings.LastTileMapPath, _renderFlags);
-            _tileMapGeneratorForm.Show();
-            _tileMapGeneratorForm.BringToFront();
-
-            _tileMapGeneratorForm.GenerateTileMap += (exportPath, startZoomLevel, endZoomLevel, createTiles, exportFlags, renderFlags) => // Called when export button is pressed in TileMapGeneratorForm
-            {
-                _tileMapGeneratorForm.Close();
-                _appSettings.LastTileMapPath = exportPath;
-                JsonHelper.SaveSettings(_appSettings);
-                _mapper.ExportInfo(exportFlags, exportPath);
-
-                if (startZoomLevel < 0 || endZoomLevel < 0) return;
-                if (startZoomLevel > endZoomLevel)
-                {
-                    var tmp = startZoomLevel;
-                    startZoomLevel = endZoomLevel;
-                    endZoomLevel = tmp;
-                }
-
-                GenerateTileMap(startZoomLevel, endZoomLevel, exportPath, createTiles, (exportFlags & ExportFlags.TileMapInfo) == ExportFlags.TileMapInfo, renderFlags);
-            };*/
         }
 
         private void FullMapToolStripMenuItem_Click(object sender, EventArgs e)

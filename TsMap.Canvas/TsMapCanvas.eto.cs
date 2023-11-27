@@ -27,7 +27,7 @@ namespace TsMap.Canvas
                         Text = "Main",
                         Items =
                         {
-                            new Command(this.GenerateTileMapToolStripMenuItem_Click) {MenuText = "Generate Tile Map"},
+                            new Command(this.ExportMapMenuItem_Click) {MenuText = "Export Map"},
                             new Command(this.ExitToolStripMenuItem_Click) {MenuText = "Exit"}
                         }
                     },

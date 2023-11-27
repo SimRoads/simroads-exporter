@@ -28,17 +28,19 @@ namespace TsMap
         internal MapOverlayManager OverlayManager { get; private set; }
         public LocalizationManager Localization { get; private set; }
 
-        private readonly Dictionary<ulong, TsPrefab> _prefabLookup = new Dictionary<ulong, TsPrefab>();
-        private readonly Dictionary<ulong, TsCity> _citiesLookup = new Dictionary<ulong, TsCity>();
-        private readonly Dictionary<ulong, TsCountry> _countriesLookup = new Dictionary<ulong, TsCountry>();
-        private readonly Dictionary<ulong, TsRoadLook> _roadLookup = new Dictionary<ulong, TsRoadLook>();
-        private readonly List<TsFerryConnection> _ferryConnectionLookup = new List<TsFerryConnection>();
+        protected readonly Dictionary<ulong, TsPrefab> _prefabLookup = new Dictionary<ulong, TsPrefab>();
+        protected readonly Dictionary<ulong, TsCity> _citiesLookup = new Dictionary<ulong, TsCity>();
+        protected readonly Dictionary<ulong, TsCountry> _countriesLookup = new Dictionary<ulong, TsCountry>();
+        protected readonly Dictionary<int, TsCountry> _countriesLookupById = new Dictionary<int, TsCountry>();
+        protected readonly Dictionary<ulong, TsRoadLook> _roadLookup = new Dictionary<ulong, TsRoadLook>();
+        protected readonly List<TsFerryConnection> _ferryConnectionLookup = new List<TsFerryConnection>();
 
-        public readonly List<TsRoadItem> Roads = new List<TsRoadItem>();
-        public readonly List<TsPrefabItem> Prefabs = new List<TsPrefabItem>();
-        public readonly List<TsMapAreaItem> MapAreas = new List<TsMapAreaItem>();
-        public readonly List<TsCityItem> Cities = new List<TsCityItem>();
-        public readonly List<TsFerryItem> FerryConnections = new List<TsFerryItem>();
+        public readonly Dictionary<ulong, TsRoadItem> Roads = new Dictionary<ulong, TsRoadItem>();
+        public readonly Dictionary<ulong, TsPrefabItem> Prefabs = new Dictionary<ulong, TsPrefabItem>();
+        public readonly Dictionary<ulong, TsMapAreaItem> MapAreas = new Dictionary<ulong, TsMapAreaItem>();
+        public readonly Dictionary<ulong, TsCityItem> Cities = new Dictionary<ulong, TsCityItem>();
+        public readonly Dictionary<ulong, TsFerryItem> FerryConnections = new Dictionary<ulong, TsFerryItem>();
+        public readonly Dictionary<ulong, TsFerryItem> FerryPorts = new Dictionary<ulong, TsFerryItem>();
 
         public readonly Dictionary<ulong, TsNode> Nodes = new Dictionary<ulong, TsNode>();
 
@@ -48,12 +50,11 @@ namespace TsMap
         public float maxZ = float.MinValue;
 
         public Rectangle BackgroundPos;
-        internal OverlayImage[] Backgrounds = new OverlayImage[4];
+        public OverlayImage[] Backgrounds = new OverlayImage[4];
 
         private List<TsSector> Sectors { get; set; }
 
-        internal readonly Dictionary<ulong, TsItem.TsItem> MapItems = new Dictionary<ulong, TsItem.TsItem>();
-        internal readonly Dictionary<int, TsCountry> _countriesLookupById = new Dictionary<int, TsCountry>();
+        public readonly Dictionary<ulong, TsItem.TsItem> MapItems = new Dictionary<ulong, TsItem.TsItem>();
 
         public TsMapper(string gameDir, List<Mod> mods)
         {
@@ -130,7 +131,7 @@ namespace TsMap
                             _countriesLookup.Add(country.Token, country);
                             _countriesLookupById.Add(country.CountryId, country);
 
-                            if (country.CountryCode != string.Empty) 
+                            if (country.CountryCode != string.Empty)
                                 OverlayManager.AddOverlay(country.CountryCode, OverlayType.Flag, country.X, country.Y, "Flag", 0);
                         }
                     }
@@ -437,7 +438,7 @@ namespace TsMap
         /// <summary>
         /// Parse through all .scs files and retrieve all necessary files
         /// </summary>
-        public void Parse()
+        public virtual void Parse()
         {
             var startTime = DateTime.Now.Ticks;
 
@@ -507,7 +508,7 @@ namespace TsMap
         {
             if (!Directory.Exists(path)) return;
             var citiesJArr = new JArray();
-            foreach (var city in Cities)
+            foreach (var city in Cities.Values)
             {
                 if (city.Hidden) continue;
                 var cityJObj = JObject.FromObject(city.City);
