@@ -51,6 +51,7 @@ namespace TsMap
 
         public Rectangle BackgroundPos;
         public OverlayImage[] Backgrounds = new OverlayImage[4];
+        public TsMapSettings mapSettings;
 
         private List<TsSector> Sectors { get; set; }
 
@@ -429,9 +430,9 @@ namespace TsMap
                     return;
                 }
 
-                TsMapSettings settings = new TsMapSettings(this, filePath);
+                mapSettings = new TsMapSettings(this, filePath);
 
-                _sectorFiles.AddRange(mapFileDir.GetFilesByExtension($"map/{mapName}", ".base").Select(x => new Tuple<string, TsMapSettings>(x, settings)));
+                _sectorFiles.AddRange(mapFileDir.GetFilesByExtension($"map/{mapName}", ".base").Select(x => new Tuple<string, TsMapSettings>(x, mapSettings)));
             }
         }
 

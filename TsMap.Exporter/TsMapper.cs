@@ -42,7 +42,7 @@ namespace TsMap.Exporter
             var hierarchy = new Mat();
             CvInvoke.FindContours(thr, contours, hierarchy, RetrType.List, ChainApproxMethod.ChainApproxNone);
 
-            Boundaries = contours.ToArrayOfArray().Select(c => c.Select(p => new PointF(p.X, p.Y)).ToList()).ToList();
+            //Boundaries = contours.ToArrayOfArray().Select(c => c.Select(p => new PointF(p.X, p.Y)).ToList()).ToList();
 
 
 
