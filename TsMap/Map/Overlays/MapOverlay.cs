@@ -2,13 +2,13 @@
 
 namespace TsMap.Map.Overlays
 {
-    internal class MapOverlay
+    public class MapOverlay
     {
         private readonly OverlayImage _overlayImage;
 
-        internal readonly string OverlayName;
+        public readonly string OverlayName;
 
-        internal bool IsSecret { get; private set; }
+        public bool IsSecret { get; private set; }
 
         public byte ZoomLevelVisibility { get; private set; }
 
@@ -23,9 +23,9 @@ namespace TsMap.Map.Overlays
             OverlayName = overlayName;
         }
 
-        internal string TypeName { get; private set; }
+        public string TypeName { get; private set; }
 
-        internal PointF Position { get; private set; }
+        public PointF Position { get; private set; }
 
         internal bool IsValid()
         {
@@ -57,7 +57,7 @@ namespace TsMap.Map.Overlays
             DlcGuard = dlcGuard;
         }
 
-        internal Bitmap GetBitmap()
+        public Bitmap GetBitmap()
         {
             return _overlayImage.GetBitmap();
         }

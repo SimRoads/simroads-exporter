@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TsMap.FileSystem;
 using TsMap.Helpers;
 using TsMap.Helpers.Logger;
@@ -207,6 +208,7 @@ namespace TsMap
                 // Log.Msg($"Spawn point of type: {spawnPoint.Type} in {_filePath}");
             }
 
+            bool performLaneCheck = false;
             for (var i = 0; i < mapPointCount; i++)
             {
                 var mapPointBaseOffset = mapPointOffset + (i * MapPointBlockSize);
@@ -257,6 +259,9 @@ namespace TsMap
                 }
                 var prefabColorFlags = MemoryHelper.ReadUint8(_stream, mapPointBaseOffset + 0x02);
 
+                if (laneCount == -2 && controlNodeIndex != -1) laneCount = PrefabNodes[controlNodeIndex].LaneCount;
+                else if (laneCount == -2) performLaneCheck = true;
+
                 var navFlags = MemoryHelper.ReadUint8(_stream, mapPointBaseOffset + 0x05);
                 var hidden = (navFlags & 0x02) != 0; // Map Point is Control Node
 
@@ -279,6 +284,56 @@ namespace TsMap
                 }
 
                 MapPoints.Add(point);
+            }
+
+            if (performLaneCheck)
+            {
+                Queue<int> queue = new();
+                HashSet<int> visited = new();
+                for (int i = 0; i < MapPoints.Count; i++)
+                {
+                    var mp = MapPoints[i];
+                    if (mp.ControlNodeIndex != -1) queue.Enqueue(i);
+                }
+
+                while (queue.Count > 0)
+                {
+                    var node = queue.Dequeue();
+                    if (visited.Contains(node)) continue;
+                    var mapPoint = MapPoints[node];
+                    if (mapPoint.LaneCount == -2)
+                    {
+                        int maxValue = int.MinValue;
+                        bool allOk = true;
+                        foreach (var neighbour in mapPoint.Neighbours)
+                        {
+                            if (MapPoints[neighbour].LaneCount == -2)
+                            {
+                                allOk = false;
+                                break;
+                            } else
+                            {
+                                maxValue = Math.Max(maxValue, MapPoints[neighbour].LaneCount);
+                            }
+                        }
+                        if (allOk)
+                        {
+                            mapPoint.LaneCount = maxValue;
+                            MapPoints[node] = mapPoint;
+                        }
+                    }
+                    if (mapPoint.LaneCount != -2)
+                    {
+                        visited.Add(node);
+                        foreach (var neighbour in mapPoint.Neighbours)
+                        {
+                            queue.Enqueue(neighbour);
+                        }
+                    } else
+                    {
+                        queue.Enqueue(node);
+                    }
+                }
             }
 
             for (var i = 0; i < triggerPointCount; i++)

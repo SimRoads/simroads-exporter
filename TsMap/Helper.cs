@@ -8,6 +8,10 @@ namespace TsMap
 
     public static class RenderHelper
     {
+        public static PointF RotatePoint(PointF point, float angle, float rotX, float rotZ)
+        {
+            return RotatePoint(point.X, point.Y, angle, rotX, rotZ);
+        }
 
         public static PointF RotatePoint(float x, float z, float angle, float rotX, float rotZ)
         {
@@ -25,6 +29,18 @@ namespace TsMap
                 (float)(z + width * Math.Sin(angle))
             );
         }
+
+        public static PointF[] GetRoundedCornerCoords(float x, float z, float width, double startAngle, double endAngle, int steps)
+        {
+            var coords = new List<PointF>();
+            var angleStep = (endAngle - startAngle) / steps;
+            for (var i = 0; i <= steps; i++)
+            {
+                coords.Add(GetCornerCoords(x, z, width, startAngle + angleStep * i));
+            }
+            return coords.ToArray();
+        }
+
         public static double Hypotenuse(float x, float y)
         {
             return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
@@ -82,12 +98,12 @@ namespace TsMap
 
         public static PointF[] ScsMapCorrection(PointF[] p)
         {
-            return p.Select(pp => ScsMapCorrection(pp)).ToArray();
+            return p.Select(ScsMapCorrection).ToArray();
         }
 
-        public static List<PointF> ScsMapCorrection(List<PointF> p)
+        public static IEnumerable<PointF> ScsMapCorrection(IEnumerable<PointF> p)
         {
-            return p.Select(pp => ScsMapCorrection(pp)).ToList();
+            return p.Select(ScsMapCorrection);
         }
 
     }

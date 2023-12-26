@@ -8,7 +8,7 @@ using TsMap.Helpers.Logger;
 
 namespace TsMap.Map.Overlays
 {
-    internal class MapOverlayManager
+    public class MapOverlayManager
     {
         private readonly ConcurrentDictionary<ulong, OverlayImage> _overlayImages =
             new ConcurrentDictionary<ulong, OverlayImage>();
@@ -133,12 +133,12 @@ namespace TsMap.Map.Overlays
             return overlayImage;
         }
 
-        internal List<MapOverlay> GetOverlays()
+        public List<MapOverlay> GetOverlays()
         {
             return _overlays.ToList();
         }
 
-        internal int GetOverlayImagesCount()
+        public int GetOverlayImagesCount()
         {
             return _overlayImages.Count;
         }

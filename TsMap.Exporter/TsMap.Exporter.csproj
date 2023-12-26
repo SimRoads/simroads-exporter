@@ -13,7 +13,6 @@
     <PackageReference Include="Emgu.CV" Version="4.8.1.5350" />
     <PackageReference Include="Google.Protobuf" Version="3.25.0" />
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
-    <PackageReference Include="NetTopologySuite.IO.VectorTiles.Mapbox" Version="1.0.0" />
     <PackageReference Include="Eto.Forms" Version="2.8.0" />
     <PackageReference Include="Eto.Platform.Gtk" Version="2.8.0" Condition="$(BuildTarget) == 'Linux'" />
     <PackageReference Include="Eto.Platform.Windows" Version="2.8.0" Condition="$(BuildTarget) == 'Windows'" />
@@ -23,13 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TsMap\TsMap.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
-  <ItemGroup>
   </ItemGroup>
 
   <PropertyGroup Condition="$(Configuration) == 'Release'">

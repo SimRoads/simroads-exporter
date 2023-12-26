@@ -27,9 +27,14 @@ namespace TsMap
             HasUICorrections = BitConverter.ToBoolean(stream, 0x44);
         }
 
+        public (float, float) Correct(float x, float z)
+        {
+            return HasUICorrections ? RenderHelper.ScsMapCorrection(x, z) : (x, z);
+        }
+
         public PointF Correct(PointF p)
         {
-            return RenderHelper.ScsMapCorrection(p);
+            return HasUICorrections ? RenderHelper.ScsMapCorrection(p) : p;
         }
 
         public PointF[] Correct(PointF[] p)
@@ -37,7 +42,7 @@ namespace TsMap
             return HasUICorrections ? RenderHelper.ScsMapCorrection(p) : p;
         }
 
-        public List<PointF> Correct(List<PointF> p)
+        public IEnumerable<PointF> Correct(IEnumerable<PointF> p)
         {
             return HasUICorrections ? RenderHelper.ScsMapCorrection(p) : p;
         }

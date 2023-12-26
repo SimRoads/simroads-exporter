@@ -25,7 +25,7 @@ namespace TsMap
 
         private List<Tuple<string, TsMapSettings>> _sectorFiles;
 
-        internal MapOverlayManager OverlayManager { get; private set; }
+        public MapOverlayManager OverlayManager { get; private set; }
         public LocalizationManager Localization { get; private set; }
 
         protected readonly Dictionary<ulong, TsPrefab> _prefabLookup = new Dictionary<ulong, TsPrefab>();
@@ -49,9 +49,9 @@ namespace TsMap
         public float minZ = float.MaxValue;
         public float maxZ = float.MinValue;
 
-        public Rectangle BackgroundPos;
-        public OverlayImage[] Backgrounds = new OverlayImage[4];
-        public TsMapSettings mapSettings;
+        public Rectangle BackgroundPos { get; private set; }
+        public OverlayImage[] Backgrounds { get; private set; } = new OverlayImage[4];
+        public TsMapSettings MapSettings { get; private set;}
 
         private List<TsSector> Sectors { get; set; }
 
@@ -430,9 +430,9 @@ namespace TsMap
                     return;
                 }
 
-                mapSettings = new TsMapSettings(this, filePath);
+                MapSettings = new TsMapSettings(this, filePath);
 
-                _sectorFiles.AddRange(mapFileDir.GetFilesByExtension($"map/{mapName}", ".base").Select(x => new Tuple<string, TsMapSettings>(x, mapSettings)));
+                _sectorFiles.AddRange(mapFileDir.GetFilesByExtension($"map/{mapName}", ".base").Select(x => new Tuple<string, TsMapSettings>(x, MapSettings)));
             }
         }
 

@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TsMap.Common;
 using TsMap.Helpers;
-using TsMap.Helpers.Logger;
 using TsMap.Map.Overlays;
-using TsMap.TsItem;
 
 namespace TsMap
 {
@@ -50,7 +48,7 @@ namespace TsMap
             var zoomIndex = RenderHelper.GetZoomIndex(clip, scale);
 
             var rectangle = new RectangleF(startPoint.X - itemDrawMargin, startPoint.Y - itemDrawMargin, clip.Width / scale + itemDrawMargin, clip.Height / scale + itemDrawMargin);
-            var mapSettings = _mapper.mapSettings;
+            var MapSettings = _mapper.MapSettings;
 
             var backgroundStartTime = DateTime.Now.Ticks;
             var backPos = _mapper.BackgroundPos;
@@ -76,7 +74,7 @@ namespace TsMap
                     {
                         if (conn.Connections.Count == 0) // no extra nodes -> straight line
                         {
-                            g.DrawLine(ferryPen, mapSettings.Correct(conn.StartPortLocation), mapSettings.Correct(conn.EndPortLocation));
+                            g.DrawLine(ferryPen, MapSettings.Correct(conn.StartPortLocation), MapSettings.Correct(conn.EndPortLocation));
                             continue;
                         }
 
@@ -89,9 +87,9 @@ namespace TsMap
                         var bezierPoints = new GraphicsPath();
                         PointF last = new PointF(conn.Connections[0].X, conn.Connections[0].Z);
                         bezierPoints.AddBezier(
-                            mapSettings.Correct(new PointF(conn.StartPortLocation.X, conn.StartPortLocation.Y)),
-                            mapSettings.Correct(new PointF(conn.StartPortLocation.X + bezierNodes.Item1.X, conn.StartPortLocation.Y + bezierNodes.Item1.Y)),
-                            mapSettings.Correct(new PointF(conn.Connections[0].X - bezierNodes.Item2.X, conn.Connections[0].Z - bezierNodes.Item2.Y)),
+                            MapSettings.Correct(new PointF(conn.StartPortLocation.X, conn.StartPortLocation.Y)),
+                            MapSettings.Correct(new PointF(conn.StartPortLocation.X + bezierNodes.Item1.X, conn.StartPortLocation.Y + bezierNodes.Item1.Y)),
+                            MapSettings.Correct(new PointF(conn.Connections[0].X - bezierNodes.Item2.X, conn.Connections[0].Z - bezierNodes.Item2.Y)),
                             last
                         );
 
@@ -105,9 +103,9 @@ namespace TsMap
 
                             bezierPoints.AddBezier(
                                 last,
-                                mapSettings.Correct(new PointF(ferryPoint.X + bezierNodes.Item1.X, ferryPoint.Z + bezierNodes.Item1.Y)),
-                                mapSettings.Correct(new PointF(nextFerryPoint.X - bezierNodes.Item2.X, nextFerryPoint.Z - bezierNodes.Item2.Y)),
-                                last = mapSettings.Correct(new PointF(nextFerryPoint.X, nextFerryPoint.Z))
+                                MapSettings.Correct(new PointF(ferryPoint.X + bezierNodes.Item1.X, ferryPoint.Z + bezierNodes.Item1.Y)),
+                                MapSettings.Correct(new PointF(nextFerryPoint.X - bezierNodes.Item2.X, nextFerryPoint.Z - bezierNodes.Item2.Y)),
+                                last = MapSettings.Correct(new PointF(nextFerryPoint.X, nextFerryPoint.Z))
                             );
                         }
 
@@ -121,9 +119,9 @@ namespace TsMap
 
                         bezierPoints.AddBezier(
                             last,
-                                mapSettings.Correct(new PointF(lastFerryPoint.X + bezierNodes.Item1.X, lastFerryPoint.Z + bezierNodes.Item1.Y)),
-                                mapSettings.Correct(new PointF(conn.EndPortLocation.X - bezierNodes.Item2.X, conn.EndPortLocation.Y - bezierNodes.Item2.Y)),
-                                mapSettings.Correct(new PointF(conn.EndPortLocation.X, conn.EndPortLocation.Y))
+                                MapSettings.Correct(new PointF(lastFerryPoint.X + bezierNodes.Item1.X, lastFerryPoint.Z + bezierNodes.Item1.Y)),
+                                MapSettings.Correct(new PointF(conn.EndPortLocation.X - bezierNodes.Item2.X, conn.EndPortLocation.Y - bezierNodes.Item2.Y)),
+                                MapSettings.Correct(new PointF(conn.EndPortLocation.X, conn.EndPortLocation.Y))
                             );
 
                         g.DrawPath(ferryPen, bezierPoints);
@@ -141,7 +139,7 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(mapArea.DlcGuard) ||
                         mapArea.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                        !rectangle.Contains(mapSettings.Correct(RenderHelper.GetPoint(mapArea.X, mapArea.Z)))
+                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapArea.X, mapArea.Z)))
                     )
                     {
                         continue;
@@ -174,7 +172,7 @@ namespace TsMap
                         zIndex = mapArea.DrawOver ? 11 : 1;
                     }
 
-                    points = mapSettings.Correct(points);
+                    points = MapSettings.Correct(points).ToList();
                     drawingQueue.Add(new TsPrefabPolyLook(points)
                     {
                         Color = fillColor,
@@ -198,7 +196,7 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(prefabItem.DlcGuard) ||
                         prefabItem.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                         !rectangle.Contains(mapSettings.Correct(RenderHelper.GetPoint(prefabItem)))
+                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(prefabItem)))
                     )
                     {
                         continue;
@@ -207,7 +205,7 @@ namespace TsMap
                     var originNode = _mapper.GetNodeByUid(prefabItem.Nodes[0]);
                     if (prefabItem.Prefab.PrefabNodes == null) continue;
 
-                    if (!prefabItem.HasLooks())
+                    if (true)
                     {
                         var mapPointOrigin = prefabItem.Prefab.PrefabNodes[prefabItem.Origin];
 
@@ -272,7 +270,7 @@ namespace TsMap
                                 }
                                 // else fillColor = _palette.Error; // Unknown
 
-                                var points = mapSettings.Correct(polyPoints.Values.ToList());
+                                var points = MapSettings.Correct(polyPoints.Values).ToList();
                                 var prefabLook = new TsPrefabPolyLook(points)
                                 {
                                     ZIndex = zIndex,
@@ -284,11 +282,6 @@ namespace TsMap
                             }
 
                             var mapPointLaneCount = mapPoint.LaneCount;
-
-                            if (mapPointLaneCount == -2 && i < prefabItem.Prefab.PrefabNodes.Count)
-                            {
-                                if (mapPoint.ControlNodeIndex != -1) mapPointLaneCount = prefabItem.Prefab.PrefabNodes[mapPoint.ControlNodeIndex].LaneCount;
-                            }
 
                             foreach (var neighbourPointIndex in mapPoint.Neighbours) // TODO: Fix connection between road segments
                             {
@@ -302,47 +295,20 @@ namespace TsMap
 
                                 var neighbourLaneCount = neighbourPoint.LaneCount;
 
-                                if (neighbourLaneCount == -2 && neighbourPointIndex < prefabItem.Prefab.PrefabNodes.Count)
-                                {
-                                    if (neighbourPoint.ControlNodeIndex != -1) neighbourLaneCount = prefabItem.Prefab.PrefabNodes[neighbourPoint.ControlNodeIndex].LaneCount;
-                                }
-
-                                if (mapPointLaneCount == -2 && neighbourLaneCount != -2) mapPointLaneCount = neighbourLaneCount;
-                                else if (neighbourLaneCount == -2 && mapPointLaneCount != -2) neighbourLaneCount = mapPointLaneCount;
-                                else if (mapPointLaneCount == -2 && neighbourLaneCount == -2)
-                                {
-                                    Logger.Instance.Debug($"Could not find lane count for ({i}, {neighbourPointIndex}), defaulting to 1 for {prefabItem.Prefab.FilePath}");
-                                    mapPointLaneCount = neighbourLaneCount = 1;
-                                }
-
                                 var cornerCoords = new List<PointF>();
 
-                                var coords = RenderHelper.GetCornerCoords(prefabstartX + mapPoint.X, prefabStartZ + mapPoint.Z,
-                                    (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f, roadYaw + Math.PI / 2);
+                                cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabstartX + mapPoint.X, prefabStartZ + mapPoint.Z,
+                                    (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f, roadYaw + Math.PI - Math.PI / 2, roadYaw + Math.PI + Math.PI/2, 4));
+                                cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabstartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
+                                    (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f, roadYaw  -  Math.PI / 2 , roadYaw  + Math.PI / 2, 4));
 
-                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z));
-
-                                coords = RenderHelper.GetCornerCoords(prefabstartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
-                                    (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f,
-                                    roadYaw + Math.PI / 2);
-                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z));
-
-                                coords = RenderHelper.GetCornerCoords(prefabstartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
-                                    (Consts.LaneWidth * neighbourLaneCount + mapPoint.LaneOffset) / 2f,
-                                    roadYaw - Math.PI / 2);
-                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z));
-
-                                coords = RenderHelper.GetCornerCoords(prefabstartX + mapPoint.X, prefabStartZ + mapPoint.Z,
-                                    (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f, roadYaw - Math.PI / 2);
-                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z));
-
-                                cornerCoords = mapSettings.Correct(cornerCoords);
+                                cornerCoords = MapSettings.Correct(cornerCoords.Select(p => RenderHelper.RotatePoint(p.X, p.Y, rot, originNode.X, originNode.Z))).ToList();
                                 TsPrefabLook prefabLook = new TsPrefabPolyLook(cornerCoords)
                                 {
                                     Color = palette.PrefabRoad,
                                     ZIndex = MemoryHelper.IsBitSet(mapPoint.PrefabColorFlags, 0) ? 13 : 3,
-                                };
-
+                                }; 
+                                
                                 prefabItem.AddLook(prefabLook);
                             }
                         }
@@ -365,7 +331,7 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(road.DlcGuard) ||
                         road.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                         !rectangle.Contains(mapSettings.Correct(RenderHelper.GetPoint(road)))
+                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(road)))
                     )
                     {
                         continue;
@@ -397,7 +363,7 @@ namespace TsMap
                             var z = (float)TsRoadLook.Hermite(s, sz, ez, tanSz, tanEz);
                             newPoints.Add(new PointF(x, z));
                         }
-                        newPoints = mapSettings.Correct(newPoints);
+                        newPoints = MapSettings.Correct(newPoints).ToList();
                         road.AddPoints(newPoints);
                     }
 
@@ -419,6 +385,9 @@ namespace TsMap
                         roadPen = new Pen(palette.Road, roadWidth);
                     }
 
+                    roadPen.LineJoin = PenLineJoin.Round;
+                    roadPen.LineCap = PenLineCap.Round;
+
                     var curvePoints = new GraphicsPath();
                     curvePoints.AddCurve(road.GetPoints()?.ToArray());
                     g.DrawPath(roadPen, curvePoints);
@@ -434,7 +403,7 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(mapOverlay.DlcGuard) ||
                         mapOverlay.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                        !rectangle.Contains(mapSettings.Correct(RenderHelper.GetPoint(mapOverlay.Position.X, mapOverlay.Position.Y)))
+                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapOverlay.Position.X, mapOverlay.Position.Y)))
                     )
                     {
                         continue;
@@ -444,7 +413,7 @@ namespace TsMap
 
                     if (b == null || !renderFlags.IsActive(RenderFlags.BusStopOverlay) && mapOverlay.OverlayType == OverlayType.BusStop) continue;
 
-                    var pos = mapSettings.Correct(mapOverlay.Position);
+                    var pos = MapSettings.Correct(mapOverlay.Position);
                     if (mapOverlay.OverlayType == OverlayType.Flag)
                     {
                         var width = b.Width / scale;
@@ -477,7 +446,7 @@ namespace TsMap
                     }
 
                     var textSize = g.MeasureString(cityFont, name);
-                    coords = mapSettings.Correct(coords);
+                    coords = MapSettings.Correct(coords);
                     g.DrawText(cityFont, _cityShadowColor, coords.X + 2, coords.Y + 2, name);
                     g.DrawText(cityFont, palette.CityName, coords.X, coords.Y, name);
                 }

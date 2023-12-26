@@ -295,8 +295,8 @@ namespace TsMap.Canvas
             var folderDialog = new SelectFolderDialog() { Title = "Select the folder to export files"};
             if (folderDialog.ShowDialog(this) == DialogResult.Ok)
             {
-                var exp = new MvtExporter((Exporter.TsMapper)_mapper);
-                exp.ExportMap(folderDialog.Directory, 1);
+                /*var exp = new MvtExporter((Exporter.TsMapper)_mapper);
+                exp.ExportMap(folderDialog.Directory, 1);*/
             }
         }
 

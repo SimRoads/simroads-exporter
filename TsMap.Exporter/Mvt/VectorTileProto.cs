@@ -9,7 +9,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace VectorTile {
+namespace TsMap.Exporter.Mvt {
 
   /// <summary>Holder for reflection information generated from vector_tile.proto.txt</summary>
   public static partial class VectorTileProtoReflection {
@@ -41,9 +41,9 @@ namespace VectorTile {
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::VectorTile.Tile), global::VectorTile.Tile.Parser, new[]{ "Layers" }, null, new[]{ typeof(global::VectorTile.Tile.Types.GeomType) }, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::VectorTile.Tile.Types.Value), global::VectorTile.Tile.Types.Value.Parser, new[]{ "StringValue", "FloatValue", "DoubleValue", "IntValue", "UintValue", "SintValue", "BoolValue" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::VectorTile.Tile.Types.Feature), global::VectorTile.Tile.Types.Feature.Parser, new[]{ "Id", "Tags", "Type", "Geometry" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::VectorTile.Tile.Types.Layer), global::VectorTile.Tile.Types.Layer.Parser, new[]{ "Version", "Name", "Features", "Keys", "Values", "Extent" }, null, null, null, null)})
+            new pbr::GeneratedClrTypeInfo(typeof(global::TsMap.Exporter.Mvt.Tile), global::TsMap.Exporter.Mvt.Tile.Parser, new[]{ "Layers" }, null, new[]{ typeof(global::TsMap.Exporter.Mvt.Tile.Types.GeomType) }, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::TsMap.Exporter.Mvt.Tile.Types.Value), global::TsMap.Exporter.Mvt.Tile.Types.Value.Parser, new[]{ "StringValue", "FloatValue", "DoubleValue", "IntValue", "UintValue", "SintValue", "BoolValue" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::TsMap.Exporter.Mvt.Tile.Types.Feature), global::TsMap.Exporter.Mvt.Tile.Types.Feature.Parser, new[]{ "Id", "Tags", "Type", "Geometry" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::TsMap.Exporter.Mvt.Tile.Types.Layer), global::TsMap.Exporter.Mvt.Tile.Types.Layer.Parser, new[]{ "Version", "Name", "Features", "Keys", "Values", "Extent" }, null, null, null, null)})
           }));
     }
     #endregion
@@ -67,7 +67,7 @@ namespace VectorTile {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::VectorTile.VectorTileProtoReflection.Descriptor.MessageTypes[0]; }
+      get { return global::TsMap.Exporter.Mvt.VectorTileProtoReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -100,12 +100,12 @@ namespace VectorTile {
 
     /// <summary>Field number for the "layers" field.</summary>
     public const int LayersFieldNumber = 3;
-    private static readonly pb::FieldCodec<global::VectorTile.Tile.Types.Layer> _repeated_layers_codec
-        = pb::FieldCodec.ForMessage(26, global::VectorTile.Tile.Types.Layer.Parser);
-    private readonly pbc::RepeatedField<global::VectorTile.Tile.Types.Layer> layers_ = new pbc::RepeatedField<global::VectorTile.Tile.Types.Layer>();
+    private static readonly pb::FieldCodec<global::TsMap.Exporter.Mvt.Tile.Types.Layer> _repeated_layers_codec
+        = pb::FieldCodec.ForMessage(26, global::TsMap.Exporter.Mvt.Tile.Types.Layer.Parser);
+    private readonly pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Layer> layers_ = new pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Layer>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::VectorTile.Tile.Types.Layer> Layers {
+    public pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Layer> Layers {
       get { return layers_; }
     }
 
@@ -309,7 +309,7 @@ namespace VectorTile {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
         public static pbr::MessageDescriptor Descriptor {
-          get { return global::VectorTile.Tile.Descriptor.NestedTypes[0]; }
+          get { return global::TsMap.Exporter.Mvt.Tile.Descriptor.NestedTypes[0]; }
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -876,7 +876,7 @@ namespace VectorTile {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
         public static pbr::MessageDescriptor Descriptor {
-          get { return global::VectorTile.Tile.Descriptor.NestedTypes[1]; }
+          get { return global::TsMap.Exporter.Mvt.Tile.Descriptor.NestedTypes[1]; }
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -956,15 +956,15 @@ namespace VectorTile {
 
         /// <summary>Field number for the "type" field.</summary>
         public const int TypeFieldNumber = 3;
-        private readonly static global::VectorTile.Tile.Types.GeomType TypeDefaultValue = global::VectorTile.Tile.Types.GeomType.Unknown;
+        private readonly static global::TsMap.Exporter.Mvt.Tile.Types.GeomType TypeDefaultValue = global::TsMap.Exporter.Mvt.Tile.Types.GeomType.Unknown;
 
-        private global::VectorTile.Tile.Types.GeomType type_;
+        private global::TsMap.Exporter.Mvt.Tile.Types.GeomType type_;
         /// <summary>
         /// The type of geometry stored in this feature.
         /// </summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public global::VectorTile.Tile.Types.GeomType Type {
+        public global::TsMap.Exporter.Mvt.Tile.Types.GeomType Type {
           get { if ((_hasBits0 & 2) != 0) { return type_; } else { return TypeDefaultValue; } }
           set {
             _hasBits0 |= 2;
@@ -1141,7 +1141,7 @@ namespace VectorTile {
                 break;
               }
               case 24: {
-                Type = (global::VectorTile.Tile.Types.GeomType) input.ReadEnum();
+                Type = (global::TsMap.Exporter.Mvt.Tile.Types.GeomType) input.ReadEnum();
                 break;
               }
               case 34:
@@ -1174,7 +1174,7 @@ namespace VectorTile {
                 break;
               }
               case 24: {
-                Type = (global::VectorTile.Tile.Types.GeomType) input.ReadEnum();
+                Type = (global::TsMap.Exporter.Mvt.Tile.Types.GeomType) input.ReadEnum();
                 break;
               }
               case 34:
@@ -1210,7 +1210,7 @@ namespace VectorTile {
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
         public static pbr::MessageDescriptor Descriptor {
-          get { return global::VectorTile.Tile.Descriptor.NestedTypes[2]; }
+          get { return global::TsMap.Exporter.Mvt.Tile.Descriptor.NestedTypes[2]; }
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1308,15 +1308,15 @@ namespace VectorTile {
 
         /// <summary>Field number for the "features" field.</summary>
         public const int FeaturesFieldNumber = 2;
-        private static readonly pb::FieldCodec<global::VectorTile.Tile.Types.Feature> _repeated_features_codec
-            = pb::FieldCodec.ForMessage(18, global::VectorTile.Tile.Types.Feature.Parser);
-        private readonly pbc::RepeatedField<global::VectorTile.Tile.Types.Feature> features_ = new pbc::RepeatedField<global::VectorTile.Tile.Types.Feature>();
+        private static readonly pb::FieldCodec<global::TsMap.Exporter.Mvt.Tile.Types.Feature> _repeated_features_codec
+            = pb::FieldCodec.ForMessage(18, global::TsMap.Exporter.Mvt.Tile.Types.Feature.Parser);
+        private readonly pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Feature> features_ = new pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Feature>();
         /// <summary>
         /// The actual features in this tile.
         /// </summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public pbc::RepeatedField<global::VectorTile.Tile.Types.Feature> Features {
+        public pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Feature> Features {
           get { return features_; }
         }
 
@@ -1336,15 +1336,15 @@ namespace VectorTile {
 
         /// <summary>Field number for the "values" field.</summary>
         public const int ValuesFieldNumber = 4;
-        private static readonly pb::FieldCodec<global::VectorTile.Tile.Types.Value> _repeated_values_codec
-            = pb::FieldCodec.ForMessage(34, global::VectorTile.Tile.Types.Value.Parser);
-        private readonly pbc::RepeatedField<global::VectorTile.Tile.Types.Value> values_ = new pbc::RepeatedField<global::VectorTile.Tile.Types.Value>();
+        private static readonly pb::FieldCodec<global::TsMap.Exporter.Mvt.Tile.Types.Value> _repeated_values_codec
+            = pb::FieldCodec.ForMessage(34, global::TsMap.Exporter.Mvt.Tile.Types.Value.Parser);
+        private readonly pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Value> values_ = new pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Value>();
         /// <summary>
         /// Dictionary encoding for values
         /// </summary>
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-        public pbc::RepeatedField<global::VectorTile.Tile.Types.Value> Values {
+        public pbc::RepeatedField<global::TsMap.Exporter.Mvt.Tile.Types.Value> Values {
           get { return values_; }
         }
 
