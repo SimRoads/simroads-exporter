@@ -22,7 +22,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
         public override bool Skip(ExportSettings sett)
         {
-            return base.Skip(sett) || Prefab.IsSecret || !sett.ActiveDlcGuards.Contains(Prefab.DlcGuard) || Mapper.GetNodeByUid(Prefab.Nodes[0]) == null;
+            return base.Skip(sett) || Prefab.Hidden || Prefab.IsSecret || !sett.ActiveDlcGuards.Contains(Prefab.DlcGuard) || Mapper.GetNodeByUid(Prefab.Nodes[0]) == null;
         }
 
         protected override Envelope CalculateEnvelope()
@@ -122,7 +122,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                     }
                     geometry.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
-                    prefabs.Add(new Feature { Type = GeomType.Polygon, Geometry = { geometry } });
+                    prefabs.Add(new Feature { Id = Prefab.GetId(i), Type = GeomType.Polygon, Geometry = { geometry } });
 
                     continue;
                 }
@@ -163,7 +163,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                     }
                     points.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
-                    roads.Add(new Feature { Type = GeomType.Polygon, Geometry = { points } });
+                    roads.Add(new Feature { Id = Prefab.GetId(i), Type = GeomType.Polygon, Geometry = { points } });
                 }
             }
 

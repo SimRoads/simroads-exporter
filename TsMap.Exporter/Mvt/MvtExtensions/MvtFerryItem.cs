@@ -34,7 +34,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             (x, z) = Mapper.MapSettings.Correct(Conn.EndPortLocation.X, Conn.EndPortLocation.Y);
             points.AddRange(sett.GenerateDeltaFromGame(x, z, ref cursorX, ref cursorY));
 
-            layers.ferries.Features.Add(new Feature { Type = GeomType.Linestring, Geometry = { points } });
+            layers.ferries.Features.Add(new Feature { Id =Conn.GetId(), Type = GeomType.Linestring, Geometry = { points } });
             return true;
         }
 

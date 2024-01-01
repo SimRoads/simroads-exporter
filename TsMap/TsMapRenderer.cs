@@ -137,7 +137,7 @@ namespace TsMap
                 var drawingQueue = new List<TsPrefabPolyLook>();
                 foreach (var mapArea in _mapper.MapAreas.Values)
                 {
-                    if (!activeDlcGuards.Contains(mapArea.DlcGuard) ||
+                    if (!activeDlcGuards.Contains(mapArea.DlcGuard) || mapArea.Hidden ||
                         mapArea.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapArea.X, mapArea.Z)))
                     )
@@ -194,7 +194,7 @@ namespace TsMap
 
                 foreach (var prefabItem in _mapper.Prefabs.Values)
                 {
-                    if (!activeDlcGuards.Contains(prefabItem.DlcGuard) ||
+                    if (!activeDlcGuards.Contains(prefabItem.DlcGuard) || prefabItem.Hidden ||
                         prefabItem.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
                          !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(prefabItem)))
                     )
@@ -329,7 +329,7 @@ namespace TsMap
             {
                 foreach (var road in _mapper.Roads.Values)
                 {
-                    if (!activeDlcGuards.Contains(road.DlcGuard) ||
+                    if (!activeDlcGuards.Contains(road.DlcGuard) || road.Hidden ||
                         road.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
                          !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(road)))
                     )
@@ -436,6 +436,7 @@ namespace TsMap
 
                 foreach (var city in _mapper.Cities.Values)
                 {
+                    if (city.Hidden) continue;
                     var name = _mapper.Localization.GetLocaleValue(city.City.LocalizationToken) ?? city.City.Name;
                     var node = _mapper.GetNodeByUid(city.NodeUid);
                     var coords = (node == null) ? new PointF(city.X, city.Z) : new PointF(node.X, node.Z);

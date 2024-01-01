@@ -18,12 +18,12 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
         public override bool Skip(ExportSettings sett)
         {
-            return base.Skip(sett) || Road.IsSecret || !sett.ActiveDlcGuards.Contains(Road.DlcGuard);
+            return base.Skip(sett) || Road.Hidden || Road.IsSecret || !sett.ActiveDlcGuards.Contains(Road.DlcGuard);
         }
 
         public override bool Discretizate(ExportSettings sett)
         {
-            return base.Discretizate(sett) && Road.RoadLook.IsOneWay();
+            return base.Discretizate(sett) && (Road.RoadLook.LanesRight.Count <= 1 || Road.RoadLook.LanesLeft.Count >= 1);
         }
 
         protected override Envelope CalculateEnvelope()
@@ -45,14 +45,12 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             var ex = endNode.X;
             var ez = endNode.Z;
 
-            var radius = Math.Sqrt(Math.Pow(sx - ex, 2) + Math.Pow(sz - ez, 2));
+            var tanSx = Math.Cos(-(Math.PI * 0.5f - startNode.Rotation)) * Envelope.Diameter;
+            var tanEx = Math.Cos(-(Math.PI * 0.5f - endNode.Rotation)) * Envelope.Diameter;
+            var tanSz = Math.Sin(-(Math.PI * 0.5f - startNode.Rotation)) * Envelope.Diameter;
+            var tanEz = Math.Sin(-(Math.PI * 0.5f - endNode.Rotation)) * Envelope.Diameter;
 
-            var tanSx = Math.Cos(-(Math.PI * 0.5f - startNode.Rotation)) * radius;
-            var tanEx = Math.Cos(-(Math.PI * 0.5f - endNode.Rotation)) * radius;
-            var tanSz = Math.Sin(-(Math.PI * 0.5f - startNode.Rotation)) * radius;
-            var tanEz = Math.Sin(-(Math.PI * 0.5f - endNode.Rotation)) * radius;
-
-            int hermiteSteps = Math.Max(2, (int)(8 * (radius / sett.Extent)));
+            int hermiteSteps = Math.Max(2, (int)(8 * (Envelope.Diameter / sett.Extent)));
             var points = new List<uint>() { GenerateCommandInteger(MapboxCommandType.MoveTo, 1) };
 
             for (var i = 0; i < hermiteSteps; i++)
@@ -65,7 +63,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 points.AddRange(sett.GenerateDeltaFromGame(x, z, ref cursorX, ref cursorY));
             }
 
-            layers.roads.Features.Add(new Feature { Type = GeomType.Linestring, Geometry = { points } });
+            layers.roads.Features.Add(new Feature { Id= Road.GetId(), Type = GeomType.Linestring, Geometry = { points } });
             return true;
         }
     }

@@ -77,14 +77,14 @@ namespace TsMap
                         {
                             item = new TsRoadItem(this, lastOffset);
                             lastOffset += item.BlockSize;
-                            if (item.Valid && !item.Hidden) Mapper.Roads.Add(item.Uid, (TsRoadItem)item);
+                            if (item.Valid) Mapper.Roads.Add(item.Uid, (TsRoadItem)item);
                             break;
                         }
                     case TsItemType.Prefab:
                         {
                             item = new TsPrefabItem(this, lastOffset);
                             lastOffset += item.BlockSize;
-                            if (item.Valid && !item.Hidden) Mapper.Prefabs.Add(item.Uid, (TsPrefabItem)item);
+                            if (item.Valid) Mapper.Prefabs.Add(item.Uid, (TsPrefabItem)item);
                             break;
                         }
                     case TsItemType.Model: // used to all be in .aux files, not sure why some are now in .base files
@@ -115,7 +115,7 @@ namespace TsMap
                         {
                             item = new TsCityItem(this, lastOffset);
                             lastOffset += item.BlockSize;
-                            if (item.Valid && !item.Hidden) Mapper.Cities.Add(item.Uid, (TsCityItem)item);
+                            if (item.Valid) Mapper.Cities.Add(item.Uid, (TsCityItem)item);
                             break;
                         }
                     case TsItemType.MapOverlay:
@@ -128,7 +128,7 @@ namespace TsMap
                         {
                             item = new TsFerryItem(this, lastOffset);
                             lastOffset += item.BlockSize;
-                            if (item.Valid && !item.Hidden) Mapper.FerryConnections.Add(item.Uid, (TsFerryItem)item);
+                            if (item.Valid) Mapper.FerryConnections.Add(item.Uid, (TsFerryItem)item);
                             Mapper.FerryPorts.Add(((TsFerryItem)item).FerryPortId, (TsFerryItem)item);
                             break;
                         }
@@ -184,7 +184,7 @@ namespace TsMap
                         {
                             item = new TsMapAreaItem(this, lastOffset);
                             lastOffset += item.BlockSize;
-                            if (item.Valid && !item.Hidden) Mapper.MapAreas.Add(item.Uid, (TsMapAreaItem)item);
+                            if (item.Valid) Mapper.MapAreas.Add(item.Uid, (TsMapAreaItem)item);
                             break;
                         }
                     case TsItemType.Curve: // used to all be in .aux files, not sure why some are now in .base files

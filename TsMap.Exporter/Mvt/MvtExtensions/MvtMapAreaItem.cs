@@ -55,7 +55,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             }
             geometry.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
-            layers.prefabs.Features.Add(new Feature { Type = GeomType.Polygon, Geometry = { geometry } });
+            layers.prefabs.Features.Add(new Feature { Id = MapArea.GetId() ,Type = GeomType.Polygon, Geometry = { geometry } });
             return true;
         }
 
@@ -77,7 +77,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
         public override bool Skip(ExportSettings sett)
         {
-            return base.Skip(sett) || MapArea.IsSecret || !sett.ActiveDlcGuards.Contains(MapArea.DlcGuard);
+            return base.Skip(sett) || MapArea.Hidden || MapArea.IsSecret || !sett.ActiveDlcGuards.Contains(MapArea.DlcGuard);
         }
     }
 }

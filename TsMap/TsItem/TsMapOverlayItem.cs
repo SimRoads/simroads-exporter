@@ -109,7 +109,7 @@ namespace TsMap.TsItem
                 return;
             }
 
-            var overlay = Sector.Mapper.OverlayManager.CreateOverlay(_overlayName, _type);
+            var overlay = Sector.Mapper.OverlayManager.CreateOverlay(_overlayName, _type, this);
 
             if (overlay == null)
             {

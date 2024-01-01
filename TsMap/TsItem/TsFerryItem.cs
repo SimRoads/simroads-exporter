@@ -51,7 +51,7 @@ namespace TsMap.TsItem
             }
 
             var overlayName = IsTrain ? "train_ico" : "port_overlay";
-            if (!Sector.Mapper.OverlayManager.AddOverlay(overlayName, OverlayType.Road, node.X, node.Z, IsTrain ? "Train" : "Ferry", DlcGuard))
+            if (!Sector.Mapper.OverlayManager.AddOverlay(overlayName, OverlayType.Road, node.X, node.Z, IsTrain ? "Train" : "Ferry", DlcGuard, this))
             {
                 Logger.Instance.Error(
                     $"Could not find Overlay: '{overlayName}'({ScsToken.StringToToken(overlayName):X}), item uid: 0x{Uid:X}, " +

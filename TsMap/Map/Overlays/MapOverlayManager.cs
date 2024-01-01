@@ -15,12 +15,12 @@ namespace TsMap.Map.Overlays
 
         private readonly ConcurrentBag<MapOverlay> _overlays = new ConcurrentBag<MapOverlay>();
 
-        internal MapOverlay CreateOverlay(string overlayName, OverlayType overlayType)
+        internal MapOverlay CreateOverlay(string overlayName, OverlayType overlayType, object referenceObj)
         {
             var overlayImage = GetOrCreateOverlayImage(overlayName, overlayType);
             if (overlayImage == null || !overlayImage.Valid) return null;
 
-            return new MapOverlay(overlayImage, overlayType, overlayName);
+            return new MapOverlay(overlayImage, overlayType, overlayName, referenceObj);
         }
 
         internal void AddOverlay(MapOverlay overlay)
@@ -29,9 +29,9 @@ namespace TsMap.Map.Overlays
         }
 
         internal bool AddOverlay(string overlayName, OverlayType overlayType, float posX, float posY,
-            string typeName, byte dlcGuard, bool isSecret = false)
+            string typeName, byte dlcGuard, object referenceObj, bool isSecret = false)
         {
-            var overlay = CreateOverlay(overlayName, overlayType);
+            var overlay = CreateOverlay(overlayName, overlayType, referenceObj);
 
             if (overlay == null) return false;
 

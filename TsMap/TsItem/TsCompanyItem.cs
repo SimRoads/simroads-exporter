@@ -122,7 +122,7 @@ namespace TsMap.TsItem
                 originNode.X, originNode.Z);
 
             if (!Sector.Mapper.OverlayManager.AddOverlay(ScsToken.TokenToString(_companyNameToken), OverlayType.Company,
-                    point.X, point.Y, "Company", DlcGuard, prefab.IsSecret))
+                    point.X, point.Y, "Company", DlcGuard, this, prefab.IsSecret))
             {
                 Logger.Instance.Error(
                     $"Could not find Company Overlay: '{ScsToken.TokenToString(_companyNameToken)}'({_companyNameToken:X}), item uid: 0x{Uid:X}, " +

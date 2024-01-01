@@ -26,7 +26,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
         protected override bool SaveMvtLayersInternal(ExportSettings sett, Layers layers)
         {
             var pos = Mapper.MapSettings.Correct(Overlay.Position);
-            layers.overlays.Features.Add(new Feature { Type = GeomType.Point, Geometry = { GenerateCommandInteger(MapboxCommandType.MoveTo, 1), sett.GenerateDeltaFromGame(pos.X, pos.Y) } });
+            layers.overlays.Features.Add(new Feature { Id = Overlay.GetId(), Type = GeomType.Point, Geometry = { GenerateCommandInteger(MapboxCommandType.MoveTo, 1), sett.GenerateDeltaFromGame(pos.X, pos.Y) } });
             return true;
         }
     }

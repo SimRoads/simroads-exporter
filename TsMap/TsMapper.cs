@@ -133,7 +133,7 @@ namespace TsMap
                             _countriesLookupById.Add(country.CountryId, country);
 
                             if (country.CountryCode != string.Empty)
-                                OverlayManager.AddOverlay(country.CountryCode, OverlayType.Flag, country.X, country.Y, "Flag", 0);
+                                OverlayManager.AddOverlay(country.CountryCode, OverlayType.Flag, country.X, country.Y, "Flag", 0, country);
                         }
                     }
                 }

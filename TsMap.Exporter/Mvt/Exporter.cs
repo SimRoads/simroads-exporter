@@ -123,7 +123,8 @@ namespace TsMap.Exporter.Mvt
                 mapper.Prefabs.Values.Select(x => new MvtPrefabItem(x, mapper))).Concat(
                 mapper.Boundaries.QueryAll().Select(x => new MvtBoundary(x, mapper))).Concat(
                 mapper.MapAreas.Values.Select(x => new MvtMapAreaItem(x, mapper))).Concat(
-                mapper.GetFerryConnections().Select(x => new MvtFerryItem(x, mapper))))
+                mapper.GetFerryConnections().Select(x => new MvtFerryItem(x, mapper))).Concat(
+                mapper.Cities.Values.Select(x => new MvtCityItem(x, mapper))))
             {
                 item.AddTo(AreaIndex);
             }

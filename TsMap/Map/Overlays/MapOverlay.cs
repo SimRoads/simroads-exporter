@@ -8,6 +8,8 @@ namespace TsMap.Map.Overlays
 
         public readonly string OverlayName;
 
+        public readonly object ReferenceObj;
+
         public bool IsSecret { get; private set; }
 
         public byte ZoomLevelVisibility { get; private set; }
@@ -16,11 +18,12 @@ namespace TsMap.Map.Overlays
 
         public OverlayType OverlayType { get; }
 
-        internal MapOverlay(OverlayImage overlayImage, OverlayType overlayType, string overlayName)
+        internal MapOverlay(OverlayImage overlayImage, OverlayType overlayType, string overlayName, object referenceObj)
         {
             _overlayImage = overlayImage;
             OverlayType = overlayType;
             OverlayName = overlayName;
+            ReferenceObj = referenceObj;
         }
 
         public string TypeName { get; private set; }

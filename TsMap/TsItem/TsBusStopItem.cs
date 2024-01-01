@@ -62,7 +62,7 @@ namespace TsMap.TsItem
             }
 
             Sector.Mapper.OverlayManager.AddOverlay("bus_stop", OverlayType.BusStop,
-                node.X, node.Z, "Bus Stop", DlcGuard);
+                node.X, node.Z, "Bus Stop", DlcGuard, this);
         }
     }
 }
