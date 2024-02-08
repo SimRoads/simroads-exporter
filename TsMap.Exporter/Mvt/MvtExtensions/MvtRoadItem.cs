@@ -69,7 +69,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 Id = Road.GetId(),
                 Type = GeomType.Linestring,
                 Geometry = { points },
-                Tags = { layers.roads.GetOrCreateTag("size", Road.RoadLook.GetWidth()), 
+                Tags = { layers.roads.GetOrCreateTag("size", Road.RoadLook.GetWidth()),
                     layers.roads.GetOrCreateTag("country", Road.Nodes.Select(x => Mapper.GetNodeByUid(x).GetCountry()).First(x => x != null).GetId()) }
             });
             return true;

@@ -1,11 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation;
-using NetTopologySuite.Simplify;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static TsMap.Exporter.Mvt.Tile.Types;
 
 namespace TsMap.Exporter.Mvt.MvtExtensions

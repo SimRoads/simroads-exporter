@@ -1,18 +1,11 @@
-﻿
-using Emgu.CV.Reg;
-using Eto.Drawing;
+﻿using Eto.Drawing;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Geometries.Utilities;
 using NetTopologySuite.Index.KdTree;
-using RTools_NTS.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TsMap.Common;
-using TsMap.Helpers;
 using TsMap.Map.Overlays;
 using TsMap.TsItem;
-using Point = NetTopologySuite.Geometries.Point;
 
 namespace TsMap.Exporter.Data
 {
@@ -24,7 +17,7 @@ namespace TsMap.Exporter.Data
 
         public static ExpOverlay Create(MapOverlay obj, DataExporter exp)
         {
-            switch(obj.ReferenceObj)
+            switch (obj.ReferenceObj)
             {
                 case TsBusStopItem busStop:
                     return new ExpBusStop(obj, exp);
@@ -74,7 +67,8 @@ namespace TsMap.Exporter.Data
             return new Envelope(expObj.Position.X, expObj.Position.Y, expObj.Position.X, expObj.Position.Y);
         }
 
-        public override TsCountry GetCountry() { 
+        public override TsCountry GetCountry()
+        {
             var city = GetCity();
             if (city != null) return mapper.GetCountryByTokenName(city.Country);
 
@@ -84,7 +78,7 @@ namespace TsMap.Exporter.Data
                 country = item.Nodes.Select(x => mapper.Nodes[x]).Select(x => x.GetCountry()).First(x => x != null);
             }
             country ??= mapper.NodesIndex.NearestNeighbor(new Coordinate(expObj.Position.X, expObj.Position.Y)).Data.GetCountry();
-            return country; 
+            return country;
         }
 
         public override TsCity GetCity()
@@ -146,7 +140,7 @@ namespace TsMap.Exporter.Data
 
         public override string GetType()
         {
-               return "bus_stop";
+            return "bus_stop";
         }
     }
 
@@ -345,7 +339,7 @@ namespace TsMap.Exporter.Data
         {
             if (expObj.OverlayType == OverlayType.Road && !expObj.OverlayName.EndsWith("_ico") && expObj.OverlayName != "quarry")
             {
-                roadNumber = (expObj.OverlayName.Contains('_') ? String.Join(' ', expObj.OverlayName.Split('_').Skip(1)): expObj.OverlayName).ToUpper();
+                roadNumber = (expObj.OverlayName.Contains('_') ? String.Join(' ', expObj.OverlayName.Split('_').Skip(1)) : expObj.OverlayName).ToUpper();
             }
         }
 
@@ -379,7 +373,8 @@ namespace TsMap.Exporter.Data
             if (roadNumber != null)
             {
                 return (null, roadNumber);
-            } else
+            }
+            else
             {
                 return (null, "Undefined overlay");
             }

@@ -1,13 +1,10 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using TsMap.Exporter.Mvt;
 using TsMap.Map.Overlays;
 
 namespace TsMap.Exporter.Overlays
@@ -44,7 +41,7 @@ namespace TsMap.Exporter.Overlays
                 bitmaps[item.OverlayName] = bitmap;
                 x += bitmap.Width;
                 width = Math.Max(width, x);
-                height = Math.Max(height, y+ bitmap.Height);
+                height = Math.Max(height, y + bitmap.Height);
                 if (x > WidthLimit)
                 {
                     x = 0;

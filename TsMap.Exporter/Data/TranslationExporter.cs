@@ -1,12 +1,8 @@
 ﻿using MessagePack;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using TsMap.Exporter.Mvt;
 
 namespace TsMap.Exporter.Data
 {

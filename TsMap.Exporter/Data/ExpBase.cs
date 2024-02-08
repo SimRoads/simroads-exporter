@@ -1,5 +1,4 @@
 ﻿using Eto.Drawing;
-using MessagePack;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
@@ -32,7 +31,7 @@ namespace TsMap.Exporter.Data
         public abstract ulong GetGameId();
         public virtual (string, string) GetSubtitle() { return (null, null); }
         public virtual Bitmap GetIcon() { return null; }
-        public virtual TsCountry GetCountry() { return null;}
+        public virtual TsCountry GetCountry() { return null; }
         public virtual TsCity GetCity() { return null; }
         public virtual Dictionary<string, object> GetAdditionalData() { return new(); }
 

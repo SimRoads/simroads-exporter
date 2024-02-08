@@ -7,7 +7,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using TsMap.Exporter.Mvt.MvtExtensions;
-using TsMap.TsItem;
 using static TsMap.Exporter.Mvt.Tile.Types;
 
 namespace TsMap.Exporter.Mvt

@@ -1,5 +1,4 @@
-﻿using Emgu.CV.Reg;
-using MessagePack;
+﻿using MessagePack;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.KdTree;
 using NetTopologySuite.Index.Quadtree;
@@ -8,11 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TsMap.Common;
-using TsMap.Exporter.Mvt;
-using TsMap.Map.Overlays;
 using TsMap.TsItem;
 
 namespace TsMap.Exporter.Data
@@ -68,7 +62,7 @@ namespace TsMap.Exporter.Data
             zipFile = zipArchive.CreateEntry(Path.Join("json", "cities.msgpack"), CompressionLevel.Fastest);
             using (var stream = zipFile.Open())
             {
-                stream.Write(MessagePackSerializer.Serialize(expCities.Select(x => x.ExportList()),Options));
+                stream.Write(MessagePackSerializer.Serialize(expCities.Select(x => x.ExportList()), Options));
                 Console.WriteLine($"Exported countries file");
             }
 
@@ -80,7 +74,7 @@ namespace TsMap.Exporter.Data
                 using (var stream = zipFile.Open())
                 {
                     stream.Write(MessagePackSerializer.Serialize(c.ExportDetail(), Options));
-                    Console.WriteLine($"Exported country {i+1}/{expCountries.Count}");
+                    Console.WriteLine($"Exported country {i + 1}/{expCountries.Count}");
                 }
             }
 
@@ -102,7 +96,7 @@ namespace TsMap.Exporter.Data
                 using (var stream = zipFile.Open())
                 {
                     stream.Write(MessagePackSerializer.Serialize(overlay.Select(x => x.ExportDetail()), Options));
-                    Console.WriteLine($"Exported overlay {i+1}/{overlaysToPrefab.Count}");
+                    Console.WriteLine($"Exported overlay {i + 1}/{overlaysToPrefab.Count}");
                 }
                 i++;
             }

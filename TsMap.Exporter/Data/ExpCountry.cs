@@ -3,7 +3,6 @@ using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using System.Linq;
 using TsMap.Map.Overlays;
-using Point = NetTopologySuite.Geometries.Point;
 
 namespace TsMap.Exporter.Data
 {

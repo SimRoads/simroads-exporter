@@ -4,11 +4,9 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.KdTree;
-using NetTopologySuite.Index.Quadtree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TsMap.Map.Overlays;
 
 namespace TsMap.Exporter
 {

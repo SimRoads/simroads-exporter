@@ -1,7 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
-using System.Diagnostics;
 using TsMap.Map.Overlays;
-using TsMap.TsItem;
 using static TsMap.Exporter.Mvt.Tile.Types;
 using static TsMap.Exporter.Mvt.VectorTileUtils;
 
@@ -33,7 +31,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 Id = Overlay.GetId(),
                 Type = GeomType.Point,
                 Geometry = { GenerateCommandInteger(MapboxCommandType.MoveTo, 1), sett.GenerateDeltaFromGame(pos.X, pos.Y) },
-                Tags = { 
+                Tags = {
                     layers.overlays.GetOrCreateTag("overlay", Overlay.OverlayName),
                 layers.overlays.GetOrCreateTag("prefab", Overlay.GetPrefabId()) }
             };

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TsMap.Exporter.Data;
-using TsMap.Exporter.Mvt;
-using TsMap.Exporter.Overlays;
 
 namespace TsMap.Exporter
 {
@@ -29,7 +23,7 @@ namespace TsMap.Exporter
                     overlayExporter.Export(archive);*/
 
                     var dataExporter = new DataExporter(mapper);
-                     dataExporter.Export(archive);
+                    dataExporter.Export(archive);
 
                 }
             }

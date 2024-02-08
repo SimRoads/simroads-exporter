@@ -1,13 +1,6 @@
-﻿using Emgu.CV.ML;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Index.KdTree;
+﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Quadtree;
-using NetTopologySuite.Operation.Distance;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TsMap.Exporter.Mvt.MvtExtensions
 {
