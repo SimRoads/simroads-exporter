@@ -1,8 +1,69 @@
 ﻿using Eto.Drawing;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using TsMap.Common;
+using TsMap.FileSystem;
+using TsMap.Helpers.Logger;
 
 namespace TsMap
 {
+    public class TsFerry
+    {
+        public readonly ulong Token;
+        public readonly string Name;
+        public readonly string LocalizationToken;
+        public readonly string TransportType = "ferry";
+
+        private List<TsFerryConnection> connections = new();
+
+        public TsFerry(string path)
+        {
+            var file = UberFileSystem.Instance.GetFile(path);
+
+            if (file == null) return;
+            var fileContent = file.Entry.Read();
+            var lines = Encoding.UTF8.GetString(fileContent).Split('\n');
+
+            foreach (var line in lines)
+            {
+                var (validLine, key, value) = SiiHelper.ParseLine(line);
+                if (!validLine) continue;
+
+                if (key == "ferry_name")
+                {
+                    Name = value.Split('"')[1];
+                }
+                else if (key == "ferry_name_localized")
+                {
+                    LocalizationToken = value.Split('"')[1].Trim('@');
+                }
+                else if (key == "transport_type")
+                {
+                    TransportType = value.Split('"')[1];
+                }
+                else if (key == "ferry_data")
+                {
+                    Token = ScsToken.StringToToken( value.Split('.')[1].Trim());
+                }
+            }
+        }
+
+        public void AddConnection(TsFerryConnection connection)
+        {
+            connections.Add(connection);
+        }
+
+        public List<TsFerryConnection> GetConnections()
+        {
+            return connections;
+        }
+
+    }
+
+
     public class TsFerryPoint
     {
         public float X;
@@ -22,11 +83,18 @@ namespace TsMap
 
     public class TsFerryConnection
     {
-        public ulong StartPortToken { get; set; }
+        public readonly TsFerry StartPort;
         public PointF StartPortLocation { get; private set; }
-        public ulong EndPortToken { get; set; }
+        public readonly TsFerry EndPort;
         public PointF EndPortLocation { get; private set; }
         public List<TsFerryPoint> Connections = new List<TsFerryPoint>();
+
+        public TsFerryConnection(TsFerry start, TsFerry end)
+        {
+            StartPort = start;
+            EndPort = end;
+            start.AddConnection(this);
+        }
 
         public void AddConnectionPosition(int index, float x, float z)
         {
@@ -41,14 +109,15 @@ namespace TsMap
 
         public void SetPortLocation(ulong ferryPortId, float x, float z)
         {
-            if (ferryPortId == StartPortToken)
+            if (ferryPortId == StartPort.Token)
             {
                 StartPortLocation = new PointF(x, z);
             }
-            else if (ferryPortId == EndPortToken)
+            else if (ferryPortId == EndPort.Token)
             {
                 EndPortLocation = new PointF(x, z);
             }
         }
     }
+
 }

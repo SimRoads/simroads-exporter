@@ -1,5 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
+using System.Diagnostics;
 using TsMap.Map.Overlays;
+using TsMap.TsItem;
 using static TsMap.Exporter.Mvt.Tile.Types;
 using static TsMap.Exporter.Mvt.VectorTileUtils;
 
@@ -26,7 +28,23 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
         protected override bool SaveMvtLayersInternal(ExportSettings sett, Layers layers)
         {
             var pos = Mapper.MapSettings.Correct(Overlay.Position);
-            layers.overlays.Features.Add(new Feature { Id = Overlay.GetId(), Type = GeomType.Point, Geometry = { GenerateCommandInteger(MapboxCommandType.MoveTo, 1), sett.GenerateDeltaFromGame(pos.X, pos.Y) } });
+            var feature = new Feature
+            {
+                Id = Overlay.GetId(),
+                Type = GeomType.Point,
+                Geometry = { GenerateCommandInteger(MapboxCommandType.MoveTo, 1), sett.GenerateDeltaFromGame(pos.X, pos.Y) },
+                Tags = { 
+                    layers.overlays.GetOrCreateTag("overlay", Overlay.OverlayName),
+                layers.overlays.GetOrCreateTag("prefab", Overlay.GetPrefabId()) }
+            };
+            if (Overlay.ReferenceObj is TsCountry country)
+            {
+                foreach (var locale in Mapper.Localization.GetLocales()) feature.Tags.Add(
+                    layers.overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(country.LocalizationToken, locale)));
+            }
+
+            layers.overlays.Features.Add(feature);
+
             return true;
         }
     }

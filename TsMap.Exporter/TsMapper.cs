@@ -14,7 +14,8 @@ namespace TsMap.Exporter
 {
     public class TsMapper : TsMap.TsMapper
     {
-        public Quadtree<Polygon> Boundaries { get; private set; } = new();
+        public Dictionary<TsCountry, List<Polygon>> Boundaries { get; private set; } = new();
+        public KdTree<TsNode> NodesIndex { get; private set; } = new();
 
         public TsMapper(string gameDir, List<Mod> mods) : base(gameDir, mods)
         {
@@ -56,7 +57,9 @@ namespace TsMap.Exporter
                     if (ring.Count >= 3)
                     {
                         var poly = new Polygon(new LinearRing(ring.ToArray()));
-                        Boundaries.Insert(poly.EnvelopeInternal, poly);
+                        var country = NodesIndex.NearestNeighbor(poly.Centroid.Coordinate).Data.GetCountry();
+                        if (!Boundaries.ContainsKey(country)) Boundaries.Add(country, new List<Polygon>());
+                        Boundaries[country].Add(poly);
                     }
                 }
             }
@@ -65,6 +68,10 @@ namespace TsMap.Exporter
 
         protected virtual void PopulateIndexes()
         {
+            foreach (var node in Nodes.Values)
+            {
+                if (node.GetCountry() != null) NodesIndex.Insert(new Coordinate(node.X, node.Z), node);
+            }
         }
 
         public override void Parse()
@@ -75,9 +82,14 @@ namespace TsMap.Exporter
             //ParseCountriesBounds();
         }
 
-        public List<TsFerryConnection> GetFerryConnections()
+        public IEnumerable<TsCountry> GetCountries()
         {
-            return _ferryConnectionLookup;
+            return _countriesLookup.Values;
+        }
+
+        public IEnumerable<TsCity> GetCities()
+        {
+            return _citiesLookup.Values;
         }
     }
 }

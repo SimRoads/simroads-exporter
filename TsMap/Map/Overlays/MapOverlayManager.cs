@@ -90,7 +90,7 @@ namespace TsMap.Map.Overlays
             return null;
         }
 
-        private OverlayImage GetOrCreateOverlayImage(string overlayName, OverlayType overlayType)
+        public OverlayImage GetOrCreateOverlayImage(string overlayName, OverlayType overlayType)
         {
             if (overlayName == "") return null;
 

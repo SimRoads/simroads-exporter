@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using TsMap.Helpers;
 using TsMap.Helpers.Logger;
 using TsMap.Map.Overlays;
@@ -9,6 +12,7 @@ namespace TsMap.TsItem
     public class TsCutsceneItem : TsItem
     {
         private bool _isSecret;
+        public string LocalizationToken { get; private set; }
 
         public TsCutsceneItem(TsSector sector, int startOffset) : base(sector, startOffset)
         {
@@ -49,7 +53,10 @@ namespace TsMap.TsItem
                 for (var s = 0; s < stringParamCount; ++s)
                 {
                     var textLength = MemoryHelper.ReadInt32(Sector.Stream, fileOffset);
-                    fileOffset += 0x04 + 0x04 + textLength; // 0x04(textLength, could be Uint64) + 0x04(padding) + textLength
+                    fileOffset += 0x04 + 0x04; // 0x04(textLength, could be Uint64) + 0x04(padding) + textLength
+                    var line = Encoding.UTF8.GetString(Sector.Stream.Skip(fileOffset).Take(textLength).ToArray());
+                    if (line.StartsWith("ui_value")) LocalizationToken = line.Split("@@")[1];
+                    fileOffset += textLength;
                 }
                 var targetTagCount = MemoryHelper.ReadInt32(Sector.Stream, fileOffset);
                 fileOffset += 0x04 + (targetTagCount * 0x08) + 0x08; // 0x04(targetTagCount) + targetTags + 0x08(target_range + action_flags)
@@ -70,7 +77,7 @@ namespace TsMap.TsItem
             }
 
             Sector.Mapper.OverlayManager.AddOverlay("viewpoint", OverlayType.Map,
-                node.X, node.Z, "Viewpoint", DlcGuard, _isSecret);
+                node.X, node.Z, "Viewpoint", DlcGuard, this, _isSecret);
 
         }
     }

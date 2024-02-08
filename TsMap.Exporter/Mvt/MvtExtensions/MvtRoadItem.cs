@@ -1,9 +1,10 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using TsMap.TsItem;
-using static TsMap.Exporter.Mvt.VectorTileUtils;
 using static TsMap.Exporter.Mvt.Tile.Types;
-using NetTopologySuite.Geometries;
+using static TsMap.Exporter.Mvt.VectorTileUtils;
 
 namespace TsMap.Exporter.Mvt.MvtExtensions
 {
@@ -23,7 +24,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
         public override bool Discretizate(ExportSettings sett)
         {
-            return base.Discretizate(sett) && (Road.RoadLook.LanesRight.Count <= 1 || Road.RoadLook.LanesLeft.Count >= 1);
+            return base.Discretizate(sett) && Road.RoadLook.IsOneWay();
         }
 
         protected override Envelope CalculateEnvelope()
@@ -63,7 +64,14 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 points.AddRange(sett.GenerateDeltaFromGame(x, z, ref cursorX, ref cursorY));
             }
 
-            layers.roads.Features.Add(new Feature { Id= Road.GetId(), Type = GeomType.Linestring, Geometry = { points } });
+            layers.roads.Features.Add(new Feature
+            {
+                Id = Road.GetId(),
+                Type = GeomType.Linestring,
+                Geometry = { points },
+                Tags = { layers.roads.GetOrCreateTag("size", Road.RoadLook.GetWidth()), 
+                    layers.roads.GetOrCreateTag("country", Road.Nodes.Select(x => Mapper.GetNodeByUid(x).GetCountry()).First(x => x != null).GetId()) }
+            });
             return true;
         }
     }

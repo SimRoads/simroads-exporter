@@ -26,7 +26,7 @@ namespace TsMap.TsItem
 
         private void CreateMapOverlay()
         {
-            Sector.Mapper.OverlayManager.AddOverlay("parking_ico", OverlayType.Map, X, Z, "Parking", DlcGuard, _isSecret);
+            Sector.Mapper.OverlayManager.AddOverlay("parking_ico", OverlayType.Map, X, Z, "Parking", DlcGuard, this, _isSecret);
         }
 
         public void TsTriggerItem825(int startOffset)

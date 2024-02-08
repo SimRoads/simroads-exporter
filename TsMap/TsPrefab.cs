@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using TsMap.FileSystem;
 using TsMap.Helpers;
 using TsMap.Helpers.Logger;
@@ -28,6 +29,7 @@ namespace TsMap
         public int NeighbourCount;
         public List<int> Neighbours;
         public sbyte ControlNodeIndex;
+        public List<sbyte> DestinationNodes;
     }
 
     public class TsSpawnPoint
@@ -215,7 +217,7 @@ namespace TsMap
                 var roadLookFlags = MemoryHelper.ReadUint8(_stream, mapPointBaseOffset + 0x01);
                 var laneTypeFlags = (byte)(roadLookFlags & 0x0F);
                 var laneOffsetFlags = (byte)(roadLookFlags >> 4);
-                var controlNodeIndexFlags = MemoryHelper.ReadInt8(_stream, mapPointBaseOffset + 0x04);
+                var navFlags = MemoryHelper.ReadUInt32(_stream, mapPointBaseOffset + 0x04);
                 int laneOffset;
                 switch (laneOffsetFlags)
                 {
@@ -248,22 +250,22 @@ namespace TsMap
                         break;
                 }
                 sbyte controlNodeIndex = -1;
-                switch (controlNodeIndexFlags)
+                if ((navFlags & 0x00000100) != 0)
                 {
-                    case 1: controlNodeIndex = 0; break;
-                    case 2: controlNodeIndex = 1; break;
-                    case 4: controlNodeIndex = 2; break;
-                    case 8: controlNodeIndex = 3; break;
-                    case 16: controlNodeIndex = 4; break;
-                    case 32: controlNodeIndex = 5; break;
+                    if ((navFlags & 0x00000001) != 0) controlNodeIndex = 0;
+                    else if ((navFlags & 0x00000002) != 0) controlNodeIndex = 1;
+                    else if ((navFlags & 0x00000004) != 0) controlNodeIndex = 2;
+                    else if ((navFlags & 0x00000008) != 0) controlNodeIndex = 3;
+                    else if ((navFlags & 0x00000010) != 0) controlNodeIndex = 4;
+                    else if ((navFlags & 0x00000020) != 0) controlNodeIndex = 5;
                 }
+
                 var prefabColorFlags = MemoryHelper.ReadUint8(_stream, mapPointBaseOffset + 0x02);
 
                 if (laneCount == -2 && controlNodeIndex != -1) laneCount = PrefabNodes[controlNodeIndex].LaneCount;
                 else if (laneCount == -2) performLaneCheck = true;
 
-                var navFlags = MemoryHelper.ReadUint8(_stream, mapPointBaseOffset + 0x05);
-                var hidden = (navFlags & 0x02) != 0; // Map Point is Control Node
+                var hidden = (navFlags & 0x00020000) != 0; // Map Point is Control Node
 
                 var point = new TsMapPoint
                 {
@@ -275,12 +277,18 @@ namespace TsMap
                     Z = MemoryHelper.ReadSingle(_stream, mapPointBaseOffset + 0x10),
                     Neighbours = new List<int>(),
                     NeighbourCount = MemoryHelper.ReadInt32(_stream, mapPointBaseOffset + 0x14 + (0x04 * 6)),
-                    ControlNodeIndex = controlNodeIndex
+                    ControlNodeIndex = controlNodeIndex,
+                    DestinationNodes = new List<sbyte>()
                 };
 
                 for (var x = 0; x < point.NeighbourCount; x++)
                 {
                     point.Neighbours.Add(MemoryHelper.ReadInt32(_stream, mapPointBaseOffset + 0x14 + (x * 0x04)));
+                }
+
+                for (int x = 0; x <6;x++)
+                {
+                    if (((navFlags >> x) & 1) != 0) point.DestinationNodes.Add((sbyte)x);
                 }
 
                 MapPoints.Add(point);

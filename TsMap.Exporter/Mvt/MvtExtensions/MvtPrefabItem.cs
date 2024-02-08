@@ -95,22 +95,21 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
                     var roadOver = MemoryHelper.IsBitSet(visualFlag, 0); // Road Over flag
                     var zIndex = roadOver ? 10 : 0;
-                    /*if (MemoryHelper.IsBitSet(visualFlag, 1))
+                    string areaType = "road";
+                    if (MemoryHelper.IsBitSet(visualFlag, 1))
                     {
-                        fillColor = palette.PrefabLight;
+                        areaType = "field";
                     }
                     else if (MemoryHelper.IsBitSet(visualFlag, 2))
                     {
-                        fillColor = palette.PrefabDark;
+                        areaType = "building";
                         zIndex = roadOver ? 11 : 1;
                     }
                     else if (MemoryHelper.IsBitSet(visualFlag, 3))
                     {
-                        fillColor = palette.PrefabGreen;
+                        areaType = "grass";
                         zIndex = roadOver ? 12 : 2;
                     }
-                    // else fillColor = _palette.Error; // Unknown
-                    */
 
                     var points = Mapper.MapSettings.Correct(polyPoints.Values).ToList();
 
@@ -122,7 +121,17 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                     }
                     geometry.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
-                    prefabs.Add(new Feature { Id = Prefab.GetId(i), Type = GeomType.Polygon, Geometry = { geometry } });
+                    prefabs.Add(new Feature
+                    {
+                        Id = Prefab.GetId(i),
+                        Type = GeomType.Polygon,
+                        Geometry = { geometry },
+                        Tags = {
+                            layers.prefabs.GetOrCreateTag("area", areaType),
+                            layers.prefabs.GetOrCreateTag("zIndex", zIndex),
+                            layers.prefabs.GetOrCreateTag("prefab", Prefab.GetId())
+                        }
+                    });
 
                     continue;
                 }
@@ -163,7 +172,16 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                     }
                     points.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
-                    roads.Add(new Feature { Id = Prefab.GetId(i), Type = GeomType.Polygon, Geometry = { points } });
+                    roads.Add(new Feature
+                    {
+                        Id = Prefab.GetId(i),
+                        Type = GeomType.Polygon,
+                        Geometry = { points },
+                        Tags = {
+                            layers.roads.GetOrCreateTag("prefab", Prefab.GetId()),
+                            layers.roads.GetOrCreateTag("country", Prefab.Nodes.Select(x => Mapper.GetNodeByUid(x).GetCountry()).First(x => x != null).GetId()),
+                        }
+                    });
                 }
             }
 

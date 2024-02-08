@@ -66,12 +66,12 @@ namespace TsMap
             {
                 var ferryPen = new Pen(palette.FerryLines, 50) { DashStyle = new DashStyle(0, new[] { 10f, 10f }) };
 
-                foreach (var ferryConnection in _mapper.FerryConnections.Values)
+                foreach (var ferryConnection in _mapper.FerryPorts.Values)
                 {
-                    var connections = _mapper.LookupFerryConnection(ferryConnection.FerryPortId);
-
-                    foreach (var conn in connections)
+                    foreach (var conn in ferryConnection.Ferry.GetConnections())
                     {
+                        if (conn.StartPort.Token > conn.EndPort.Token) continue; // prevent duplicate connections
+
                         if (conn.Connections.Count == 0) // no extra nodes -> straight line
                         {
                             g.DrawLine(ferryPen, MapSettings.Correct(conn.StartPortLocation), MapSettings.Correct(conn.EndPortLocation));
@@ -205,7 +205,7 @@ namespace TsMap
                     var originNode = _mapper.GetNodeByUid(prefabItem.Nodes[0]);
                     if (prefabItem.Prefab.PrefabNodes == null) continue;
 
-                    if (true)
+                    if (!prefabItem.HasLooks())
                     {
                         var mapPointOrigin = prefabItem.Prefab.PrefabNodes[prefabItem.Origin];
 

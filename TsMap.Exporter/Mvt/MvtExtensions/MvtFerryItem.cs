@@ -1,10 +1,7 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
 using System.Collections.Generic;
-using TsMap.TsItem;
-using static TsMap.Exporter.Mvt.VectorTileUtils;
 using static TsMap.Exporter.Mvt.Tile.Types;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Index.Quadtree;
+using static TsMap.Exporter.Mvt.VectorTileUtils;
 
 namespace TsMap.Exporter.Mvt.MvtExtensions
 {
@@ -34,7 +31,12 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             (x, z) = Mapper.MapSettings.Correct(Conn.EndPortLocation.X, Conn.EndPortLocation.Y);
             points.AddRange(sett.GenerateDeltaFromGame(x, z, ref cursorX, ref cursorY));
 
-            layers.ferries.Features.Add(new Feature { Id =Conn.GetId(), Type = GeomType.Linestring, Geometry = { points } });
+            layers.ferries.Features.Add(new Feature
+            {
+                Id = Conn.GetId(),
+                Type = GeomType.Linestring,
+                Geometry = { points }
+            });
             return true;
         }
 

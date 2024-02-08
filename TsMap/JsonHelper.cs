@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace TsMap
 {
@@ -34,6 +35,28 @@ namespace TsMap
         {
             if (!File.Exists(Path.Combine(_settingsPath, "Settings.json"))) return new Settings();
             return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(Path.Combine(_settingsPath, "Settings.json")));
+        }
+
+        public static object Deserialize(string json)
+        {
+            return ToObject(JToken.Parse(json));
+        }
+
+        public static object ToObject(JToken token)
+        {
+            switch (token.Type)
+            {
+                case JTokenType.Object:
+                    return token.Children<JProperty>()
+                                .ToDictionary(prop => prop.Name,
+                                              prop => ToObject(prop.Value));
+
+                case JTokenType.Array:
+                    return token.Select(ToObject).ToList();
+
+                default:
+                    return ((JValue)token).Value;
+            }
         }
     }
 }

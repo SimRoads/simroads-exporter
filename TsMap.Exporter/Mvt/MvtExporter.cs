@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using TsMap.Exporter.Mvt.MvtExtensions;
+using TsMap.TsItem;
 using static TsMap.Exporter.Mvt.Tile.Types;
 
 namespace TsMap.Exporter.Mvt
@@ -17,7 +18,7 @@ namespace TsMap.Exporter.Mvt
         public readonly uint Extent;
         public readonly Envelope Envelope;
         public readonly Envelope SearchEnvelope;
-        public readonly Exporter Exporter;
+        public readonly MvtExporter Exporter;
         public readonly List<byte> ActiveDlcGuards;
 
         public float ItemDrawMargin = 500f;
@@ -25,7 +26,7 @@ namespace TsMap.Exporter.Mvt
 
         public const float MinDiscretizationThreshold = 0.01f;
 
-        public ExportSettings(uint z, uint x, uint y, uint maxZoom, TsMapper mapper, Exporter exporter)
+        public ExportSettings(uint z, uint x, uint y, uint maxZoom, TsMapper mapper, MvtExporter exporter)
         {
             float size = Math.Max(mapper.maxX - mapper.minX, mapper.maxZ - mapper.minZ);
             float tileSize = (float)(size / Math.Pow(2, z));
@@ -107,37 +108,28 @@ namespace TsMap.Exporter.Mvt
         }
     }
 
-    public class Exporter
+    public class MvtExporter : BaseExporter
     {
-
-        private readonly TsMapper mapper;
-
         public readonly Quadtree<MvtExtension> AreaIndex = new();
         public readonly Quadtree<MvtExtension> OverlayIndex = new(), CityIndex = new();
 
-        public Exporter(TsMapper mapper) { this.mapper = mapper; Initialize(); }
+        public uint ZoomLimit;
+
+        public MvtExporter(TsMapper mapper, uint zoomLimit = 7) : base(mapper) { this.ZoomLimit = zoomLimit; Initialize(); }
 
         private void Initialize()
         {
             foreach (var item in mapper.Roads.Values.Select(x => new MvtRoadItem(x, mapper)).Cast<RectMvtExtension>().Concat(
                 mapper.Prefabs.Values.Select(x => new MvtPrefabItem(x, mapper))).Concat(
-                mapper.Boundaries.QueryAll().Select(x => new MvtBoundary(x, mapper))).Concat(
+                mapper.Boundaries.SelectMany(pair => pair.Value.Select(x => new MvtBoundary(x, pair.Key, mapper)))).Concat(
                 mapper.MapAreas.Values.Select(x => new MvtMapAreaItem(x, mapper))).Concat(
-                mapper.GetFerryConnections().Select(x => new MvtFerryItem(x, mapper))).Concat(
+                mapper.FerryPorts.Values.SelectMany(x => x.Ferry.GetConnections().Where(x => x.StartPort.Token > x.EndPort.Token).Select(x => new MvtFerryItem(x, mapper)))).Concat(
                 mapper.Cities.Values.Select(x => new MvtCityItem(x, mapper))))
             {
                 item.AddTo(AreaIndex);
             }
 
-
             foreach (var item in mapper.OverlayManager.GetOverlays().Select(x => (new MvtOverlay(x, mapper)))) item.AddTo(OverlayIndex);
-            /*foreach (var item in mapper.OverlayManager.GetOverlays().Select(x => (new MvtOverlay(x, mapper)))) item.AddTo(OverlayIndex);
-            OverlayIndex.Insert(new Coordinate(overlay.Position.X, overlay.Position.Y), overlay);
-
-            foreach (TsFerryConnection conn in _mapper.GetFerryConnections())
-            {
-                FerryConnectionIndex.Insert(new Envelope(conn.StartPortLocation.X, conn.StartPortLocation.Y, conn.EndPortLocation.X, conn.EndPortLocation.Y), conn);
-            }*/
         }
 
         private IEnumerable<MvtExtension> GetItems(ExportSettings sett)
@@ -145,32 +137,25 @@ namespace TsMap.Exporter.Mvt
             return AreaIndex.Query(sett.SearchEnvelope).Cast<MvtExtension>().Concat(OverlayIndex.Query(sett.SearchEnvelope)).Concat(CityIndex.Query(sett.SearchEnvelope));
         }
 
-        public void ExportMap(string path, uint zoomLimit = 7)
+        public override void Export(ZipArchive archive)
         {
-            using (var fileStream = new FileStream(Path.Join(path, "test.zip"), FileMode.Create))
+            for (uint i = 0; i <= this.ZoomLimit; i++)
             {
-                using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Create, true))
+                for (uint j = 0; j < Math.Pow(2, i); j++)
                 {
-                    for (uint i = 0; i <= zoomLimit; i++)
+                    for (uint k = 0; k < Math.Pow(2, i); k++)
                     {
-                        for (uint j = 0; j < Math.Pow(2, i); j++)
+                        var zipArchiveEntry = archive.CreateEntry(Path.Join("mvt", i.ToString(), j.ToString(), k + ".mvt"), CompressionLevel.Fastest);
+                        using (var stream = zipArchiveEntry.Open())
                         {
-                            for (uint k = 0; k < Math.Pow(2, i); k++)
-                            {
-                                var zipArchiveEntry = archive.CreateEntry(Path.Join(i.ToString(), j.ToString(), k + ".mvt"), CompressionLevel.Fastest);
-                                using (var stream = zipArchiveEntry.Open())
-                                {
-                                    var settings = new ExportSettings(i, j, k, zoomLimit, mapper, this);
-                                    var result = ExportTile(settings, stream);
-                                    Console.WriteLine($"Exported tile {i}/{j}/{k}");
-                                }
-
-                            }
+                            var settings = new ExportSettings(i, j, k, this.ZoomLimit, mapper, this);
+                            var result = ExportTile(settings, stream);
+                            Console.WriteLine($"Exported tile {i}/{j}/{k}");
                         }
+
                     }
                 }
             }
-
         }
 
         public ExportSettings ExportTile(ExportSettings settings, Stream output)
@@ -187,27 +172,6 @@ namespace TsMap.Exporter.Mvt
 
             return settings;
         }
-
-        /*var geometry = new LineString((new Coordinate[] { new Coordinate(0, 0), new Coordinate(10, 10) }));
-        var feature = new Feature(geometry, new AttributesTable { { "uid", 5 } });
-        roadsLayer.Features.Add(feature);
-
-
-        geometry = new LineString((new Coordinate[] { new Coordinate(20, 20), new Coordinate(10, 10) }));
-        feature = new Feature(geometry, new AttributesTable { { "uid", 5 } });
-        roadsLayer.Features.Add(feature);
-
-        geometry = new LineString((new Coordinate[] { new Coordinate(0, 20), new Coordinate(10, 10) }));
-        feature = new Feature(geometry, new AttributesTable { { "uid", 5 } });
-        roadsLayer.Features.Add(feature);
-
-        geometry = new LineString((new Coordinate[] { new Coordinate(20, 0), new Coordinate(10, 10) }));
-        feature = new Feature(geometry, new AttributesTable { { "uid", 5 } });
-        roadsLayer.Features.Add(feature);
-
-        geometry = GeometryFactory.Fixed.CreateLineString(new Coordinate[] { new Coordinate(-20, -20), new Coordinate(100090, 100090) });
-        feature = new Feature(geometry, new AttributesTable { { "uid", 5 } });
-        roadsLayer.Features.Add(feature);*/
 
 
     }

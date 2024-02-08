@@ -11,6 +11,8 @@ namespace TsMap.TsItem
     {
         public ulong FerryPortId { get; private set; }
         public ulong PrefabUid { get; private set; }
+        public TsPrefabItem PrefabItem { get; private set; }
+        public TsFerry Ferry { get; private set; }
 
         public bool IsTrain { get; private set; }
 
@@ -33,13 +35,22 @@ namespace TsMap.TsItem
             {
                 MemoryHelper.ReadUInt64(Sector.Stream, fileOffset += 0x08) // 0x08(FerryPortId) + 0x08(prefab_link_uid)
             };
-            Sector.Mapper.AddFerryPortLocation(FerryPortId, X, Z);
+            Ferry = Sector.Mapper.LookupFerry(FerryPortId);
             fileOffset += 0x08 + 0x0C; // 0x08(node_uid) + 0x0C(unloadoffset)
             BlockSize = fileOffset - startOffset;
         }
 
         internal override void Update()
         {
+            PrefabItem = Sector.Mapper.Prefabs[PrefabUid];
+
+            foreach (var connection in this.Ferry.GetConnections())
+            {
+                connection.SetPortLocation(Ferry.Token, X, Z);
+                foreach (var backConnection in connection.EndPort.GetConnections())
+                    backConnection.SetPortLocation(Ferry.Token, X, Z);
+            }
+
             var node = Sector.Mapper.GetNodeByUid(Nodes[0]);
 
             if (node == null)

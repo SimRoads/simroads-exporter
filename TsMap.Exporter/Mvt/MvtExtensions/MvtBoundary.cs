@@ -13,10 +13,12 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
     internal class MvtBoundary : RectMvtExtension
     {
         public readonly Polygon Polygon;
+        public readonly TsCountry Country;
 
-        public MvtBoundary(Polygon polygon, TsMapper mapper) : base(mapper)
+        public MvtBoundary(Polygon polygon, TsCountry country, TsMapper mapper) : base(mapper)
         {
             Polygon = polygon;
+            Country = country;
         }
 
         public override bool Skip(ExportSettings sett)
@@ -45,6 +47,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 }
                 points.Add(sett.GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
                 var feature = new Feature() { Type = GeomType.Polygon, Geometry = { points } };
+                if (Country != null) feature.Tags.Add(layers.bounds.GetOrCreateTag("country", Country.GetId()));
                 layers.bounds.Features.Add(feature);
                 inserted = true;
             }

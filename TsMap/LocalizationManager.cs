@@ -126,5 +126,6 @@ namespace TsMap.Helpers
         }
 
         public List<string> GetLocales() => _localization.Keys.ToList();
+        public List<string> GetLocaleKeys() => _localization.Values.SelectMany(x => x.Keys).Distinct().ToList();
     }
 }

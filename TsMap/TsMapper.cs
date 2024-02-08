@@ -33,13 +33,13 @@ namespace TsMap
         protected readonly Dictionary<ulong, TsCountry> _countriesLookup = new Dictionary<ulong, TsCountry>();
         protected readonly Dictionary<int, TsCountry> _countriesLookupById = new Dictionary<int, TsCountry>();
         protected readonly Dictionary<ulong, TsRoadLook> _roadLookup = new Dictionary<ulong, TsRoadLook>();
-        protected readonly List<TsFerryConnection> _ferryConnectionLookup = new List<TsFerryConnection>();
+        protected readonly Dictionary<ulong, TsCompany> _companyLookup = new Dictionary<ulong, TsCompany>();
+        protected readonly Dictionary<ulong, TsFerry> _ferryLookup = new Dictionary<ulong, TsFerry>();
 
         public readonly Dictionary<ulong, TsRoadItem> Roads = new Dictionary<ulong, TsRoadItem>();
         public readonly Dictionary<ulong, TsPrefabItem> Prefabs = new Dictionary<ulong, TsPrefabItem>();
         public readonly Dictionary<ulong, TsMapAreaItem> MapAreas = new Dictionary<ulong, TsMapAreaItem>();
         public readonly Dictionary<ulong, TsCityItem> Cities = new Dictionary<ulong, TsCityItem>();
-        public readonly Dictionary<ulong, TsFerryItem> FerryConnections = new Dictionary<ulong, TsFerryItem>();
         public readonly Dictionary<ulong, TsFerryItem> FerryPorts = new Dictionary<ulong, TsFerryItem>();
 
         public readonly Dictionary<ulong, TsNode> Nodes = new Dictionary<ulong, TsNode>();
@@ -302,6 +302,19 @@ namespace TsMap
 
         private void ParseFerryConnections()
         {
+            var ferryDirectory = UberFileSystem.Instance.GetDirectory("def/ferry");
+            if (ferryDirectory == null)
+            {
+                Logger.Instance.Error("Could not read 'def/ferry' dir");
+                return;
+            }
+
+            foreach (var ferryFilePath in ferryDirectory.GetFilesByExtension("def/ferry", ".sui", ".sii"))
+            {
+                var ferry = new TsFerry(ferryFilePath);
+                _ferryLookup[ferry.Token] = ferry;
+            }
+
             var connectionDirectory = UberFileSystem.Instance.GetDirectory("def/ferry/connection");
             if (connectionDirectory == null)
             {
@@ -348,21 +361,44 @@ namespace TsMap
                         if (key == "ferry_connection")
                         {
                             var portIds = value.Split('.');
-                            conn = new TsFerryConnection
-                            {
-                                StartPortToken = ScsToken.StringToToken(portIds[1]),
-                                EndPortToken = ScsToken.StringToToken(portIds[2].TrimEnd('{').Trim())
-                            };
+                            conn = new TsFerryConnection(_ferryLookup[ScsToken.StringToToken(portIds[1])],
+                                _ferryLookup[ScsToken.StringToToken(portIds[2].TrimEnd('{').Trim())]);
                         }
                     }
 
                     if (!line.Contains("}") || conn == null) continue;
+                }
+            }
 
-                    var existingItem = _ferryConnectionLookup.FirstOrDefault(item =>
-                        (item.StartPortToken == conn.StartPortToken && item.EndPortToken == conn.EndPortToken) ||
-                        (item.StartPortToken == conn.EndPortToken && item.EndPortToken == conn.StartPortToken)); // Check if connection already exists
-                    if (existingItem == null) _ferryConnectionLookup.Add(conn);
-                    conn = null;
+        }
+
+        private void ParseCompanyFiles()
+        {
+            var defDirectory = UberFileSystem.Instance.GetDirectory("def");
+            if (defDirectory == null)
+            {
+                Logger.Instance.Error("Could not read 'def' dir");
+                return;
+            }
+
+            foreach (var companyFileName in defDirectory.GetFiles("company"))
+            {
+                var companyFile = UberFileSystem.Instance.GetFile($"def/{companyFileName}");
+
+                var data = companyFile.Entry.Read();
+                var lines = Encoding.UTF8.GetString(data).Split('\n');
+                foreach (var line in lines)
+                {
+                    if (line.TrimStart().StartsWith("#")) continue;
+                    if (line.Contains("@include"))
+                    {
+                        var path = PathHelper.GetFilePath(line.Split('"')[1], "def");
+                        var company = new TsCompany(path);
+                        if (company.Token != 0 && !_companyLookup.ContainsKey(company.Token))
+                        {
+                            _companyLookup.Add(company.Token, company);
+                        }
+                    }
                 }
             }
         }
@@ -385,12 +421,16 @@ namespace TsMap
             Logger.Instance.Info($"Loaded {_prefabLookup.Count} prefabs in {(DateTime.Now.Ticks - startTime) / TimeSpan.TicksPerMillisecond}ms");
 
             startTime = DateTime.Now.Ticks;
+            ParseCompanyFiles();
+            Logger.Instance.Info($"Loaded {_companyLookup.Count} companies in {(DateTime.Now.Ticks - startTime) / TimeSpan.TicksPerMillisecond}ms");
+
+            startTime = DateTime.Now.Ticks;
             ParseRoadLookFiles();
             Logger.Instance.Info($"Loaded {_roadLookup.Count} roads in {(DateTime.Now.Ticks - startTime) / TimeSpan.TicksPerMillisecond}ms");
 
             startTime = DateTime.Now.Ticks;
             ParseFerryConnections();
-            Logger.Instance.Info($"Loaded {_ferryConnectionLookup.Count} ferry connections in {(DateTime.Now.Ticks - startTime) / TimeSpan.TicksPerMillisecond}ms");
+            Logger.Instance.Info($"Loaded {_ferryLookup.Count} ferry ports in {(DateTime.Now.Ticks - startTime) / TimeSpan.TicksPerMillisecond}ms");
 
             startTime = DateTime.Now.Ticks;
             ParseBackground();
@@ -480,15 +520,6 @@ namespace TsMap
             foreach (var mapItem in MapItems.Values)
             {
                 mapItem.Update();
-            }
-
-            var invalidFerryConnections = _ferryConnectionLookup.Where(x => x.StartPortLocation.IsZero || x.EndPortLocation.IsZero).ToList();
-            foreach (var invalidFerryConnection in invalidFerryConnections)
-            {
-                _ferryConnectionLookup.Remove(invalidFerryConnection);
-                Logger.Instance.Debug($"Ignored ferry connection " +
-                    $"'{ScsToken.TokenToString(invalidFerryConnection.StartPortToken)}-{ScsToken.TokenToString(invalidFerryConnection.EndPortToken)}' " +
-                    $"due to not having Start/End location set.");
             }
 
             Logger.Instance.Info($"Loaded {OverlayManager.GetOverlayImagesCount()} overlay images, with {OverlayManager.GetOverlays().Count} overlays on the map");
@@ -669,18 +700,15 @@ namespace TsMap
             return _citiesLookup.ContainsKey(cityId) ? _citiesLookup[cityId] : null;
         }
 
-        public List<TsFerryConnection> LookupFerryConnection(ulong ferryPortId)
+        public TsCompany LookupCompany(ulong companyId)
         {
-            return _ferryConnectionLookup.Where(item => item.StartPortToken == ferryPortId).ToList();
+            return _companyLookup.ContainsKey(companyId) ? _companyLookup[companyId] : null;
         }
 
-        public void AddFerryPortLocation(ulong ferryPortId, float x, float z)
+        public TsFerry LookupFerry(ulong ferryPortId)
         {
-            var ferry = _ferryConnectionLookup.Where(item => item.StartPortToken == ferryPortId || item.EndPortToken == ferryPortId);
-            foreach (var connection in ferry)
-            {
-                connection.SetPortLocation(ferryPortId, x, z);
-            }
+            return _ferryLookup.ContainsKey(ferryPortId) ? _ferryLookup[ferryPortId] : null;
         }
+
     }
 }

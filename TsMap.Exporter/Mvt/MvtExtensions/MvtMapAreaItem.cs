@@ -1,10 +1,10 @@
 ﻿using Eto.Drawing;
-using System.Collections.Generic;
-using TsMap.TsItem;
-using static TsMap.Exporter.Mvt.VectorTileUtils;
-using static TsMap.Exporter.Mvt.Tile.Types;
 using NetTopologySuite.Geometries;
 using System;
+using System.Collections.Generic;
+using TsMap.TsItem;
+using static TsMap.Exporter.Mvt.Tile.Types;
+using static TsMap.Exporter.Mvt.VectorTileUtils;
 
 namespace TsMap.Exporter.Mvt.MvtExtensions
 {
@@ -29,23 +29,23 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 points.Add(Mapper.MapSettings.Correct(new PointF(node.X, node.Z)));
             }
 
-            /*Brush fillColor = palette.PrefabRoad;
-            var zIndex = MapArea.DrawOver ? 10 : 0;
+            string areaType = "road";
+            int zIndex = MapArea.DrawOver ? 10 : 0;
             if ((MapArea.ColorIndex & 0x03) == 3)
             {
-                fillColor = palette.PrefabGreen;
+                areaType = "grass";
                 zIndex = MapArea.DrawOver ? 13 : 3;
             }
             else if ((MapArea.ColorIndex & 0x02) == 2)
             {
-                fillColor = palette.PrefabDark;
+                areaType = "building";
                 zIndex = MapArea.DrawOver ? 12 : 2;
             }
             else if ((MapArea.ColorIndex & 0x01) == 1)
             {
-                fillColor = palette.PrefabLight;
+                areaType = "field";
                 zIndex = MapArea.DrawOver ? 11 : 1;
-            }*/
+            }
 
             var geometry = new List<uint>() { GenerateCommandInteger(MapboxCommandType.MoveTo, 1) };
             for (int j = 0; j < points.Count; j++)
@@ -55,7 +55,13 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             }
             geometry.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
-            layers.prefabs.Features.Add(new Feature { Id = MapArea.GetId() ,Type = GeomType.Polygon, Geometry = { geometry } });
+            layers.prefabs.Features.Add(new Feature
+            {
+                Id = MapArea.GetId(),
+                Type = GeomType.Polygon,
+                Geometry = { geometry },
+                Tags = { layers.prefabs.GetOrCreateTag("area", areaType), layers.prefabs.GetOrCreateTag("zIndex", zIndex) }
+            });
             return true;
         }
 

@@ -11,6 +11,8 @@ namespace TsMap.TsItem
     {
         private ulong _prefabUid;
 
+        public TsPrefabItem PrefabItem { get; private set; }
+
         public TsBusStopItem(TsSector sector, int startOffset) : base(sector, startOffset)
         {
             Valid = true;
@@ -48,9 +50,9 @@ namespace TsMap.TsItem
 
         internal override void Update()
         {
-            var prefab = Sector.Mapper.Prefabs.Values.FirstOrDefault(x => x.Uid == _prefabUid);
+            var Prefab = Sector.Mapper.Prefabs[_prefabUid];
 
-            if (prefab == null) return; // invalid or hidden prefab
+            if (Prefab == null) return; // invalid or hidden prefab
 
             var node = Sector.Mapper.GetNodeByUid(Nodes[0]);
             if (node == null)

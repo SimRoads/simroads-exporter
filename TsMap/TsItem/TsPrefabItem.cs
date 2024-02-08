@@ -304,7 +304,7 @@ namespace TsMap.TsItem
                 }
 
                 Sector.Mapper.OverlayManager.AddOverlay(overlayName, OverlayType.Map, newPoint.X, newPoint.Y,
-                    displayName, DlcGuard, IsSecret);
+                    displayName, DlcGuard, this, IsSecret);
             }
 
             var lastId = -1;
@@ -320,7 +320,7 @@ namespace TsMap.TsItem
                 if (triggerPoint.TriggerActionToken == ScsToken.StringToToken("hud_parking")) // parking trigger
                 {
                     Sector.Mapper.OverlayManager.AddOverlay("parking_ico", OverlayType.Map, newPoint.X, newPoint.Y,
-                        "Parking", DlcGuard, IsSecret);
+                        "Parking", DlcGuard, this, IsSecret);
                 }
             }
         }

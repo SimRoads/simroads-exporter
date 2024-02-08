@@ -13,6 +13,8 @@ namespace TsMap.TsItem
     {
         private ulong _companyNameToken;
         private ulong _prefabUid;
+        public TsCompany Company { get; private set; }
+        public TsPrefabItem PrefabItem { get; private set; }
 
         public TsCompanyItem(TsSector sector, int startOffset) : base(sector, startOffset)
         {
@@ -26,6 +28,8 @@ namespace TsMap.TsItem
             else
                 Logger.Instance.Error($"Unknown base file version ({Sector.Version}) for item {Type} " +
                     $"in file '{Path.GetFileName(Sector.FilePath)}' @ {startOffset} from '{Sector.GetUberFile().Entry.GetArchiveFile().GetPath()}'");
+
+            Company = Sector.Mapper.LookupCompany(_companyNameToken);
         }
 
         public void TsCompanyItem825(int startOffset)
@@ -95,8 +99,8 @@ namespace TsMap.TsItem
 
         internal override void Update()
         {
-            var prefab = Sector.Mapper.Prefabs.Values.FirstOrDefault(x => x.Uid == _prefabUid);
-            if (prefab == null)
+            var PrefabItem = Sector.Mapper.Prefabs[_prefabUid];
+            if (PrefabItem == null)
             {
                 Logger.Instance.Error(
                     $"Could not find prefab for company (uid: 0x{Uid:X}, name: '{ScsToken.TokenToString(_companyNameToken)}') " +
@@ -104,16 +108,16 @@ namespace TsMap.TsItem
                 return;
             }
 
-            var originNode = Sector.Mapper.GetNodeByUid(prefab.Nodes[0]);
-            if (prefab.Prefab.PrefabNodes == null) return;
-            var mapPointOrigin = prefab.Prefab.PrefabNodes[prefab.Origin];
+            var originNode = Sector.Mapper.GetNodeByUid(PrefabItem.Nodes[0]);
+            if (PrefabItem.Prefab.PrefabNodes == null) return;
+            var mapPointOrigin = PrefabItem.Prefab.PrefabNodes[PrefabItem.Origin];
 
             var rot = (float)(originNode.Rotation - Math.PI -
                 Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) + Math.PI / 2);
 
             var prefabStartX = originNode.X - mapPointOrigin.X;
             var prefabStartZ = originNode.Z - mapPointOrigin.Z;
-            var companyPos = prefab.Prefab.SpawnPoints.FirstOrDefault(x => x.Type == TsSpawnPointType.CompanyPos);
+            var companyPos = PrefabItem.Prefab.SpawnPoints.FirstOrDefault(x => x.Type == TsSpawnPointType.CompanyPos);
 
             if (companyPos == null) return;
 
@@ -122,7 +126,7 @@ namespace TsMap.TsItem
                 originNode.X, originNode.Z);
 
             if (!Sector.Mapper.OverlayManager.AddOverlay(ScsToken.TokenToString(_companyNameToken), OverlayType.Company,
-                    point.X, point.Y, "Company", DlcGuard, this, prefab.IsSecret))
+                    point.X, point.Y, "Company", DlcGuard, this, PrefabItem.IsSecret))
             {
                 Logger.Instance.Error(
                     $"Could not find Company Overlay: '{ScsToken.TokenToString(_companyNameToken)}'({_companyNameToken:X}), item uid: 0x{Uid:X}, " +
