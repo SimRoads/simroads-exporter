@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using TsMap.Exporter.Data;
+using TsMap.Exporter.Routing;
 
 namespace TsMap.Exporter
 {
@@ -22,8 +23,11 @@ namespace TsMap.Exporter
                     /*var overlayExporter = new OverlayExporter(mapper);
                     overlayExporter.Export(archive);*/
 
-                    var dataExporter = new DataExporter(mapper);
-                    dataExporter.Export(archive);
+                    /*var dataExporter = new DataExporter(mapper);
+                    dataExporter.Export(archive);*/
+
+                    var routingExporter = new RoutingExporter(mapper);
+                    routingExporter.Export(archive);
 
                 }
             }
