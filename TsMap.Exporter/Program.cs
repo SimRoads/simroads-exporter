@@ -8,20 +8,15 @@ namespace TsMap.Exporter
         static void Main(string[] args)
         {
             new Eto.Forms.Application();
-            var gameDir = Environment.GetEnvironmentVariable("GAME_DIR");
-            var exportFile = Environment.GetEnvironmentVariable("EXPORT_FILE");
-            if (gameDir == null)
+            if (args.Length < 2)
             {
-                Console.WriteLine("GAME_DIR environment variable not set");
+                Console.WriteLine("Usage: TsMap.Exporter <game_dir> <export_file> [mods_paths]");
                 return;
             }
-            if (exportFile == null)
-            {
-                Console.WriteLine("EXPORT_FILE environment variable not set");
-                return;
-            }
+            var gameDir = args[0];
+            var exportFile = args[1];
 
-            var mods = Environment.GetEnvironmentVariable("MODS")?.Split(";").Select(x => new Mod(x)).ToList() ?? new();
+            var mods = args.Skip(2).Select(x => new Mod(x)).ToList();
             var mapper = new TsMapper(gameDir, mods);
             mapper.Parse();
 

@@ -1,14 +1,11 @@
-name: Build
+name: Build Project
 
 on:
-  push:
-    branches: [ master ]
-    tags: ["*"]
-  pull_request:
-    branches: [ master ]
-
-env:
-  ProjectName: "TsMap.Canvas"
+  workflow_call:
+    inputs:
+      project_name:
+        required: true
+        type: string
 
 jobs:
   build-windows:
@@ -25,11 +22,11 @@ jobs:
         run: dotnet clean && dotnet nuget locals all --clear
 
       - name: Publish
-        run: dotnet publish ${{ env.ProjectName }} --configuration Release
+        run: dotnet publish ${{ inputs.project_name }} --configuration Release
 
       - uses: actions/upload-artifact@v3
         with:
-            name: ${{ env.ProjectName }}-windows
+            name: ${{ inputs.project_name }}-windows
             path: artifacts/publish/*
   
   build-linux:
@@ -46,14 +43,14 @@ jobs:
         run: dotnet clean && dotnet nuget locals all --clear
 
       - name: Publish
-        run: dotnet publish ${{ env.ProjectName }}/${{ env.ProjectName }}.csproj --configuration Release
+        run: dotnet publish ${{ inputs.project_name }}/${{ inputs.project_name }}.csproj --configuration Release
 
       - name: Permissions & Rename
-        run: (for f in artifacts/publish/*.linux-x64;do mv $f $f.bin;done) && chmod u+x artifacts/publish/${{ env.ProjectName }}.linux-x64.bin
+        run: (for f in artifacts/publish/*.linux-x64;do mv $f $f.bin;done) && chmod u+x artifacts/publish/${{ inputs.project_name }}.linux-x64.bin
 
       - uses: actions/upload-artifact@v3
         with:
-            name: ${{ env.ProjectName }}-linux
+            name: ${{ inputs.project_name }}-linux
             path: artifacts/publish/*
 
   update-release:

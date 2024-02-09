@@ -1,0 +1,17 @@
+name: Builds
+
+on:
+  push:
+    branches: [ master ]
+    tags: ["*"]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        proj_name: [TsMap.Canvas, TsMap.Exporter]
+    uses: ./.github/workflows/build.yml
+    with:
+      project_name: ${{ matrix.proj_name }}    

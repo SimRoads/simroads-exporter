@@ -1,0 +1,64 @@
+name: Export TS Data
+
+on:
+  workflow_call:
+    inputs:
+      game:
+        required: true
+        type: choice
+        options:
+          - Euro Truck Simulator 2
+          - American Truck Simulator
+      mods:
+        required: false
+        type: string
+      export_name:
+        required: true
+        type: string
+
+jobs:
+  download-game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: "steam_folder"
+          path: ".steam"
+
+      - uses: CyberAndrii/setup-steamcmd@v1
+
+      - name: Setup SteamCMD
+        run: mkdir .steam && cd .steam && (echo "${{ secrets.STEAMCMD_CONFIG }}" | base64 --decode | tar xvz)
+
+      - name: Install Game
+        run: |
+          import os
+          import requests
+          app_id = 227300 if "${{ inputs.game }}" == "Euro Truck Simulator 2" else 270880
+          r = requests.get(f"https://store.steampowered.com/api/appdetails?appids={app_id}").json()
+          os.exec(f"steamcmd +login ${{ secrets.STEAMCMD_USER }} ${{ secrets.STEAMCMD_PASSWORD }} +app_update {app_id} validate +quit")
+          for dlc in r[str(app_id)]["data"]["dlc"]:
+              os.exec(f"steamcmd +login ${{ secrets.STEAMCMD_USER }} ${{ secrets.STEAMCMD_PASSWORD }} +app_update {dlc} validate +quit")
+        shell: python
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "steam_folder"
+          path: ".steam"     
+
+  export-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: "steam_folder"
+          path: ".steam"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: "TsMap.Exporter-linux"
+          path: "bin"
+          
+      - name: Export Data
+        run: ./bin/TsMap.Exporter.linux-x64.bin .steam/SteamApps/common/${{ inputs.game }} ${{ inputs.export_name }}.zip
+        
