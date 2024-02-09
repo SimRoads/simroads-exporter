@@ -1,7 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using TsMap.TsItem;
 using static TsMap.Exporter.Mvt.Tile.Types;
 using static TsMap.Exporter.Mvt.VectorTileUtils;
@@ -72,7 +71,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 Geometry = { points },
                 Tags = {
                     layers.roads.GetOrCreateTag("size", Road.RoadLook.GetWidth()),
-                    layers.roads.GetOrCreateTag("country", country) 
+                    layers.roads.GetOrCreateTag("country", country)
                 }
             });
             return true;

@@ -1,9 +1,6 @@
-﻿using NetTopologySuite.Algorithm;
-using NetTopologySuite.Index.KdTree;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 using TsMap.TsItem;
 
 namespace TsMap.Exporter.Routing
@@ -22,8 +19,8 @@ namespace TsMap.Exporter.Routing
             StartNode = startNode;
             EndNode = endNode;
 
-            Length = (ushort)(Math.Sqrt(Math.Pow(startNode.Node.X - endNode.Node.X, 2) +  Math.Pow(startNode.Node.Z - endNode.Node.Z, 2))*10);
-            RoadSize = (byte)(road.LeftDriving ? road.RoadLook.LanesLeft.Count: road.RoadLook.LanesRight.Count);
+            Length = (ushort)(Math.Sqrt(Math.Pow(startNode.Node.X - endNode.Node.X, 2) + Math.Pow(startNode.Node.Z - endNode.Node.Z, 2)) * 10);
+            RoadSize = (byte)(road.LeftDriving ? road.RoadLook.LanesLeft.Count : road.RoadLook.LanesRight.Count);
             ElementsIds.Add(road.GetId());
         }
 
@@ -35,7 +32,7 @@ namespace TsMap.Exporter.Routing
             var (start, end) = (prefab.Nodes.IndexOf(startNode.Node.Uid), prefab.Nodes.IndexOf(endNode.Node.Uid));
             var (startMapPoint, endMapPoint) = (prefab.Prefab.MapPoints.FindIndex(x => x.ControlNodeIndex == start), prefab.Prefab.MapPoints.FindIndex(x => x.ControlNodeIndex == end));
             Stack<List<int>> q = new();
-            q.Push(new List<int>() { startMapPoint } );
+            q.Push(new List<int>() { startMapPoint });
             while (q.Count > 0)
             {
                 var el = q.Pop();
@@ -47,12 +44,13 @@ namespace TsMap.Exporter.Routing
                     for (int i = 1; i < el.Count; i++)
                     {
                         var (prev, curr) = (prefab.Prefab.MapPoints[el[i - 1]], prefab.Prefab.MapPoints[el[i]]);
-                        Length += (ushort)(Math.Sqrt(Math.Pow(prev.X - curr.X, 2) + Math.Pow(prev.Z - curr.Z, 2))*10);
+                        Length += (ushort)(Math.Sqrt(Math.Pow(prev.X - curr.X, 2) + Math.Pow(prev.Z - curr.Z, 2)) * 10);
                         RoadSize = (byte)Math.Min(RoadSize, curr.LaneCount);
                         ElementsIds.Add(prefab.GetId(el[i]));
                     }
                     return;
-                } else
+                }
+                else
                 {
                     foreach (var next in prefab.Prefab.MapPoints[el.Last()].Neighbours)
                     {
@@ -93,13 +91,13 @@ namespace TsMap.Exporter.Routing
 
         public static Dictionary<ulong, RoutingNode> GetNetwork(TsMapper mapper)
         {
-            var nodes = mapper.Nodes.Where(x => 
-                x.Value.BackwardItem is TsRoadItem || 
-                x.Value.BackwardItem is TsPrefabItem || 
-                x.Value.ForwardItem is TsRoadItem || 
+            var nodes = mapper.Nodes.Where(x =>
+                x.Value.BackwardItem is TsRoadItem ||
+                x.Value.BackwardItem is TsPrefabItem ||
+                x.Value.ForwardItem is TsRoadItem ||
                 x.Value.ForwardItem is TsPrefabItem).ToDictionary(x => x.Key, x => new RoutingNode(x.Value));
 
-            foreach(var (uid,rNode) in nodes)
+            foreach (var (uid, rNode) in nodes)
             {
                 var node = rNode.Node;
                 TsItem.TsItem[] items = new TsItem.TsItem[] { node.BackwardItem, node.ForwardItem };

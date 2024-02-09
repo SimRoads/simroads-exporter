@@ -1,6 +1,4 @@
 ﻿using MessagePack;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -17,7 +15,7 @@ namespace TsMap.Exporter.Routing
 
         public override void Export(ZipArchive zipArchive)
         {
-            var nodes =  RoutingNode.GetNetwork(mapper);
+            var nodes = RoutingNode.GetNetwork(mapper);
 
             var zipArchiveEntry = zipArchive.CreateEntry(Path.Join("routing", "nodes.msgpack"), CompressionLevel.Fastest);
             using (var stream = zipArchiveEntry.Open())

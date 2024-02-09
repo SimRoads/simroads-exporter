@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using TsMap.Exporter.Data;
-using TsMap.Exporter.Mvt;
-using TsMap.Exporter.Overlays;
-using TsMap.Exporter.Routing;
 
 namespace TsMap.Exporter
 {
