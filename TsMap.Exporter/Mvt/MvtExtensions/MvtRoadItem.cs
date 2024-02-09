@@ -64,13 +64,16 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 points.AddRange(sett.GenerateDeltaFromGame(x, z, ref cursorX, ref cursorY));
             }
 
+            ulong country = Road.GetStartNode().GetCountry()?.GetId() ?? Road.GetEndNode().GetCountry()?.GetId() ?? 0;
             layers.roads.Features.Add(new Feature
             {
                 Id = Road.GetId(),
                 Type = GeomType.Linestring,
                 Geometry = { points },
-                Tags = { layers.roads.GetOrCreateTag("size", Road.RoadLook.GetWidth()),
-                    layers.roads.GetOrCreateTag("country", Road.Nodes.Select(x => Mapper.GetNodeByUid(x).GetCountry()).First(x => x != null).GetId()) }
+                Tags = {
+                    layers.roads.GetOrCreateTag("size", Road.RoadLook.GetWidth()),
+                    layers.roads.GetOrCreateTag("country", country) 
+                }
             });
             return true;
         }

@@ -67,7 +67,7 @@ namespace TsMap
             Localization = new LocalizationManager();
         }
 
-        public List<DlcGuard> GetDlcGuardsForCurrentGame()
+        public virtual List<DlcGuard> GetDlcGuardsForCurrentGame()
         {
             return IsEts2
                 ? Consts.DefaultEts2DlcGuards

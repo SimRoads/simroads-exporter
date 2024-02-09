@@ -33,12 +33,13 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 Geometry = { GenerateCommandInteger(MapboxCommandType.MoveTo, 1), sett.GenerateDeltaFromGame(pos.X, pos.Y) },
                 Tags = {
                     layers.overlays.GetOrCreateTag("overlay", Overlay.OverlayName),
-                layers.overlays.GetOrCreateTag("prefab", Overlay.GetPrefabId()) }
+                    layers.overlays.GetOrCreateTag("prefab", Overlay.GetPrefabId())
+                }
             };
             if (Overlay.ReferenceObj is TsCountry country)
             {
                 foreach (var locale in Mapper.Localization.GetLocales()) feature.Tags.Add(
-                    layers.overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(country.LocalizationToken, locale)));
+                    layers.overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(country.LocalizationToken, locale) ?? country.Name));
             }
 
             layers.overlays.Features.Add(feature);

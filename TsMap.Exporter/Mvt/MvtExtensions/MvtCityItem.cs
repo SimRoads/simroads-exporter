@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TsMap.TsItem;
@@ -53,7 +54,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 Geometry = { geometry }
             };
             foreach (var locale in Mapper.Localization.GetLocales()) feature.Tags.Add(
-                layers.overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(City.City.LocalizationToken, locale)));
+                layers.overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(City.City.LocalizationToken, locale) ?? City.City.Name));
 
             layers.overlays.Features.Add(feature);
             return true;

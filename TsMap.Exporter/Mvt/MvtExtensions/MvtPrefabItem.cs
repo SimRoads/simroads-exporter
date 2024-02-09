@@ -179,7 +179,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                         Geometry = { points },
                         Tags = {
                             layers.roads.GetOrCreateTag("prefab", Prefab.GetId()),
-                            layers.roads.GetOrCreateTag("country", Prefab.Nodes.Select(x => Mapper.GetNodeByUid(x).GetCountry()).First(x => x != null).GetId()),
+                            layers.roads.GetOrCreateTag("country", Prefab.Nodes.Select(x => Mapper.GetNodeByUid(x).GetCountry()).FirstOrDefault(x => x != null)?.GetId() ?? 0),
                         }
                     });
                 }

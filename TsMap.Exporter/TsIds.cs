@@ -26,6 +26,11 @@ namespace TsMap.Exporter
             return ids[obj];
         }
 
+        public static object GetObject(ulong id)
+        {
+            return idsReverse[id];
+        }
+
         public static ulong GetId(this TsItem.TsItem item)
         {
             return getId(item, item.Uid);

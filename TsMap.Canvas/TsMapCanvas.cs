@@ -292,11 +292,16 @@ namespace TsMap.Canvas
 
         private void ExportMapMenuItem_Click(object sender, EventArgs e)
         {
-            var folderDialog = new SelectFolderDialog() { Title = "Select the folder to export files"};
-            if (folderDialog.ShowDialog(this) == DialogResult.Ok)
+            var fileDialog = new OpenFileDialog()
             {
-                /*var exp = new MvtExporter((Exporter.TsMapper)_mapper);
-                exp.ExportMap(folderDialog.Directory, 1);*/
+                Title = "Select the zip file to export files",
+                Filters = {
+                    new FileFilter { Name = "ZIP File", Extensions = new[] { "*.zip" } }
+                },
+            };
+            if (fileDialog.ShowDialog(this) == DialogResult.Ok)
+            {
+                BaseExporter.ExportAll((Exporter.TsMapper)_mapper, fileDialog.FileName);
             }
         }
 

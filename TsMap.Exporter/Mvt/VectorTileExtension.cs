@@ -49,6 +49,9 @@ namespace TsMap.Exporter.Mvt
                             case uint u:
                                 layerValue.UintValue = u;
                                 break;
+                            case ulong ul:
+                                layerValue.UintValue = ul;
+                                break;
                             case long l:
                                 layerValue.SintValue = l;
                                 break;

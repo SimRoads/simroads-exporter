@@ -95,8 +95,8 @@ namespace TsMap.Exporter.Data
             if (prefabUid != expObj.GetId())
             {
                 data["prefab"] = prefabUid;
+                TsPrefabItem prefabItem = (TsPrefabItem)TsIds.GetObject(prefabUid);
                 Envelope prefabArea = new Envelope();
-                var prefabItem = mapper.Prefabs[prefabUid];
 
                 var originNode = mapper.GetNodeByUid(prefabItem.Nodes[0]);
                 var mapPointOrigin = prefabItem.Prefab.PrefabNodes[prefabItem.Origin];

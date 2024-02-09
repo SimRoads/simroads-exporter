@@ -14,16 +14,16 @@ namespace TsMap.Exporter.Routing
         public readonly RoutingNode EndNode;
         public readonly List<ulong> ElementsIds = new();
 
-        public readonly float Length;
-        public readonly int RoadSize;
+        public readonly ushort Length;
+        public readonly byte RoadSize;
 
         public RoutingLink(TsRoadItem road, RoutingNode startNode, RoutingNode endNode)
         {
             StartNode = startNode;
             EndNode = endNode;
 
-            Length = (float)Math.Sqrt(Math.Pow(startNode.Node.X - endNode.Node.X, 2) +  Math.Pow(startNode.Node.Z - endNode.Node.Z, 2));
-            RoadSize = road.LeftDriving ? road.RoadLook.LanesLeft.Count: road.RoadLook.LanesRight.Count;
+            Length = (ushort)(Math.Sqrt(Math.Pow(startNode.Node.X - endNode.Node.X, 2) +  Math.Pow(startNode.Node.Z - endNode.Node.Z, 2))*10);
+            RoadSize = (byte)(road.LeftDriving ? road.RoadLook.LanesLeft.Count: road.RoadLook.LanesRight.Count);
             ElementsIds.Add(road.GetId());
         }
 
@@ -42,13 +42,13 @@ namespace TsMap.Exporter.Routing
                 if (el.Last() == endMapPoint)
                 {
                     Length = 0;
-                    RoadSize = prefab.Prefab.MapPoints[el[0]].LaneCount;
+                    RoadSize = (byte)(prefab.Prefab.MapPoints[el[0]].LaneCount);
                     ElementsIds.Add(prefab.GetId(el[0]));
                     for (int i = 1; i < el.Count; i++)
                     {
                         var (prev, curr) = (prefab.Prefab.MapPoints[el[i - 1]], prefab.Prefab.MapPoints[el[i]]);
-                        Length += (float)Math.Sqrt(Math.Pow(prev.X - curr.X, 2) + Math.Pow(prev.Z - curr.Z, 2));
-                        RoadSize = Math.Min(RoadSize, curr.LaneCount);
+                        Length += (ushort)(Math.Sqrt(Math.Pow(prev.X - curr.X, 2) + Math.Pow(prev.Z - curr.Z, 2))*10);
+                        RoadSize = (byte)Math.Min(RoadSize, curr.LaneCount);
                         ElementsIds.Add(prefab.GetId(el[i]));
                     }
                     return;
@@ -67,25 +67,28 @@ namespace TsMap.Exporter.Routing
 
         public object[] Serialize()
         {
-            return new object[] { StartNode.Node.Uid, EndNode.Node.Uid, ElementsIds, Length, RoadSize };
+            return new object[] { StartNode.Id, EndNode.Id, ElementsIds, Length, RoadSize };
         }
 
     }
 
     public class RoutingNode
     {
+        public readonly ushort Id;
         public readonly TsNode Node;
 
         private List<RoutingLink> Links = new();
+        private static ushort NextId = 0;
 
         public RoutingNode(TsNode node)
         {
             Node = node;
+            Id = NextId++;
         }
 
         public object[] Serialize()
         {
-            return new object[] { Node.Uid, Node.X, Node.Z };
+            return new object[] { Id, Node.X, Node.Z };
         }
 
         public static Dictionary<ulong, RoutingNode> GetNetwork(TsMapper mapper)

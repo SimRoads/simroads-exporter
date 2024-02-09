@@ -7,6 +7,7 @@ using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TsMap.Common;
 
 namespace TsMap.Exporter
 {
@@ -78,6 +79,14 @@ namespace TsMap.Exporter
 
             PopulateIndexes();
             //ParseCountriesBounds();
+        }
+
+        public override List<DlcGuard> GetDlcGuardsForCurrentGame()
+        {
+            return Environment.GetEnvironmentVariable("DLC_GUARDS")?.Split(";").Select(x => { 
+                var dlc_data = x.Split(",");
+                return new DlcGuard(dlc_data[0], (byte)int.Parse(dlc_data[1]), dlc_data.Length > 2 ? bool.Parse(dlc_data[2]) : true);
+            }).ToList() ?? base.GetDlcGuardsForCurrentGame();
         }
 
         public IEnumerable<TsCountry> GetCountries()
