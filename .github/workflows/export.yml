@@ -45,6 +45,7 @@ jobs:
           name: "games"
           path: "./games"
           if_no_artifact_found: ignore
+          search_artifacts: true
 
       - uses: CyberAndrii/setup-steamcmd@v1
       - uses: CyberAndrii/steam-totp@v1
@@ -65,7 +66,6 @@ jobs:
           totp = os.getenv("STEAMCMD_TOTP")
           game = os.getenv("INPUT_GAME")
           app_id = 227300 if game == "ETS2" else 270880
-          print(os.getcwd())
           os.system(f"steamcmd +force_install_dir {os.getcwd()}/games +login {user} {password} {totp} +app_update {app_id} validate +quit")
         shell: python
       
