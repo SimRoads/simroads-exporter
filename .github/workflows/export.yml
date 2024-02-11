@@ -47,6 +47,7 @@ jobs:
           if_no_artifact_found: fail
           search_artifacts: true
           check_artifacts: true
+          allow_forks: true
 
       - uses: CyberAndrii/setup-steamcmd@v1
       - uses: CyberAndrii/steam-totp@v1
