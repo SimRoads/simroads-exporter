@@ -44,7 +44,7 @@ jobs:
         with:
           name: "games"
           path: "./games"
-          if_no_artifact_found: ignore
+          if_no_artifact_found: fail
           search_artifacts: true
 
       - uses: CyberAndrii/setup-steamcmd@v1
