@@ -33,6 +33,13 @@ jobs:
   download-game:
     runs-on: ubuntu-latest
     steps:
+      - uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-android: 'true'
+          remove-haskell: 'true'
+
       - uses: dawidd6/action-download-artifact@v3
         with:
           name: "games"
