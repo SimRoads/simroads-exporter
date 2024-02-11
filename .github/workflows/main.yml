@@ -2,10 +2,10 @@ name: Builds
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     tags: ["*"]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -14,4 +14,14 @@ jobs:
         proj_name: [TsMap.Canvas, TsMap.Exporter]
     uses: ./.github/workflows/build.yml
     with:
-      project_name: ${{ matrix.proj_name }}    
+      project_name: ${{ matrix.proj_name }}
+  
+  export:
+    strategy:
+      matrix:
+        export_conf: ${{ vars.GAMES_EXPORT }}
+    needs: build
+    uses: ./.github/workflows/export.yml
+    with:
+      game: ${{ matrix.export_conf.game}}
+      export_name: ${{ matrix.export_conf.export_name}}
