@@ -46,6 +46,8 @@ jobs:
         id: steam-totp
         with:
           shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
+      - name: test
+        run: df -h
 
       - name: Install Game
         env:
