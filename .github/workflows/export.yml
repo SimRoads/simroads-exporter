@@ -7,8 +7,8 @@ on:
         required: true
         type: choice
         options:
-          - Euro Truck Simulator 2
-          - American Truck Simulator
+          - ETS2
+          - ATS
       mods:
         required: false
         type: string
@@ -33,21 +33,17 @@ jobs:
   download-game:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/cache@v4
+      - uses: dawidd6/action-download-artifact@v3
         with:
-          key: "steam_folder"
-          path: "~/Steam"
-
-      - name: Setup Python
-        run: pip3 install requests
+          name: "games"
+          path: "./games"
+          if_no_artifact_found: ignore
 
       - uses: CyberAndrii/setup-steamcmd@v1
       - uses: CyberAndrii/steam-totp@v1
         id: steam-totp
         with:
           shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
-      - name: test
-        run: df -h
 
       - name: Install Game
         env:
@@ -57,18 +53,19 @@ jobs:
           INPUT_GAME: ${{ inputs.game }}
         run: |
           import os
-          import requests
           user = os.getenv("STEAMCMD_USER")
           password = os.getenv("STEAMCMD_PASSWORD")
           totp = os.getenv("STEAMCMD_TOTP")
           game = os.getenv("INPUT_GAME")
-          app_id = 227300 if game == "Euro Truck Simulator 2" else 270880
-          r = requests.get(f"https://store.steampowered.com/api/appdetails?appids={app_id}").json()
-          with open("download_list.txt", "w") as f:
-              apps = [str(app_id)] + [str(dlc) for dlc in r[str(app_id)]["data"]["dlc"]]
-              f.write("\n".join(["app_update " + app + " validate" for app in apps]) + "\nquit")
-          os.system(f"steamcmd +login {user} {password} {totp} +runscript {os.getcwd()}/download_list.txt")
+          app_id = 227300 if game == "ETS2" else 270880
+          os.system(f"steamcmd +login {user} {password} {totp} +force_install_dir ./games/{game} +app_update {app_id} validate +quit")
         shell: python
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "games"
+          path: "./games"
+
         
   export-data:
     needs: download-game
@@ -79,13 +76,15 @@ jobs:
         project_name: "TsMap.Exporter"
         only_linux: true
     
-    - uses: actions/cache@v4
+    - uses: dawidd6/action-download-artifact@v3
       with:
-        key: "steam_folder"
-        path: "~/Steam"
+        name: "games"
+        path: "./games"
+        search_artifacts: true
+        if_no_artifact_found: fail
       
     - name: Export Data
-      run: ./bin/TsMap.Exporter.linux-x64.bin ~/Steam/steamapps/common/${{ inputs.game }} ${{ inputs.export_name }}.zip
+      run: ./bin/TsMap.Exporter.linux-x64.bin ./games/${{ inputs.game }} ${{ inputs.export_name }}.zip
         
     - uses: actions/upload-artifact@v4
       with:
