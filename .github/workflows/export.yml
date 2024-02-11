@@ -19,10 +19,7 @@ on:
     inputs:
       game:
         required: true
-        type: choice
-        options:
-          - Euro Truck Simulator 2
-          - American Truck Simulator
+        type: string
       mods:
         required: false
         type: string
