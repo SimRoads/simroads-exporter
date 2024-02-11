@@ -65,7 +65,8 @@ jobs:
           totp = os.getenv("STEAMCMD_TOTP")
           game = os.getenv("INPUT_GAME")
           app_id = 227300 if game == "ETS2" else 270880
-          os.system(f"steamcmd +force_install_dir {os.getcwd()}/games/{game} +login {user} {password} {totp} +app_update {app_id} validate +quit")
+          print(os.getcwd())
+          os.system(f"steamcmd +force_install_dir {os.getcwd()}/games +login {user} {password} {totp} +app_update {app_id} validate +quit")
         shell: python
       
       - uses: actions/upload-artifact@v4
@@ -91,7 +92,7 @@ jobs:
         if_no_artifact_found: fail
       
     - name: Export Data
-      run: ./bin/TsMap.Exporter.linux-x64.bin ./games/${{ inputs.game }} ${{ inputs.export_name }}.zip
+      run: ./bin/TsMap.Exporter.linux-x64.bin "./games/steamapps/American Truck Simulator" ${{ inputs.export_name }}.zip
         
     - uses: actions/upload-artifact@v4
       with:
