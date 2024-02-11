@@ -58,7 +58,7 @@ jobs:
           totp = os.getenv("STEAMCMD_TOTP")
           game = os.getenv("INPUT_GAME")
           app_id = 227300 if game == "ETS2" else 270880
-          os.system(f"steamcmd +login {user} {password} {totp} +force_install_dir ./games/{game} +app_update {app_id} validate +quit")
+          os.system(f"steamcmd +force_install_dir ./games/{game} +login {user} {password} {totp} +app_update {app_id} validate +quit")
         shell: python
       
       - uses: actions/upload-artifact@v4
