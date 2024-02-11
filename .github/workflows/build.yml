@@ -6,10 +6,15 @@ on:
       project_name:
         required: true
         type: string
+      only_linux:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build-windows:
     runs-on: windows-latest
+    if: ${{ !inputs.only_linux }}
     steps:
       - uses: actions/checkout@v3
 

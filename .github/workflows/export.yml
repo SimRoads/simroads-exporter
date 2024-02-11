@@ -27,6 +27,8 @@ on:
         required: true
         type: string
 
+permissions: write-all
+
 jobs:
   download-game:
     runs-on: ubuntu-latest
@@ -63,22 +65,22 @@ jobs:
           with open("download_list.txt", "w") as f:
               apps = [str(app_id)] + [str(dlc) for dlc in r[str(app_id)]["data"]["dlc"]]
               f.write("\n".join(["app_update " + app + " validate" for app in apps]) + "\nquit")
-          os.system(f"steamcmd +login {user} {password} {totp} +quit +runscript {os.getcwd()}/download_list.txt")
+          os.system(f"steamcmd +login {user} {password} {totp} +runscript {os.getcwd()}/download_list.txt")
         shell: python
         
   export-data:
     needs: download-game
     runs-on: ubuntu-latest
     steps:
+    - uses: ./.github/workflows/build.yml
+      with:
+        project_name: "TsMap.Exporter"
+        only_linux: true
+    
     - uses: actions/cache@v4
       with:
         key: "steam_folder"
         path: "~/Steam"
-
-    - uses: actions/download-artifact@v4
-      with:
-        name: "TsMap.Exporter-linux"
-        path: "bin"
       
     - name: Export Data
       run: ./bin/TsMap.Exporter.linux-x64.bin ~/Steam/steamapps/common/${{ inputs.game }} ${{ inputs.export_name }}.zip
