@@ -5,6 +5,7 @@ using sd = System.Drawing;
 
 namespace TsMap.Canvas.Renderer
 {
+    #if LINUX
     public static class EtoConversions
     {
         public static Point ToEto(this sd.Point point)
@@ -128,4 +129,5 @@ namespace TsMap.Canvas.Renderer
             return result;
         }
     }
+    #endif
 }
