@@ -1,13 +1,13 @@
 ﻿namespace TsMap.Map.Overlays
 {
-    internal struct Color8888
+    public struct Color8888
     {
-        internal byte A { get; private set; }
-        internal byte R { get; }
-        internal byte G { get; }
-        internal byte B { get; }
+        public byte A { get; private set; }
+        public byte R { get; }
+        public byte G { get; }
+        public byte B { get; }
 
-        internal Color8888(byte a, byte r, byte g, byte b)
+        public Color8888(byte a, byte r, byte g, byte b)
         {
             A = a;
             R = r;
@@ -15,7 +15,7 @@
             B = b;
         }
 
-        internal Color8888(Color565 color565, byte a)
+        public Color8888(Color565 color565, byte a)
         {
             A = a;
             R = (byte)(color565.R << 3);
@@ -23,17 +23,17 @@
             B = (byte)(color565.B << 3);
         }
 
-        internal void SetAlpha(byte a)
+        public void SetAlpha(byte a)
         {
             A = a;
         }
     }
 
-    internal struct Color565
+    public struct Color565
     {
-        internal byte R { get; }
-        internal byte G { get; }
-        internal byte B { get; }
+        public byte R { get; }
+        public byte G { get; }
+        public byte B { get; }
 
         private Color565(byte r, byte g, byte b)
         {
@@ -42,7 +42,7 @@
             B = b;
         }
 
-        internal Color565(ushort color) : this((byte)((color >> 11) & 0x1F), (byte)((color >> 5) & 0x3F),
+        public Color565(ushort color) : this((byte)((color >> 11) & 0x1F), (byte)((color >> 5) & 0x3F),
             (byte)(color & 0x1F))
         {
         }

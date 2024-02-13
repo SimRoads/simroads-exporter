@@ -1,19 +1,15 @@
-﻿using Eto.Drawing;
-using System;
-using System.Runtime.InteropServices;
+﻿using System;
 using TsMap.FileSystem;
 using TsMap.Helpers;
 using TsMap.Helpers.Logger;
 
 namespace TsMap.Map.Overlays
 {
-    internal class OverlayImage
+    public class OverlayImage
     {
-        private Bitmap _bitmap;
-
         private UberFile _file;
 
-        private Color8888[] _pixelData;
+        public Color8888[] PixelData { get; private set; }
         private byte[] _stream;
 
         public OverlayImage(string filePath)
@@ -21,44 +17,10 @@ namespace TsMap.Map.Overlays
             FilePath = filePath;
         }
 
-        internal bool Valid { get; private set; }
-        internal uint Width { get; private set; }
-        internal uint Height { get; private set; }
-
-        internal string FilePath { get; }
-
-        public Bitmap GetBitmap()
-        {
-            if (_bitmap == null)
-            {
-                _bitmap = new Bitmap((int)Width, (int)Height, PixelFormat.Format32bppRgba);
-
-                var bd = _bitmap.Lock();
-
-                var ptr = bd.Data;
-
-                Marshal.Copy(GetData(), 0, ptr, _bitmap.Width * _bitmap.Height * 0x4);
-
-                bd.Dispose();
-            }
-
-            return _bitmap;
-        }
-
-        private byte[] GetData()
-        {
-            var bytes = new byte[Width * Height * 4];
-            for (var i = 0; i < _pixelData.Length; ++i)
-            {
-                var pixel = _pixelData[i];
-                bytes[i * 4 + 3] = pixel.A;
-                bytes[i * 4] = pixel.B;
-                bytes[i * 4 + 1] = pixel.G;
-                bytes[i * 4 + 2] = pixel.R;
-            }
-
-            return bytes;
-        }
+        public bool Valid { get; private set; }
+        public uint Width { get; private set; }
+        public uint Height { get; private set; }
+        public string FilePath { get; }
 
         internal void Parse()
         {
@@ -103,12 +65,12 @@ namespace TsMap.Map.Overlays
 
             var fileOffset = 0x7C;
 
-            _pixelData = new Color8888[Width * Height];
+            PixelData = new Color8888[Width * Height];
 
             for (var i = 0; i < Width * Height; ++i)
             {
                 var rgba = MemoryHelper.ReadUInt32(_stream, fileOffset += 0x04);
-                _pixelData[i] = new Color8888((byte)((rgba >> 0x18) & 0xFF), (byte)((rgba >> 0x10) & 0xFF),
+                PixelData[i] = new Color8888((byte)((rgba >> 0x18) & 0xFF), (byte)((rgba >> 0x10) & 0xFF),
                     (byte)((rgba >> 0x08) & 0xFF), (byte)(rgba & 0xFF));
             }
         }
@@ -116,7 +78,7 @@ namespace TsMap.Map.Overlays
         private void ParseDxt3() // https://msdn.microsoft.com/en-us/library/windows/desktop/bb694531
         {
             var fileOffset = 0x80;
-            _pixelData = new Color8888[Width * Height];
+            PixelData = new Color8888[Width * Height];
             for (var y = 0; y < Height; y += 4)
                 for (var x = 0; x < Width; x += 4)
                 {
@@ -147,8 +109,8 @@ namespace TsMap.Map.Overlays
                             var colorIndex = (colorRow >> (j * 2)) & 3;
                             var alpha = (alphaRow >> (j * 4)) & 15;
                             var pos = y * Width + i * Width + x + j;
-                            _pixelData[pos] = colors[colorIndex];
-                            _pixelData[pos].SetAlpha((byte)(alpha / 15f * 255));
+                            PixelData[pos] = colors[colorIndex];
+                            PixelData[pos].SetAlpha((byte)(alpha / 15f * 255));
                         }
                     }
 
@@ -159,7 +121,7 @@ namespace TsMap.Map.Overlays
         private void ParseDxt5() // https://msdn.microsoft.com/en-us/library/windows/desktop/bb694531
         {
             var fileOffset = 0x80;
-            _pixelData = new Color8888[Width * Height];
+            PixelData = new Color8888[Width * Height];
             for (var y = 0; y < Height; y += 4)
                 for (var x = 0; x < Width; x += 4)
                 {
@@ -226,8 +188,8 @@ namespace TsMap.Map.Overlays
                         {
                             var index = (colorTexelRowData >> (i * 0x02)) & 0x03;
                             var pos = (uint)(y * Width + j * Width + x + i);
-                            _pixelData[pos] = colors[index];
-                            _pixelData[pos].SetAlpha(alphaTexels[j * 4 + i]);
+                            PixelData[pos] = colors[index];
+                            PixelData[pos].SetAlpha(alphaTexels[j * 4 + i]);
                         }
                     }
 

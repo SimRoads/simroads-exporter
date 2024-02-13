@@ -15,29 +15,12 @@ namespace TsMap.TsItem
         private const int PrefabVegetationBlockSize = 0x20;
         public int Origin { get; private set; }
         public TsPrefab Prefab { get; private set; }
-        private List<TsPrefabLook> _looks;
-
         public bool IsSecret { get; private set; }
 
-        public void AddLook(TsPrefabLook look)
-        {
-            _looks.Add(look);
-        }
-
-        public List<TsPrefabLook> GetLooks()
-        {
-            return _looks;
-        }
-
-        public bool HasLooks()
-        {
-            return _looks != null && _looks.Count != 0;
-        }
 
         public TsPrefabItem(TsSector sector, int startOffset) : base(sector, startOffset)
         {
             Valid = true;
-            _looks = new List<TsPrefabLook>();
             Nodes = new List<ulong>();
             if (Sector.Version < 829)
                 TsPrefabItem825(startOffset);

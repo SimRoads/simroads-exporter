@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TsMap.Canvas.Renderer;
 using TsMap.TsItem;
 
 namespace TsMap.Canvas

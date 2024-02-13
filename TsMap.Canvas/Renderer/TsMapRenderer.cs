@@ -1,7 +1,11 @@
+global using PointF = Eto.Drawing.PointF;
+global using Rectangle = Eto.Drawing.Rectangle;
+using Eto;
 using Eto.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TsMap.Canvas.Renderer;
 using TsMap.Common;
 using TsMap.Helpers;
 using TsMap.Helpers.Logger;
@@ -46,7 +50,7 @@ namespace TsMap
 
             var activeDlcGuards = dlcGuards.Where(x => x.Enabled).Select(x => x.Index).ToList();
 
-            var zoomIndex = RenderHelper.GetZoomIndex(clip, scale);
+            var zoomIndex = RenderHelper.GetZoomIndex(clip.ToSD(), scale);
 
             var endPoint = new PointF(startPoint.X + clip.Width / scale, startPoint.Y + clip.Height / scale);
 
@@ -63,7 +67,7 @@ namespace TsMap
                     {
                         if (conn.Connections.Count == 0) // no extra nodes -> straight line
                         {
-                            g.DrawLine(ferryPen, conn.StartPortLocation, conn.EndPortLocation);
+                            g.DrawLine(ferryPen, conn.StartPortLocation.ToEto(), conn.EndPortLocation.ToEto());
                             continue;
                         }
 
@@ -123,7 +127,7 @@ namespace TsMap
             var mapAreaStartTime = DateTime.Now.Ticks;
             if (renderFlags.IsActive(RenderFlags.MapAreas))
             {
-                var drawingQueue = new List<TsPrefabPolyLook>();
+                var drawingQueue = new List<PolyAreaGeometry>();
                 foreach (var mapArea in _mapper.MapAreas)
                 {
                     if (!activeDlcGuards.Contains(mapArea.DlcGuard) ||
@@ -161,7 +165,7 @@ namespace TsMap
                         zIndex = mapArea.DrawOver ? 11 : 1;
                     }
 
-                    drawingQueue.Add(new TsPrefabPolyLook(points)
+                    drawingQueue.Add(new PolyAreaGeometry(mapArea, points)
                     {
                         Color = fillColor,
                         ZIndex = zIndex
@@ -178,7 +182,7 @@ namespace TsMap
             var prefabStartTime = DateTime.Now.Ticks;
             if (renderFlags.IsActive(RenderFlags.Prefabs))
             {
-                List<TsPrefabLook> drawingQueue = new List<TsPrefabLook>();
+                List<PrefabGeometry> drawingQueue = new List<PrefabGeometry>();
 
                 foreach (var prefabItem in _mapper.Prefabs)
                 {
@@ -193,7 +197,7 @@ namespace TsMap
                     var originNode = _mapper.GetNodeByUid(prefabItem.Nodes[0]);
                     if (prefabItem.Prefab.PrefabNodes == null) continue;
 
-                    if (!prefabItem.HasLooks())
+                    if (PrefabGeometry.GetGeometries(prefabItem).Count() == 0)
                     {
                         var mapPointOrigin = prefabItem.Prefab.PrefabNodes[prefabItem.Origin];
 
@@ -258,13 +262,12 @@ namespace TsMap
                                 }
                                 // else fillColor = _palette.Error; // Unknown
 
-                                var prefabLook = new TsPrefabPolyLook(polyPoints.Values.ToList())
+                                var prefabLook = new PolyPrefabGeometry(prefabItem, polyPoints.Values.ToList())
                                 {
                                     ZIndex = zIndex,
                                     Color = fillColor
                                 };
 
-                                prefabItem.AddLook(prefabLook);
                                 continue;
                             }
 
@@ -305,34 +308,32 @@ namespace TsMap
                                 var coords = RenderHelper.GetCornerCoords(prefabstartX + mapPoint.X, prefabStartZ + mapPoint.Z,
                                     (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f, roadYaw + Math.PI / 2);
 
-                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z));
+                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z).ToEto());
 
                                 coords = RenderHelper.GetCornerCoords(prefabstartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
                                     (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f,
                                     roadYaw + Math.PI / 2);
-                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z));
+                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z).ToEto());
 
                                 coords = RenderHelper.GetCornerCoords(prefabstartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
                                     (Consts.LaneWidth * neighbourLaneCount + mapPoint.LaneOffset) / 2f,
                                     roadYaw - Math.PI / 2);
-                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z));
+                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z).ToEto());
 
                                 coords = RenderHelper.GetCornerCoords(prefabstartX + mapPoint.X, prefabStartZ + mapPoint.Z,
                                     (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f, roadYaw - Math.PI / 2);
-                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z));
+                                cornerCoords.Add(RenderHelper.RotatePoint(coords.X, coords.Y, rot, originNode.X, originNode.Z).ToEto());
 
-                                TsPrefabLook prefabLook = new TsPrefabPolyLook(cornerCoords)
+                                var prefabLook = new PolyPrefabGeometry(prefabItem, cornerCoords)
                                 {
                                     Color = palette.PrefabRoad,
                                     ZIndex = MemoryHelper.IsBitSet(mapPoint.PrefabColorFlags, 0) ? 13 : 3,
                                 };
-
-                                prefabItem.AddLook(prefabLook);
                             }
                         }
                     }
 
-                    prefabItem.GetLooks().ForEach(x => drawingQueue.Add(x));
+                    PrefabGeometry.GetGeometries(prefabItem).ToList().ForEach(x => drawingQueue.Add(x));
                 }
 
                 foreach (var prefabLook in drawingQueue.OrderBy(p => p.ZIndex))
@@ -357,10 +358,10 @@ namespace TsMap
 
                     var startNode = road.GetStartNode();
                     var endNode = road.GetEndNode();
+                    var geom = RoadGeometry.GetGeometry(road);
 
-                    if (!road.HasPoints())
+                    if (!geom.HasPoints())
                     {
-                        var newPoints = new List<PointF>();
 
                         var sx = startNode.X;
                         var sz = startNode.Z;
@@ -379,9 +380,8 @@ namespace TsMap
                             var s = i / (float)(8 - 1);
                             var x = (float)TsRoadLook.Hermite(s, sx, ex, tanSx, tanEx);
                             var z = (float)TsRoadLook.Hermite(s, sz, ez, tanSz, tanEz);
-                            newPoints.Add(new PointF(x, z));
+                            geom.AddPoint(new (x,z));
                         }
-                        road.AddPoints(newPoints);
                     }
 
                     var roadWidth = road.RoadLook.GetWidth();
@@ -403,7 +403,7 @@ namespace TsMap
                     }
 
                     var curvePoints = new GraphicsPath();
-                    curvePoints.AddCurve(road.GetPoints()?.ToArray());
+                    curvePoints.AddCurve(geom.GetPoints()?.ToArray());
                     g.DrawPath(roadPen, curvePoints);
                     roadPen.Dispose();
                 }
@@ -425,7 +425,7 @@ namespace TsMap
                         continue;
                     }
 
-                    var b = mapOverlay.GetBitmap();
+                    var b = mapOverlay.OverlayImage.GetBitmap();
 
                     if (b == null || !renderFlags.IsActive(RenderFlags.BusStopOverlay) && mapOverlay.OverlayType == OverlayType.BusStop) continue;
 

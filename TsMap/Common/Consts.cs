@@ -3,7 +3,7 @@ using TsMap.Helpers.Logger;
 
 namespace TsMap.Common
 {
-    internal static class Consts
+    public static class Consts
     {
         /// <summary>
         /// List of DLC guards that are in the game, DLC guards can be found in the map editor.
