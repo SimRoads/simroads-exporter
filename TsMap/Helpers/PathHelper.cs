@@ -2,7 +2,7 @@
 
 namespace TsMap.Helpers
 {
-    internal class PathHelper
+    public class PathHelper
     {
         /// <summary>
         /// Combines two paths together with forward slashes with the leading slash removed
@@ -10,7 +10,7 @@ namespace TsMap.Helpers
         /// <param name="firstPath"></param>
         /// <param name="secondPath"></param>
         /// <returns>The combined path</returns>
-        internal static string CombinePath(string firstPath, string secondPath)
+        public static string CombinePath(string firstPath, string secondPath)
         {
             var fullPath = Path.Combine(firstPath, secondPath);
 
@@ -20,7 +20,7 @@ namespace TsMap.Helpers
         /// <summary>
         /// Removes leading slash if the path contains it
         /// </summary>
-        internal static string EnsureLocalPath(string path)
+        public static string EnsureLocalPath(string path)
         {
             if (path.StartsWith("/"))
             {
@@ -35,7 +35,7 @@ namespace TsMap.Helpers
         /// </summary>
         /// <param name="path"></param>
         /// <param name="currentPath">string to be prefixed if path is not absolute</param>
-        internal static string GetFilePath(string path, string currentPath = "")
+        public static string GetFilePath(string path, string currentPath = "")
         {
             if (path.StartsWith("/")) // absolute path
             {
@@ -51,7 +51,7 @@ namespace TsMap.Helpers
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        internal static string GetDirectoryPath(string filePath)
+        public static string GetDirectoryPath(string filePath)
         {
             var lastSlash = filePath.LastIndexOf("/");
             return filePath.Substring(0, lastSlash);
@@ -63,7 +63,7 @@ namespace TsMap.Helpers
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        internal static string GetFileNameFromPath(string filePath)
+        public static string GetFileNameFromPath(string filePath)
         {
             return Path.GetFileName(filePath);
         }
@@ -74,7 +74,7 @@ namespace TsMap.Helpers
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        internal static string GetFileNameWithoutExtensionFromPath(string filePath)
+        public static string GetFileNameWithoutExtensionFromPath(string filePath)
         {
             return Path.GetFileNameWithoutExtension(filePath);
         }

@@ -1,7 +1,8 @@
-﻿using Eto.Drawing;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using TsMap.FileSystem;
+using TsMap.Helpers;
 
 namespace TsMap
 {

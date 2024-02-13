@@ -1,6 +1,6 @@
 ﻿using Eto.Drawing;
 
-namespace TsMap
+namespace TsMap.Canvas.Renderer
 {
     public class MapPalette
     {

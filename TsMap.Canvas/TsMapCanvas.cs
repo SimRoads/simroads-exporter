@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using TsMap.Exporter;
+using TsMap.Canvas.Renderer;
 using TsMap.TsItem;
 
 namespace TsMap.Canvas

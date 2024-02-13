@@ -1,12 +1,9 @@
-﻿using Eto.Drawing;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using TsMap.Common;
 using TsMap.FileSystem;
-using TsMap.Helpers.Logger;
+using TsMap.Helpers;
 
 namespace TsMap
 {

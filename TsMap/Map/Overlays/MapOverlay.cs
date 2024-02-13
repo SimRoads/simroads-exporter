@@ -1,10 +1,10 @@
-﻿using Eto.Drawing;
+﻿using System.Drawing;
 
 namespace TsMap.Map.Overlays
 {
     public class MapOverlay
     {
-        private readonly OverlayImage _overlayImage;
+        public readonly OverlayImage OverlayImage;
 
         public readonly string OverlayName;
 
@@ -20,7 +20,7 @@ namespace TsMap.Map.Overlays
 
         internal MapOverlay(OverlayImage overlayImage, OverlayType overlayType, string overlayName, object referenceObj)
         {
-            _overlayImage = overlayImage;
+            OverlayImage = overlayImage;
             OverlayType = overlayType;
             OverlayName = overlayName;
             ReferenceObj = referenceObj;
@@ -32,7 +32,7 @@ namespace TsMap.Map.Overlays
 
         internal bool IsValid()
         {
-            return _overlayImage.Valid;
+            return OverlayImage.Valid;
         }
 
         internal void SetPosition(float x, float y)
@@ -58,11 +58,6 @@ namespace TsMap.Map.Overlays
         internal void SetDlcGuard(byte dlcGuard)
         {
             DlcGuard = dlcGuard;
-        }
-
-        public Bitmap GetBitmap()
-        {
-            return _overlayImage.GetBitmap();
         }
     }
 }

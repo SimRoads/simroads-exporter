@@ -1,4 +1,5 @@
 ﻿using Eto.Drawing;
+using TsMap.Canvas.Renderer;
 
 namespace TsMap.Canvas
 {

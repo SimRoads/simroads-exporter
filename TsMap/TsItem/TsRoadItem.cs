@@ -1,6 +1,4 @@
-﻿using Eto.Drawing;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using TsMap.Common;
 using TsMap.Helpers;
 using TsMap.Helpers.Logger;
@@ -12,24 +10,8 @@ namespace TsMap.TsItem
         private const int StampBlockSize = 0x18;
         public TsRoadLook RoadLook { get; private set; }
 
-        private List<PointF> _points;
         public bool LeftDriving { get; private set; }
         public bool IsSecret { get; private set; }
-
-        public void AddPoints(List<PointF> points)
-        {
-            _points = points;
-        }
-
-        public bool HasPoints()
-        {
-            return _points != null && _points.Count != 0;
-        }
-
-        public PointF[] GetPoints()
-        {
-            return _points?.ToArray();
-        }
 
         public TsRoadItem(TsSector sector, int startOffset) : base(sector, startOffset)
         {
