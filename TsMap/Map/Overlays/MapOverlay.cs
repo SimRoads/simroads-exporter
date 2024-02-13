@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using TsMap.Helpers;
 
 namespace TsMap.Map.Overlays
 {

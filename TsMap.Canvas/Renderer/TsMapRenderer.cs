@@ -380,7 +380,7 @@ namespace TsMap
                             var s = i / (float)(8 - 1);
                             var x = (float)TsRoadLook.Hermite(s, sx, ex, tanSx, tanEx);
                             var z = (float)TsRoadLook.Hermite(s, sz, ez, tanSz, tanEz);
-                            geom.AddPoint(new (x,z));
+                            geom.AddPoint(new(x, z));
                         }
                     }
 

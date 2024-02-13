@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using TsMap.Helpers;
 
 namespace TsMap
 {

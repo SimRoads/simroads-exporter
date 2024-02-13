@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
+﻿using System.IO;
 using TsMap.Common;
 using TsMap.Helpers;
 using TsMap.Helpers.Logger;

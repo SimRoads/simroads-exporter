@@ -1,7 +1,6 @@
 ﻿using Eto.Drawing;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using TsMap.TsItem;
 
 namespace TsMap.Canvas.Renderer
