@@ -1,7 +1,8 @@
-﻿using Eto.Drawing;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
+using SixLabors.ImageSharp;
 using System.Collections.Generic;
 using System.Linq;
+using TsMap.Exporter.Overlays;
 using TsMap.Map.Overlays;
 
 namespace TsMap.Exporter.Data
@@ -28,9 +29,9 @@ namespace TsMap.Exporter.Data
             return new Envelope(expObj.X, expObj.Y, expObj.X, expObj.Y);
         }
 
-        public override Bitmap GetIcon()
+        public override Image GetIcon()
         {
-            return mapper.OverlayManager.GetOrCreateOverlayImage(expObj.CountryCode, OverlayType.Flag).GetBitmap();
+            return mapper.OverlayManager.GetOrCreateOverlayImage(expObj.CountryCode, OverlayType.Flag).GetImage();
         }
 
         public override Dictionary<string, object> GetAdditionalData()

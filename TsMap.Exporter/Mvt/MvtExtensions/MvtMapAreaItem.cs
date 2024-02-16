@@ -1,7 +1,7 @@
-﻿using Eto.Drawing;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using TsMap.TsItem;
 using static TsMap.Exporter.Mvt.Tile.Types;
 using static TsMap.Exporter.Mvt.VectorTileUtils;

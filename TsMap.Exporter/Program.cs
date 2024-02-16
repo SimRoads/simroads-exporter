@@ -7,7 +7,6 @@ namespace TsMap.Exporter
     {
         static void Main(string[] args)
         {
-            new Eto.Forms.Application();
             if (args.Length < 2)
             {
                 Console.WriteLine("Usage: TsMap.Exporter <game_dir> <export_file> [mods_paths]");
@@ -20,7 +19,7 @@ namespace TsMap.Exporter
             var mapper = new TsMapper(gameDir, mods);
             mapper.Parse();
 
-            BaseExporter.ExportAll(mapper, exportFile);
+            //BaseExporter.ExportAll(mapper, exportFile);
         }
     }
 }

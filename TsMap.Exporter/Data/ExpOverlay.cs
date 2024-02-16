@@ -1,9 +1,11 @@
-﻿using Eto.Drawing;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.KdTree;
+using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TsMap.Exporter.Overlays;
+using TsMap.Helpers;
 using TsMap.Map.Overlays;
 using TsMap.TsItem;
 
@@ -47,9 +49,9 @@ namespace TsMap.Exporter.Data
             refObj = expObj.ReferenceObj as T;
         }
 
-        public override Bitmap GetIcon()
+        public override Image GetIcon()
         {
-            return expObj.GetBitmap();
+            return expObj.OverlayImage.GetImage();
         }
 
         public override ulong GetId()

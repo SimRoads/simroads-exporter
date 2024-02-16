@@ -1,7 +1,8 @@
-﻿using Eto.Drawing;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
+using SixLabors.ImageSharp;
 using System.Collections.Generic;
 using System.Linq;
+using TsMap.Exporter.Overlays;
 using TsMap.Map.Overlays;
 using TsMap.TsItem;
 
@@ -40,9 +41,9 @@ namespace TsMap.Exporter.Data
             return "city";
         }
 
-        public override Bitmap GetIcon()
+        public override Image GetIcon()
         {
-            return mapper.OverlayManager.GetOrCreateOverlayImage(GetCountry().CountryCode, OverlayType.Flag).GetBitmap();
+            return mapper.OverlayManager.GetOrCreateOverlayImage(GetCountry().CountryCode, OverlayType.Flag).GetImage();
         }
 
         public override TsCountry GetCountry()

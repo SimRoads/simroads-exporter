@@ -143,7 +143,7 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(mapArea.DlcGuard) || mapArea.Hidden ||
                         mapArea.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapArea.X, mapArea.Z)))
+                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapArea.X, mapArea.Z).ToEto()))
                     )
                     {
                         continue;
@@ -200,7 +200,7 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(prefabItem.DlcGuard) || prefabItem.Hidden ||
                         prefabItem.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(prefabItem)))
+                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(prefabItem)).ToEto())
                     )
                     {
                         continue;
@@ -301,12 +301,12 @@ namespace TsMap
                                 var cornerCoords = new List<PointF>();
 
                                 cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabstartX + mapPoint.X, prefabStartZ + mapPoint.Z,
-                                    (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f, roadYaw + Math.PI - Math.PI / 2, roadYaw + Math.PI + Math.PI/2, 4));
+                                    (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f, roadYaw + Math.PI - Math.PI / 2, roadYaw + Math.PI + Math.PI/2, 4).Select(x=>x.ToEto()));
                                 cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabstartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
-                                    (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f, roadYaw  -  Math.PI / 2 , roadYaw  + Math.PI / 2, 4));
+                                    (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f, roadYaw  -  Math.PI / 2 , roadYaw  + Math.PI / 2, 4).Select(x => x.ToEto()));
 
-                                cornerCoords = MapSettings.Correct(cornerCoords.Select(p => RenderHelper.RotatePoint(p.X, p.Y, rot, originNode.X, originNode.Z))).ToList();
-                                var prefabLook = new PolyPrefabGeometry(cornerCoords)
+                                cornerCoords = MapSettings.Correct(cornerCoords.Select(p => RenderHelper.RotatePoint(p.X, p.Y, rot, originNode.X, originNode.Z).ToEto())).ToList();
+                                var prefabLook = new PolyPrefabGeometry(prefabItem, cornerCoords)
                                 {
                                     Color = palette.PrefabRoad,
                                     ZIndex = MemoryHelper.IsBitSet(mapPoint.PrefabColorFlags, 0) ? 13 : 3,
@@ -332,7 +332,7 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(road.DlcGuard) || road.Hidden ||
                         road.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(road)))
+                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(road).ToEto()))
                     )
                     {
                         continue;
@@ -402,7 +402,7 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(mapOverlay.DlcGuard) ||
                         mapOverlay.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapOverlay.Position.X, mapOverlay.Position.Y)))
+                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapOverlay.Position.X, mapOverlay.Position.Y).ToEto()))
                     )
                     {
                         continue;

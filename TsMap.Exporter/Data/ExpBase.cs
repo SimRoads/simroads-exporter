@@ -1,7 +1,8 @@
-﻿using Eto.Drawing;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace TsMap.Exporter.Data
         public new abstract string GetType();
         public abstract ulong GetGameId();
         public virtual (string, string) GetSubtitle() { return (null, null); }
-        public virtual Bitmap GetIcon() { return null; }
+        public virtual Image GetIcon() { return null; }
         public virtual TsCountry GetCountry() { return null; }
         public virtual TsCity GetCity() { return null; }
         public virtual Dictionary<string, object> GetAdditionalData() { return new(); }
@@ -81,10 +82,10 @@ namespace TsMap.Exporter.Data
                 return JsonHelper.Deserialize(stringWriter.ToString());
             }
         }
-        protected byte[] GetPng(Bitmap bitmap)
+        protected byte[] GetPng(Image im)
         {
             using var ms = new MemoryStream();
-            bitmap.Save(ms, ImageFormat.Png);
+            im.Save(ms, new PngEncoder());
             return ms.ToArray();
         }
     }

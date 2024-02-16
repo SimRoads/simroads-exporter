@@ -1,13 +1,14 @@
-﻿using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
-using Emgu.CV.Util;
+﻿using NetTopologySuite.Algorithm.Hull;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.KdTree;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using TsMap.Common;
+using TsMap.Exporter.Overlays;
 
 namespace TsMap.Exporter
 {
@@ -16,53 +17,139 @@ namespace TsMap.Exporter
         public Dictionary<TsCountry, List<Polygon>> Boundaries { get; private set; } = new();
         public KdTree<TsNode> NodesIndex { get; private set; } = new();
 
+        private class CC
+        {
+            public HashSet<Tuple<short, short>> Borders = new();
+            private short MinY, MaxY, MinX, MaxX;
+            private List<CC> childs = new();
+            private CC parent;
+
+            public CC()
+            {
+                parent = this;
+                MinY = short.MaxValue;
+                MaxY = short.MinValue;
+                MinX = short.MaxValue;
+                MaxX = short.MinValue;
+            }
+
+            public bool IsRoot() => parent == this;
+
+            public CC AddRange(CC ccLine)
+            {
+                CC p1 = parent, p2 = ccLine.parent;
+                if (p1 == p2) return p1;
+                if (p1.Borders.Count < p2.Borders.Count) (p1, p2) = (p2, p1);
+                p1.Borders.UnionWith(p2.Borders);
+                foreach (var ccs in p2.childs)
+                {
+                    ccs.parent = p1;
+                    p1.childs.Add(ccs);
+                }
+                p2.parent = p1;
+                p1.childs.Add(p2);
+                p1.MinY = Math.Min(p1.MinY, p2.MinY);
+                p1.MaxY = Math.Max(p1.MaxY, p2.MaxY);
+                p1.MinX = Math.Min(p1.MinX, p2.MinX);
+                p1.MaxX = Math.Max(p1.MaxX, p2.MaxX);
+                return p1;
+            }
+
+            public void Add(int xPos, int yPos, Image<Rgba32> im)
+            {
+                short x = (short)xPos, y = (short)yPos;
+                if ((x > 0 && im[x - 1, y].R == 255) ||
+                    (y > 0 && im[x, y - 1].R == 255) ||
+                    (y < im.Height - 1 && im[x, y + 1].R == 255) ||
+                    (x < im.Width - 1 && im[x + 1, y].R == 255)) parent.Borders.Add(new(x, y));
+                if ((x == im.Width - 1 || x == 0 || y == 0 || y == im.Height - 1))
+                {
+                    parent.Borders.Add(new(x, y));
+                }
+                MinY = Math.Min(MinY, y);
+                MaxY = Math.Max(MaxY, y);
+                MinX = Math.Min(MinX, x);
+                MaxX = Math.Max(MaxX, x);
+            }
+
+            public Polygon GetPolygon()
+            {
+                if (MaxX - MinX > 1 && MaxY - MinY > 1)
+                {
+                    // Find concave hull
+                    var points = new MultiPoint(parent.Borders.Select(p => new NetTopologySuite.Geometries.Point(p.Item1, p.Item2)).ToArray());
+                    return (Polygon)ConcaveHull.ConcaveHullByLength(points, 2);
+                }
+                return null;
+            }
+
+        }
+
         public TsMapper(string gameDir, List<Mod> mods) : base(gameDir, mods)
         {
         }
 
         protected virtual void ParseCountriesBounds()
         {
-            var image = new Image<Rgb, Byte>(Backgrounds[0].GetBitmap().Width * 2, Backgrounds[0].GetBitmap().Height * 2);
+            var image = new Image<Rgba32>((int)Backgrounds[0].Width * 2, (int)Backgrounds[0].Height * 2);
             for (int i = 0; i < Backgrounds.Length; i++)
             {
-                var part = Backgrounds[i].GetBitmap();
-                var partLock = part.Lock();
-                var emguImage = new Image<Rgba, Byte>(part.Width, part.Height);
-                CvInvoke.MixChannels(new Image<Rgba, Byte>(part.Width, part.Height, 4, partLock.Data), emguImage, new int[] { 0, 0, 1, 1, 2, 2, 3, 3 });
-                var finalImage = new Image<Rgb, Byte>(part.Width, part.Height);
-                CvInvoke.CvtColor(emguImage.Add(emguImage.Split()[3].Not().ThresholdBinary(new Gray(127), new Gray(255)).Convert<Rgba, byte>()), finalImage, ColorConversion.Rgba2Rgb);
+                image.Mutate(x => x.DrawImage(
+                    Backgrounds[i].GetImage(),
+                    new SixLabors.ImageSharp.Point((int)Backgrounds[i].Width * (i / 2), (int)Backgrounds[i].Height * (i % 2)), 1)
+                );
+            }
+            image.Mutate(im => im.BackgroundColor(Color.White).BinaryThreshold(0.5f, BinaryThresholdMode.Luminance));
+            //Find connected components
+            CC[] ccLine = new CC[image.Width];
+            List<CC> ccs = new();
 
-                image.ROI = new System.Drawing.Rectangle((i / 2) * part.Width, (i % 2) * part.Height, part.Width, part.Height);
-                finalImage.CopyTo(image);
-                image.ROI = System.Drawing.Rectangle.Empty;
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    if (image[x, y].R == 255)
+                    {
+                        ccLine[x] = null;
+                    }
+                    else
+                    {
+                        if (x > 0 && ccLine[x] != null && ccLine[x - 1] != null)
+                        {
+                            ccLine[x] = ccLine[x].AddRange(ccLine[x - 1]);
+                        }
+                        else if (x > 0 && ccLine[x] == null && ccLine[x - 1] != null)
+                        {
+                            ccLine[x] = ccLine[x - 1];
+                        }
+                        else if (ccLine[x] == null)
+                        {
+                            ccLine[x] = new CC();
+                            ccs.Add(ccLine[x]);
+                        }
+                        ccLine[x].Add(x, y, image);
+                    }
+                }
             }
 
-            var thr = image.Convert<Gray, Byte>().ThresholdBinaryInv(new Gray(127), new Gray(255));
-            var labels = new Mat();
-            int ll = CvInvoke.ConnectedComponents(thr, labels, LineType.FourConnected);
-            var labelsImg = labels.ToImage<Gray, Byte>();
-            for (int i = 1; i < ll; i++)
+            foreach (var cc in ccs)
             {
-                var v = new VectorOfVectorOfPoint();
-                var hierarchy = new Mat();
-                CvInvoke.FindContours(labelsImg.InRange(new Gray(i), new Gray(i)), v, hierarchy, RetrType.List, ChainApproxMethod.ChainApproxTc89Kcos);
-                for (int j = 0; j < v.Size; j++)
+                if (cc.IsRoot())
                 {
-                    var ring = new List<Coordinate>(v[j].ToArray().Select(p => new Coordinate(
-                        BackgroundPos.X + (p.X / (float)image.Width) * BackgroundPos.Width,
-                        BackgroundPos.Y + (p.Y / (float)image.Height) * BackgroundPos.Height
-                    )));
-                    ring.Add(ring[0]);
-                    if (ring.Count >= 3)
+                    var polyImage = cc.GetPolygon();
+                    if (polyImage != null)
                     {
-                        var poly = new Polygon(new LinearRing(ring.ToArray()));
+                        var poly = new Polygon(new LinearRing(polyImage.ExteriorRing.Coordinates.Select(p => new Coordinate(
+                            BackgroundPos.X + (p.X / (float)image.Width) * BackgroundPos.Width,
+                            BackgroundPos.Y + (p.Y / (float)image.Height) * BackgroundPos.Height
+                        )).ToArray()));
                         var country = NodesIndex.NearestNeighbor(poly.Centroid.Coordinate).Data.GetCountry();
                         if (!Boundaries.ContainsKey(country)) Boundaries.Add(country, new List<Polygon>());
                         Boundaries[country].Add(poly);
                     }
                 }
             }
-            image.Dispose();
+
         }
 
         protected virtual void PopulateIndexes()
@@ -78,7 +165,7 @@ namespace TsMap.Exporter
             base.Parse();
 
             PopulateIndexes();
-            //ParseCountriesBounds();
+            ParseCountriesBounds();
         }
 
         public override List<DlcGuard> GetDlcGuardsForCurrentGame()

@@ -1,13 +1,16 @@
+using Eto;
 using Eto.Drawing;
+using System.Collections.Generic;
+using System.Linq;
 using sd = System.Drawing;
 
 // https://github.com/picoe/Eto/blob/d7ad8feb94b341a8d01861cfd75fc1e30315a119/src/Eto.WinForms/WinConversions.shared.cs
 
 namespace TsMap.Canvas.Renderer
 {
-    #if LINUX
     public static class EtoConversions
     {
+        #if LINUX
         public static Point ToEto(this sd.Point point)
         {
             return new Point(point.X, point.Y);
@@ -128,6 +131,21 @@ namespace TsMap.Canvas.Renderer
 
             return result;
         }
+        #endif
+
+        internal static PointF Correct(this TsMapSettings sett, PointF point)
+        {
+            return sett.Correct(point.ToSD()).ToEto();
+        }
+
+        internal static PointF[] Correct(this TsMapSettings sett, PointF[] points)
+        {
+            return sett.Correct(points.Select(x => x.ToSD()).ToArray()).Select(x => x.ToEto()).ToArray();
+        }
+
+        internal static PointF[] Correct(this TsMapSettings sett, IEnumerable<PointF> points)
+        {
+            return sett.Correct(points.Select(x => x.ToSD()).ToArray()).Select(x => x.ToEto()).ToArray();
+        }
     }
-    #endif
 }
