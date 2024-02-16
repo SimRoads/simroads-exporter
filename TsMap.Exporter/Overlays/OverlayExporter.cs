@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using TsMap.Map.Overlays;
 
@@ -17,32 +18,29 @@ namespace TsMap.Exporter.Overlays
     {
         public int WidthLimit = 2048;
 
+        private Dictionary<string, Dictionary<string, int>> overlays = new();
+        private Image<Rgba32> sprite;
+
+
         public OverlayExporter(TsMapper mapper) : base(mapper)
         {
         }
 
-        public override void Export(ZipArchive zipArchive)
-        {
-            ExportSprite(zipArchive, mapper.OverlayManager.GetOverlays(), "overlays");
-
-        }
-
-        private void ExportSprite(ZipArchive zipArchive, IEnumerable<MapOverlay> overlays, string name)
+        public override void Prepare()
         {
             int width = 0, height = 0, x = 0, y = 0;
-            var reference = new Dictionary<string, Dictionary<string, int>>();
-            var bitmaps = new Dictionary<string, Image>();
-            foreach (var item in overlays.Where(x => !x.IsSecret).DistinctBy(x => x.OverlayName).OrderByDescending(x => x.OverlayImage.GetImage().Height))
+            var images = new Dictionary<string, Image>();
+            foreach (var item in Mapper.OverlayManager.GetOverlays().Where(x => !x.IsSecret).DistinctBy(x => x.OverlayName).OrderByDescending(x => x.OverlayImage.GetImage().Height))
             {
                 var bitmap = item.OverlayImage.GetImage();
-                reference[item.OverlayName] = new Dictionary<string, int>()
+                overlays[item.OverlayName] = new ()
                 {
                     { "x", x },
                     { "y", y },
                     { "width", bitmap.Width },
                     { "height", bitmap.Height }
                 };
-                bitmaps[item.OverlayName] = bitmap;
+                images[item.OverlayName] = bitmap;
                 x += bitmap.Width;
                 width = Math.Max(width, x);
                 height = Math.Max(height, y + bitmap.Height);
@@ -53,23 +51,25 @@ namespace TsMap.Exporter.Overlays
                 }
             }
 
-            var image = new Image<Rgba32>(width, height);
-            foreach (var (key, item) in bitmaps)
+            sprite = new Image<Rgba32>(width, height);
+            foreach (var (key, item) in images)
             {
-                image.Mutate(x => x.DrawImage(item, new SixLabors.ImageSharp.Point(reference[key]["x"], reference[key]["y"]), 1));
+                sprite.Mutate(x => x.DrawImage(item, new Point(overlays[key]["x"], overlays[key]["y"]), 1));
             }
+        }
 
-            var zipArchiveEntry = zipArchive.CreateEntry(Path.Join("overlays", $"{name}.json"), CompressionLevel.Fastest);
-            using (var stream = zipArchiveEntry.Open())
-            {
-                stream.Write(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(reference)));
-            }
-            zipArchiveEntry = zipArchive.CreateEntry(Path.Join("overlays", $"{name}.png"), CompressionLevel.Fastest);
-            using (var stream = zipArchiveEntry.Open())
-            {
-                image.Save(stream, new PngEncoder() { CompressionLevel = PngCompressionLevel.Level9 });
-            }
+        public object ExportReference()
+        {
+            return overlays;
+        }
 
+        public byte[] ExportSprite()
+        {
+            using (var stream = new MemoryStream())
+            {
+                sprite.Save(stream, new PngEncoder() { CompressionLevel = PngCompressionLevel.Level9 });
+                return stream.ToArray();
+            }
         }
     }
 }

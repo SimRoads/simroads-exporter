@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using MessagePack;
+using System.IO;
 using System.IO.Compression;
 using TsMap.Exporter.Data;
 using TsMap.Exporter.Mvt;
@@ -9,35 +10,27 @@ namespace TsMap.Exporter
 {
     public abstract class BaseExporter
     {
-        protected readonly TsMapper mapper;
+        public readonly TsMapper Mapper;
 
-        public BaseExporter(TsMapper mapper)
+        protected BaseExporter(TsMapper mapper)
         {
-            this.mapper = mapper;
+            Mapper = mapper;
         }
 
-        public abstract void Export(ZipArchive zipArchive);
-
-        public static void ExportAll(TsMapper mapper, string zipPath)
-        {
-            using (FileStream zipToOpen = new FileStream(zipPath, FileMode.Create))
-            {
-                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
-                {
-                    BaseExporter exporter = new MvtExporter(mapper);
-                    exporter.Export(archive);
-
-                    exporter = new OverlayExporter(mapper);
-                    exporter.Export(archive);
-
-                    exporter = new DataExporter(mapper);
-                    exporter.Export(archive);
-
-                    exporter = new RoutingExporter(mapper);
-                    exporter.Export(archive);
-                }
-            }
-        }
+        public virtual void Prepare() { }
     }
 
+    public abstract class MsgPackExporter : BaseExporter
+    {
+        protected static MessagePackSerializerOptions Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+
+        protected MsgPackExporter(TsMapper mapper) : base(mapper)
+        {
+        }
+
+        protected byte[] GetMsgPack(object o)
+        {
+            return MessagePackSerializer.Serialize(o, Options);
+        }
+    }
 }

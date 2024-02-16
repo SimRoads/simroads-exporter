@@ -11,14 +11,13 @@ using Point = NetTopologySuite.Geometries.Point;
 
 namespace TsMap.Exporter.Data
 {
-    public abstract class ExpElement<T> where T : class
+    public abstract class ExpElement
     {
-
         protected readonly DataExporter exporter;
         protected readonly TsMapper mapper;
-        protected readonly T expObj;
+        protected readonly object expObj;
 
-        public ExpElement(T expObj, DataExporter exp)
+        public ExpElement(object expObj, DataExporter exp)
         {
             this.expObj = expObj;
             this.exporter = exp;
@@ -59,7 +58,6 @@ namespace TsMap.Exporter.Data
             };
         }
 
-
         protected object Localize(string key, string defaultValue = "")
         {
             exporter.Translations.SelectedKeys.Add(key);
@@ -88,6 +86,12 @@ namespace TsMap.Exporter.Data
             im.Save(ms, new PngEncoder());
             return ms.ToArray();
         }
+    }
+
+    public abstract class ExpElement<T> : ExpElement
+    {
+        protected new T expObj;
+        public ExpElement(T expObj, DataExporter exp) : base(expObj, exp) { }
     }
 
 }

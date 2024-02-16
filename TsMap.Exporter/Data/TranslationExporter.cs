@@ -15,24 +15,14 @@ namespace TsMap.Exporter.Data
         {
         }
 
-        public override void Export(ZipArchive archive)
+        public object ExportTranslations(string locale)
         {
-            var zipArchiveEntry = archive.CreateEntry(Path.Join("translations", "keys"), CompressionLevel.Fastest);
-            using (var stream = zipArchiveEntry.Open())
-            {
-                stream.Write(MessagePackSerializer.Serialize(SelectedKeys, Options));
-            }
+            return SelectedKeys.ToDictionary(x => x, x => Mapper.Localization.GetLocaleValue(x, locale));
+        }
 
-            foreach (var locale in mapper.Localization.GetLocales())
-            {
-                zipArchiveEntry = archive.CreateEntry(Path.Join("translations", locale), CompressionLevel.Fastest);
-                var values = SelectedKeys.Select(key => mapper.Localization.GetLocaleValue(key, locale)).ToList();
-                using (var stream = zipArchiveEntry.Open())
-                {
-                    stream.Write(MessagePackSerializer.Serialize(values, Options));
-                }
-            }
-
+        public object ExportLocales()
+        {
+            return Mapper.Localization.GetLocales();
         }
 
     }

@@ -1,11 +1,7 @@
-﻿using MessagePack;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Index.KdTree;
+﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Quadtree;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using TsMap.TsItem;
 
@@ -14,16 +10,13 @@ namespace TsMap.Exporter.Data
     public class DataExporter : BaseExporter
     {
         public readonly TranslationExporter Translations;
-        public readonly TsMapper Mapper;
-        public readonly Quadtree<TsCityItem> cityTree = new();
-        public readonly KdTree<TsNode> nodeIndex = new();
 
-        private static MessagePackSerializerOptions Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+        private readonly Quadtree<TsCityItem> cityTree = new();
+        private Dictionary<ulong, List<ExpElement>> expElements = new();
 
         public DataExporter(TsMapper mapper) : base(mapper)
         {
             Translations = new TranslationExporter(mapper);
-            Mapper = mapper;
 
             foreach (var city in mapper.Cities.Values)
             {
@@ -31,10 +24,8 @@ namespace TsMap.Exporter.Data
             }
         }
 
-        public override void Export(ZipArchive zipArchive)
+        public override void Prepare()
         {
-            Dictionary<ulong, List<ExpOverlay>> overlaysToPrefab = new();
-
             var activeDlcGuards = Mapper.GetDlcGuardsForCurrentGame().Where(x => x.Enabled).Select(x => x.Index).ToList();
             foreach (var overlay in Mapper.OverlayManager.GetOverlays())
             {
@@ -42,66 +33,50 @@ namespace TsMap.Exporter.Data
                 var ov = ExpOverlay.Create(overlay, this);
                 if (ov == null) continue;
                 var prefabId = overlay.GetPrefabId();
-                if (!overlaysToPrefab.ContainsKey(prefabId))
+                if (!expElements.ContainsKey(prefabId))
                 {
-                    overlaysToPrefab[prefabId] = new();
+                    expElements[prefabId] = new();
                 }
-                overlaysToPrefab[prefabId].Add(ov);
+                expElements[prefabId].Add(ov);
             }
-            List<ExpCountry> expCountries = Mapper.GetCountries().Select(x => new ExpCountry(x, this)).ToList();
-            List<ExpCity> expCities = Mapper.GetCities().Select(x => new ExpCity(x, this)).ToList();
 
-            ZipArchiveEntry zipFile = zipArchive.CreateEntry(Path.Join("json", "countries.msgpack"), CompressionLevel.Fastest);
-            using (var stream = zipFile.Open())
+            foreach (var country in Mapper.GetCountries())
             {
-                var s = expCountries.Select(x => x.ExportList()).ToList();
-                stream.Write(MessagePackSerializer.Serialize(expCountries.Select(x => x.ExportList()), Options));
-                Console.WriteLine($"Exported countries file");
+                expElements[country.GetId()] = new List<ExpElement> { new ExpCountry(country, this) };
             }
 
-            zipFile = zipArchive.CreateEntry(Path.Join("json", "cities.msgpack"), CompressionLevel.Fastest);
-            using (var stream = zipFile.Open())
+            foreach (var city in Mapper.GetCities())
             {
-                stream.Write(MessagePackSerializer.Serialize(expCities.Select(x => x.ExportList()), Options));
-                Console.WriteLine($"Exported countries file");
+                expElements[city.GetId()] = new List<ExpElement> { new ExpCity(city, this) };
             }
 
-            int i = 0;
-            for (i = 0; i < expCountries.Count; i++)
+            foreach (var el in expElements.Values)
             {
-                var c = expCountries[i];
-                zipFile = zipArchive.CreateEntry(Path.Join("json", "export", c.GetId().ToString() + ".msgpack"), CompressionLevel.Fastest);
-                using (var stream = zipFile.Open())
-                {
-                    stream.Write(MessagePackSerializer.Serialize(c.ExportDetail(), Options));
-                    Console.WriteLine($"Exported country {i + 1}/{expCountries.Count}");
-                }
+                el.ForEach(x => x.ExportDetail());
             }
 
-            for (i = 0; i < expCities.Count; i++)
-            {
-                var c = expCities[i];
-                zipFile = zipArchive.CreateEntry(Path.Join("json", "export", c.GetId().ToString() + ".msgpack"), CompressionLevel.Fastest);
-                using (var stream = zipFile.Open())
-                {
-                    stream.Write(MessagePackSerializer.Serialize(c.ExportDetail(), Options));
-                    Console.WriteLine($"Exported city {i + 1}/{expCities.Count}");
-                }
-            }
-
-            i = 0;
-            foreach (var (prefabId, overlay) in overlaysToPrefab)
-            {
-                zipFile = zipArchive.CreateEntry(Path.Join("json", "export", prefabId + ".msgpack"), CompressionLevel.Fastest);
-                using (var stream = zipFile.Open())
-                {
-                    stream.Write(MessagePackSerializer.Serialize(overlay.Select(x => x.ExportDetail()), Options));
-                    Console.WriteLine($"Exported overlay {i + 1}/{overlaysToPrefab.Count}");
-                }
-                i++;
-            }
-
-            Translations.Export(zipArchive);
+            Translations.Prepare();
         }
+
+        public object ExportElement(string id)
+        {
+            ulong idValue = Convert.ToUInt64(id);
+            if (expElements.ContainsKey(idValue))
+            {
+                return expElements[idValue].Select(x => x.ExportDetail()).ToList();
+            }
+            return null;
+        }
+
+        public object ExportCountries()
+        {
+            return Mapper.GetCountries().Select(x => expElements[x.GetId()].First().ExportList()).ToList();
+        }
+
+        public object ExportCities()
+        {
+            return Mapper.GetCities().Select(x => expElements[x.GetId()].First().ExportList()).ToList();
+        }
+
     }
 }

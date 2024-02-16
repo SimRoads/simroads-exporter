@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="NavExporter.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.25.0" />
     <PackageReference Include="MessagePack" Version="2.5.140" />
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
@@ -21,28 +17,7 @@
     <ProjectReference Include="..\TsMap\TsMap.csproj" />
   </ItemGroup>
 
-  <PropertyGroup Condition="$(Configuration) == 'Release'">
-    <PublishSingleFile>True</PublishSingleFile>
-    <EnableCompressionInSingleFile>True</EnableCompressionInSingleFile>
-    <SelfContained>True</SelfContained>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(BuildTarget) == 'Windows'">
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
-    <UseWindowsForms>True</UseWindowsForms>
-    <DefineConstants>WINDOWS</DefineConstants>
-    <IncludeNativeLibrariesForSelfExtract>True</IncludeNativeLibrariesForSelfExtract>
-    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(BuildTarget) == 'Linux'">
-    <TargetFramework>net7.0</TargetFramework>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-    <DefineConstants>LINUX</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup>
-    <AssemblyName>TsMap.Exporter.$(RuntimeIdentifier)</AssemblyName>
+    <AssemblyName>TsMap.Exporter</AssemblyName>
   </PropertyGroup>
 </Project>
