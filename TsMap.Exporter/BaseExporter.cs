@@ -1,10 +1,9 @@
 ﻿using MessagePack;
-using System.IO;
-using System.IO.Compression;
-using TsMap.Exporter.Data;
-using TsMap.Exporter.Mvt;
-using TsMap.Exporter.Overlays;
-using TsMap.Exporter.Routing;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Runtime.InteropServices.JavaScript;
 
 namespace TsMap.Exporter
 {
@@ -12,25 +11,53 @@ namespace TsMap.Exporter
     {
         public readonly TsMapper Mapper;
 
+
         protected BaseExporter(TsMapper mapper)
         {
             Mapper = mapper;
         }
 
         public virtual void Prepare() { }
+
+
     }
 
-    public abstract class MsgPackExporter : BaseExporter
+    public static partial class JSBaseExporter
     {
-        protected static MessagePackSerializerOptions Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
-
-        protected MsgPackExporter(TsMapper mapper) : base(mapper)
+        private static MessagePackSerializerOptions _options = 
+            MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+        private static TsMapper _mapperInstance;
+        public static TsMapper MapperInstance
         {
+            get
+            {
+                if (_mapperInstance == null)
+                    throw new Exception("Map isn't loaded. Call LoadMap() first.");
+                return _mapperInstance;
+            }
         }
 
-        protected byte[] GetMsgPack(object o)
+        [JSExport]
+        public static void LoadMap(string gameDir)
         {
-            return MessagePackSerializer.Serialize(o, Options);
+            _mapperInstance = new TsMapper(gameDir, new());
+            Console.WriteLine(gameDir);
+            _mapperInstance.Parse();
+            Console.WriteLine("Map loaded");
+        }
+
+        [JSExport]
+        public static void LoadMap(string gameDir, string[] modsPaths)
+        {
+            var mods = modsPaths.Select(x => new Mod(x)).ToList();
+            _mapperInstance = new TsMapper(gameDir, mods);
+            _mapperInstance.Parse();
+        }
+
+        public static Span<Byte> GetMsgPack(object obj)
+        {
+            return MessagePackSerializer.Serialize(obj, _options);
         }
     }
+
 }

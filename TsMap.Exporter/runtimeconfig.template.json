@@ -1,0 +1,15 @@
+﻿{
+  "wasmHostProperties": {
+    "perHostConfig": [
+      {
+        "name": "node",
+        "js-path": "main.mjs",
+        "host": "nodejs",
+        "host-args": [
+          "--experimental-wasm-simd", // 👈 Enable SIMD support
+          "--experimental-wasm-eh" // 👈 Enable exception handling support
+        ]
+      }
+    ]
+  }
+}

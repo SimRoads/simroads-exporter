@@ -1,8 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputType>Exe</OutputType>
+    <WasmMainJSPath>main.mjs</WasmMainJSPath>
+    <WasmEnableSIMD>false</WasmEnableSIMD>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +19,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TsMap\TsMap.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
   <PropertyGroup>

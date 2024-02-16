@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using TsMap.Exporter;
 using TsMap.Canvas.Renderer;
 using TsMap.TsItem;
 
@@ -46,7 +45,7 @@ namespace TsMap.Canvas
 
             JsonHelper.SaveSettings(_appSettings);
 
-            _mapper = new Exporter.TsMapper(path, mods);
+            _mapper = new TsMapper(path, mods);
             _palette = new SimpleMapPalette();
 
             _mapper.Parse();
@@ -293,7 +292,7 @@ namespace TsMap.Canvas
 
         private void ExportMapMenuItem_Click(object sender, EventArgs e)
         {
-            var fileDialog = new OpenFileDialog()
+            /*var fileDialog = new OpenFileDialog()
             {
                 Title = "Select the zip file to export files",
                 Filters = {
@@ -303,7 +302,7 @@ namespace TsMap.Canvas
             if (fileDialog.ShowDialog(this) == DialogResult.Ok)
             {
                 BaseExporter.ExportAll((Exporter.TsMapper)_mapper, fileDialog.FileName);
-            }
+            }*/
         }
 
         private void FullMapToolStripMenuItem_Click(object sender, EventArgs e)

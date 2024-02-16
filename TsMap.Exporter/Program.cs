@@ -22,4 +22,6 @@ namespace TsMap.Exporter
             //BaseExporter.ExportAll(mapper, exportFile);
         }
     }
+
+    public static partial class JSBaseExporter { }
 }

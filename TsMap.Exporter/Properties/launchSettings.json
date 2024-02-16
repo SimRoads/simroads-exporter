@@ -2,7 +2,11 @@
   "profiles": {
     "TsMap.Exporter": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Euro Truck Simulator 2\"\r\n\"C:\\Users\\edog\\Desktop\\aaa.zip\""
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:55920;http://localhost:55921"
     }
   }
 }
