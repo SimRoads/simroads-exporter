@@ -19,7 +19,7 @@ namespace TsMap
 
         private int[] zoomCaps = { 1000, 5000, 18500, 45000 };
 
-        private readonly Font _defaultFont = new Font("Arial", 10.0f, FontStyle.Bold);
+        private readonly Font _defaultFont = new Font("monospace", 10.0f, FontStyle.Bold);
         private readonly SolidBrush _cityShadowColor = new SolidBrush(Color.FromArgb(210, 0, 0, 0));
 
         public TsMapRenderer(TsMapper mapper)
@@ -27,7 +27,8 @@ namespace TsMap
             _mapper = mapper;
         }
 
-        public void Render(Graphics g, Rectangle clip, float scale, PointF startPoint, MapPalette palette, RenderFlags renderFlags = RenderFlags.All)
+        public void Render(Graphics g, Rectangle clip, float scale, PointF startPoint, MapPalette palette,
+            RenderFlags renderFlags = RenderFlags.All)
         {
             var startTime = DateTime.Now.Ticks;
             g.FillRectangle(palette.Background, new Rectangle(0, 0, clip.Width, clip.Height));
@@ -51,7 +52,8 @@ namespace TsMap
 
             var zoomIndex = RenderHelper.GetZoomIndex(clip.ToSD(), scale);
 
-            var rectangle = new RectangleF(startPoint.X - itemDrawMargin, startPoint.Y - itemDrawMargin, clip.Width / scale + itemDrawMargin, clip.Height / scale + itemDrawMargin);
+            var rectangle = new RectangleF(startPoint.X - itemDrawMargin, startPoint.Y - itemDrawMargin,
+                clip.Width / scale + itemDrawMargin, clip.Height / scale + itemDrawMargin);
             var MapSettings = _mapper.MapSettings;
 
             var backgroundStartTime = DateTime.Now.Ticks;
@@ -60,8 +62,10 @@ namespace TsMap
             var tileHeight = (backPos.Height / 2);
             for (int i = 0; i < 4; i++)
             {
-                g.DrawImage(_mapper.Backgrounds[i].GetBitmap(), (i / 2) * tileWidth + backPos.X, (i % 2) * tileHeight + backPos.Y, tileWidth + 35, tileHeight + 35);
+                g.DrawImage(_mapper.Backgrounds[i].GetBitmap(), (i / 2) * tileWidth + backPos.X,
+                    (i % 2) * tileHeight + backPos.Y, tileWidth + 35, tileHeight + 35);
             }
+
             var backgroundTime = DateTime.Now.Ticks - backgroundStartTime;
 
 
@@ -82,7 +86,9 @@ namespace TsMap
                             continue;
                         }
 
-                        var startYaw = Math.Atan2(conn.Connections[0].Z - conn.StartPortLocation.Y, // get angle of the start port to the first node
+                        var startYaw = Math.Atan2(
+                            conn.Connections[0].Z -
+                            conn.StartPortLocation.Y, // get angle of the start port to the first node
                             conn.Connections[0].X - conn.StartPortLocation.X);
                         var bezierNodes = RenderHelper.GetBezierControlNodes(conn.StartPortLocation.X,
                             conn.StartPortLocation.Y, startYaw, conn.Connections[0].X, conn.Connections[0].Z,
@@ -92,8 +98,10 @@ namespace TsMap
                         PointF last = new PointF(conn.Connections[0].X, conn.Connections[0].Z);
                         bezierPoints.AddBezier(
                             MapSettings.Correct(new PointF(conn.StartPortLocation.X, conn.StartPortLocation.Y)),
-                            MapSettings.Correct(new PointF(conn.StartPortLocation.X + bezierNodes.Item1.X, conn.StartPortLocation.Y + bezierNodes.Item1.Y)),
-                            MapSettings.Correct(new PointF(conn.Connections[0].X - bezierNodes.Item2.X, conn.Connections[0].Z - bezierNodes.Item2.Y)),
+                            MapSettings.Correct(new PointF(conn.StartPortLocation.X + bezierNodes.Item1.X,
+                                conn.StartPortLocation.Y + bezierNodes.Item1.Y)),
+                            MapSettings.Correct(new PointF(conn.Connections[0].X - bezierNodes.Item2.X,
+                                conn.Connections[0].Z - bezierNodes.Item2.Y)),
                             last
                         );
 
@@ -102,19 +110,23 @@ namespace TsMap
                             var ferryPoint = conn.Connections[i];
                             var nextFerryPoint = conn.Connections[i + 1];
 
-                            bezierNodes = RenderHelper.GetBezierControlNodes(ferryPoint.X, ferryPoint.Z, ferryPoint.Rotation,
+                            bezierNodes = RenderHelper.GetBezierControlNodes(ferryPoint.X, ferryPoint.Z,
+                                ferryPoint.Rotation,
                                 nextFerryPoint.X, nextFerryPoint.Z, nextFerryPoint.Rotation);
 
                             bezierPoints.AddBezier(
                                 last,
-                                MapSettings.Correct(new PointF(ferryPoint.X + bezierNodes.Item1.X, ferryPoint.Z + bezierNodes.Item1.Y)),
-                                MapSettings.Correct(new PointF(nextFerryPoint.X - bezierNodes.Item2.X, nextFerryPoint.Z - bezierNodes.Item2.Y)),
+                                MapSettings.Correct(new PointF(ferryPoint.X + bezierNodes.Item1.X,
+                                    ferryPoint.Z + bezierNodes.Item1.Y)),
+                                MapSettings.Correct(new PointF(nextFerryPoint.X - bezierNodes.Item2.X,
+                                    nextFerryPoint.Z - bezierNodes.Item2.Y)),
                                 last = MapSettings.Correct(new PointF(nextFerryPoint.X, nextFerryPoint.Z))
                             );
                         }
 
                         var lastFerryPoint = conn.Connections[conn.Connections.Count - 1];
-                        var endYaw = Math.Atan2(conn.EndPortLocation.Y - lastFerryPoint.Z, // get angle of the last node to the end port
+                        var endYaw = Math.Atan2(
+                            conn.EndPortLocation.Y - lastFerryPoint.Z, // get angle of the last node to the end port
                             conn.EndPortLocation.X - lastFerryPoint.X);
 
                         bezierNodes = RenderHelper.GetBezierControlNodes(lastFerryPoint.X,
@@ -123,16 +135,20 @@ namespace TsMap
 
                         bezierPoints.AddBezier(
                             last,
-                                MapSettings.Correct(new PointF(lastFerryPoint.X + bezierNodes.Item1.X, lastFerryPoint.Z + bezierNodes.Item1.Y)),
-                                MapSettings.Correct(new PointF(conn.EndPortLocation.X - bezierNodes.Item2.X, conn.EndPortLocation.Y - bezierNodes.Item2.Y)),
-                                MapSettings.Correct(new PointF(conn.EndPortLocation.X, conn.EndPortLocation.Y))
-                            );
+                            MapSettings.Correct(new PointF(lastFerryPoint.X + bezierNodes.Item1.X,
+                                lastFerryPoint.Z + bezierNodes.Item1.Y)),
+                            MapSettings.Correct(new PointF(conn.EndPortLocation.X - bezierNodes.Item2.X,
+                                conn.EndPortLocation.Y - bezierNodes.Item2.Y)),
+                            MapSettings.Correct(new PointF(conn.EndPortLocation.X, conn.EndPortLocation.Y))
+                        );
 
                         g.DrawPath(ferryPen, bezierPoints);
                     }
                 }
+
                 ferryPen.Dispose();
             }
+
             var ferryTime = DateTime.Now.Ticks - ferryStartTime;
 
             var mapAreaStartTime = DateTime.Now.Ticks;
@@ -144,7 +160,7 @@ namespace TsMap
                     if (!activeDlcGuards.Contains(mapArea.DlcGuard) || mapArea.Hidden ||
                         mapArea.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapArea.X, mapArea.Z).ToEto()))
-                    )
+                       )
                     {
                         continue;
                     }
@@ -189,6 +205,7 @@ namespace TsMap
                     mapArea.Draw(g);
                 }
             }
+
             var mapAreaTime = DateTime.Now.Ticks - mapAreaStartTime;
 
             var prefabStartTime = DateTime.Now.Ticks;
@@ -200,8 +217,8 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(prefabItem.DlcGuard) || prefabItem.Hidden ||
                         prefabItem.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(prefabItem)).ToEto())
-                    )
+                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(prefabItem)).ToEto())
+                       )
                     {
                         continue;
                     }
@@ -214,7 +231,7 @@ namespace TsMap
                         var mapPointOrigin = prefabItem.Prefab.PrefabNodes[prefabItem.Origin];
 
                         var rot = (float)(originNode.Rotation - Math.PI -
-                                           Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) + Math.PI / 2);
+                            Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) + Math.PI / 2);
 
                         var prefabstartX = originNode.X - mapPointOrigin.X;
                         var prefabStartZ = originNode.Z - mapPointOrigin.Z;
@@ -241,12 +258,14 @@ namespace TsMap
                                             nextPoint = neighbour;
                                             var newPoint = RenderHelper.RotatePoint(
                                                 prefabstartX + prefabItem.Prefab.MapPoints[nextPoint].X,
-                                                prefabStartZ + prefabItem.Prefab.MapPoints[nextPoint].Z, rot, originNode.X,
+                                                prefabStartZ + prefabItem.Prefab.MapPoints[nextPoint].Z, rot,
+                                                originNode.X,
                                                 originNode.Z);
 
                                             polyPoints.Add(nextPoint, new PointF(newPoint.X, newPoint.Y));
                                             break;
                                         }
+
                                         nextPoint = -1;
                                     }
                                 } while (nextPoint != -1);
@@ -275,7 +294,7 @@ namespace TsMap
                                 // else fillColor = _palette.Error; // Unknown
 
                                 var points = MapSettings.Correct(polyPoints.Values).ToList();
-                                var prefabLook = new PolyPrefabGeometry(prefabItem, polyPoints.Values.ToList())
+                                var prefabLook = new PolyPrefabGeometry(prefabItem, points.ToList())
                                 {
                                     ZIndex = zIndex,
                                     Color = fillColor
@@ -286,12 +305,14 @@ namespace TsMap
 
                             var mapPointLaneCount = mapPoint.LaneCount;
 
-                            foreach (var neighbourPointIndex in mapPoint.Neighbours) // TODO: Fix connection between road segments
+                            foreach (var neighbourPointIndex in
+                                     mapPoint.Neighbours) // TODO: Fix connection between road segments
                             {
                                 if (pointsDrawn.Contains(neighbourPointIndex)) continue;
                                 var neighbourPoint = prefabItem.Prefab.MapPoints[neighbourPointIndex];
 
-                                if ((mapPoint.Hidden || neighbourPoint.Hidden) && prefabItem.Prefab.PrefabNodes.Count + 1 <
+                                if ((mapPoint.Hidden || neighbourPoint.Hidden) &&
+                                    prefabItem.Prefab.PrefabNodes.Count + 1 <
                                     prefabItem.Prefab.MapPoints.Count) continue;
 
                                 var roadYaw = Math.Atan2(neighbourPoint.Z - mapPoint.Z, neighbourPoint.X - mapPoint.X);
@@ -300,12 +321,19 @@ namespace TsMap
 
                                 var cornerCoords = new List<PointF>();
 
-                                cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabstartX + mapPoint.X, prefabStartZ + mapPoint.Z,
-                                    (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f, roadYaw + Math.PI - Math.PI / 2, roadYaw + Math.PI + Math.PI/2, 4).Select(x=>x.ToEto()));
-                                cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabstartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
-                                    (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f, roadYaw  -  Math.PI / 2 , roadYaw  + Math.PI / 2, 4).Select(x => x.ToEto()));
+                                cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabstartX + mapPoint.X,
+                                        prefabStartZ + mapPoint.Z,
+                                        (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f,
+                                        roadYaw + Math.PI - Math.PI / 2, roadYaw + Math.PI + Math.PI / 2, 4)
+                                    .Select(x => x.ToEto()));
+                                cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(
+                                    prefabstartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
+                                    (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f,
+                                    roadYaw - Math.PI / 2, roadYaw + Math.PI / 2, 4).Select(x => x.ToEto()));
 
-                                cornerCoords = MapSettings.Correct(cornerCoords.Select(p => RenderHelper.RotatePoint(p.X, p.Y, rot, originNode.X, originNode.Z).ToEto())).ToList();
+                                cornerCoords = MapSettings.Correct(cornerCoords.Select(p =>
+                                        RenderHelper.RotatePoint(p.X, p.Y, rot, originNode.X, originNode.Z).ToEto()))
+                                    .ToList();
                                 var prefabLook = new PolyPrefabGeometry(prefabItem, cornerCoords)
                                 {
                                     Color = palette.PrefabRoad,
@@ -323,6 +351,7 @@ namespace TsMap
                     prefabLook.Draw(g);
                 }
             }
+
             var prefabTime = DateTime.Now.Ticks - prefabStartTime;
 
             var roadStartTime = DateTime.Now.Ticks;
@@ -332,8 +361,8 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(road.DlcGuard) || road.Hidden ||
                         road.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                         !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(road).ToEto()))
-                    )
+                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(road).ToEto()))
+                       )
                     {
                         continue;
                     }
@@ -344,7 +373,6 @@ namespace TsMap
 
                     if (!geom.HasPoints())
                     {
-
                         var sx = startNode.X;
                         var sz = startNode.Z;
                         var ex = endNode.X;
@@ -372,7 +400,8 @@ namespace TsMap
                     {
                         if (zoomIndex < 3)
                         {
-                            roadPen = new Pen(palette.Road, roadWidth) { DashStyle = new DashStyle(0, new[] { 1f, 1f }) };
+                            roadPen = new Pen(palette.Road, roadWidth)
+                                { DashStyle = new DashStyle(0, new[] { 1f, 1f }) };
                         }
                         else // zoomed out with DashPattern causes OutOfMemory Exception
                         {
@@ -393,6 +422,7 @@ namespace TsMap
                     roadPen.Dispose();
                 }
             }
+
             var roadTime = DateTime.Now.Ticks - roadStartTime;
 
             var mapOverlayStartTime = DateTime.Now.Ticks;
@@ -402,15 +432,17 @@ namespace TsMap
                 {
                     if (!activeDlcGuards.Contains(mapOverlay.DlcGuard) ||
                         mapOverlay.IsSecret && !renderFlags.IsActive(RenderFlags.SecretRoads) ||
-                        !rectangle.Contains(MapSettings.Correct(RenderHelper.GetPoint(mapOverlay.Position.X, mapOverlay.Position.Y).ToEto()))
-                    )
+                        !rectangle.Contains(MapSettings.Correct(RenderHelper
+                            .GetPoint(mapOverlay.Position.X, mapOverlay.Position.Y).ToEto()))
+                       )
                     {
                         continue;
                     }
 
                     var b = mapOverlay.OverlayImage.GetBitmap();
 
-                    if (b == null || !renderFlags.IsActive(RenderFlags.BusStopOverlay) && mapOverlay.OverlayType == OverlayType.BusStop) continue;
+                    if (b == null || !renderFlags.IsActive(RenderFlags.BusStopOverlay) &&
+                        mapOverlay.OverlayType == OverlayType.BusStop) continue;
 
                     var pos = MapSettings.Correct(mapOverlay.Position);
                     if (mapOverlay.OverlayType == OverlayType.Flag)
@@ -423,15 +455,15 @@ namespace TsMap
                     {
                         g.DrawImage(b, pos.X - (b.Width / 2f), pos.Y - (b.Height / 2f), b.Width, b.Height);
                     }
-
                 }
             }
+
             var mapOverlayTime = DateTime.Now.Ticks - mapOverlayStartTime;
 
             var cityStartTime = DateTime.Now.Ticks;
             if (renderFlags.IsActive(RenderFlags.CityNames)) // TODO: Fix position and scaling
             {
-                var cityFont = new Font("Arial", 100 + zoomCaps[zoomIndex] / 100, FontStyle.Bold);
+                var cityFont = new Font("monospace", 100 + zoomCaps[zoomIndex] / 100, FontStyle.Bold);
 
                 foreach (var city in _mapper.Cities.Values)
                 {
@@ -450,15 +482,18 @@ namespace TsMap
                     g.DrawText(cityFont, _cityShadowColor, coords.X + 2, coords.Y + 2, name);
                     g.DrawText(cityFont, palette.CityName, coords.X, coords.Y, name);
                 }
+
                 cityFont.Dispose();
             }
+
             var cityTime = DateTime.Now.Ticks - cityStartTime;
 
             g.RestoreTransform();
             var elapsedTime = DateTime.Now.Ticks - startTime;
             if (renderFlags.IsActive(RenderFlags.TextOverlay))
             {
-                g.DrawText(_defaultFont, Brushes.WhiteSmoke, 5, 5, $"DrawTime: {elapsedTime / TimeSpan.TicksPerMillisecond} ms, x: {startPoint.X}, y: {startPoint.Y}, scale: {scale}");
+                g.DrawText(_defaultFont, Brushes.WhiteSmoke, 5, 5,
+                    $"DrawTime: {elapsedTime / TimeSpan.TicksPerMillisecond} ms, x: {startPoint.X}, y: {startPoint.Y}, scale: {scale}");
 
                 //g.FillRectangle(new SolidBrush(Color.FromArgb(100, 0, 0, 0)), 5, 20, 150, 150);
                 //g.DrawString(_defaultFont, Brushes.White, 10, 40, $"Road: {roadTime / TimeSpan.TicksPerMillisecond}ms");
@@ -468,7 +503,6 @@ namespace TsMap
                 //g.DrawString(_defaultFont, Brushes.White, 10, 115, $"MapArea: {mapAreaTime / TimeSpan.TicksPerMillisecond}ms");
                 //g.DrawString(_defaultFont, Brushes.White, 10, 130, $"City: {cityTime / TimeSpan.TicksPerMillisecond}ms");
             }
-
         }
     }
 }

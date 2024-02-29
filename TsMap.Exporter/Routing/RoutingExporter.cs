@@ -1,33 +1,19 @@
-﻿using MessagePack;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
 using System.Linq;
 
 namespace TsMap.Exporter.Routing
 {
-    public class RoutingExporter : BaseExporter
+    public class RoutingExporter(TsMapper mapper) : MsgPackExporter(mapper)
     {
-        private static MessagePackSerializerOptions Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4Block);
-
-        public RoutingExporter(TsMapper mapper) : base(mapper)
-        {
-        }
-
         public override void Export(ZipArchive zipArchive)
         {
-            var nodes = RoutingNode.GetNetwork(mapper);
+            var nodes = RoutingNode.GetNetwork(Mapper);
 
-            var zipArchiveEntry = zipArchive.CreateEntry(Path.Join("routing", "nodes.msgpack"), CompressionLevel.Fastest);
-            using (var stream = zipArchiveEntry.Open())
-            {
-                stream.Write(MessagePackSerializer.Serialize(nodes.Values.Select(x => x.Serialize()), Options));
-            }
-
-            zipArchiveEntry = zipArchive.CreateEntry(Path.Join("routing", "links.msgpack"), CompressionLevel.Fastest);
-            using (var stream = zipArchiveEntry.Open())
-            {
-                stream.Write(MessagePackSerializer.Serialize(nodes.Values.SelectMany(x => x.GetLinks()).Select(x => x.Serialize()).ToArray(), Options));
-            }
+            WriteMsgPack(zipArchive, Path.Join("json", "routing", "nodes.msgpack"),
+                nodes.Values.Select(x => x.Serialize()).ToList());
+            WriteMsgPack(zipArchive, Path.Join("json", "routing", "links.msgpack"),
+                nodes.Values.SelectMany(x => x.GetLinks()).Select(x => x.Serialize()).ToArray());
         }
     }
 }

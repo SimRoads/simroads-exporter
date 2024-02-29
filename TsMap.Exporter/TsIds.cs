@@ -12,17 +12,24 @@ namespace TsMap.Exporter
 
         private static ulong getId(Object obj, ulong uid = 0)
         {
-
-            if (!ids.ContainsKey(obj))
+            lock (ids)
             {
-                if (uid == 0) uid = (ulong)ids.Count;
-                while (idsReverse.ContainsKey(uid))
+                if (!ids.ContainsKey(obj))
                 {
-                    uid++;
+                    if (uid == 0) uid = (ulong)ids.Count;
+                    uid &= (ulong)(Math.Pow(2, 53) - 1);
+                    while (idsReverse.ContainsKey(uid))
+                    {
+                        if (uid == (ulong)(Math.Pow(2, 53) - 1)) uid = (ulong)ids.Count;
+                        uid++;
+                        uid &= (ulong)(Math.Pow(2, 53) - 1);
+                    }
+
+                    ids[obj] = uid;
+                    idsReverse[uid] = obj;
                 }
-                ids.Add(obj, uid);
-                idsReverse.Add(uid, obj);
             }
+
             return ids[obj];
         }
 
@@ -52,6 +59,7 @@ namespace TsMap.Exporter
             {
                 return GetId(country);
             }
+
             return getId(overlay);
         }
 
@@ -74,6 +82,7 @@ namespace TsMap.Exporter
             {
                 prefab = prefabItem;
             }
+
             return prefab == null ? overlay.GetId() : prefab.GetId();
         }
 

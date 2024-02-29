@@ -78,7 +78,7 @@ namespace TsMap.Exporter
                 {
                     // Find concave hull
                     var points = new MultiPoint(parent.Borders.Select(p => new NetTopologySuite.Geometries.Point(p.Item1, p.Item2)).ToArray());
-                    return (Polygon)ConcaveHull.ConcaveHullByLength(points, 2);
+                    return (Polygon)ConcaveHull.ConcaveHullByLength(points, 5);
                 }
                 return null;
             }

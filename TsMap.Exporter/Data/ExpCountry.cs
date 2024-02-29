@@ -26,7 +26,7 @@ namespace TsMap.Exporter.Data
 
         public override Envelope GetEnvelope()
         {
-            return new Envelope(expObj.X, expObj.Y, expObj.X, expObj.Y);
+            return new Envelope(expObj.X, expObj.X, expObj.Y, expObj.Y);
         }
 
         public override Image GetIcon()

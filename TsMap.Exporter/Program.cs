@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CommandLine;
 
 namespace TsMap.Exporter
 {
@@ -7,19 +8,18 @@ namespace TsMap.Exporter
     {
         static void Main(string[] args)
         {
-            if (args.Length < 2)
-            {
-                Console.WriteLine("Usage: TsMap.Exporter <game_dir> <export_file> [mods_paths]");
-                return;
-            }
-            var gameDir = args[0];
-            var exportFile = args[1];
+            Parser.Default.ParseArguments<ExportSettings>(args).WithParsed(opt => Run(opt));
+        }
 
-            var mods = args.Skip(2).Select(x => new Mod(x)).ToList();
-            var mapper = new TsMapper(gameDir, mods);
+        static int Run(ExportSettings settings)
+        {
+            var mods = settings.Mods.Select(x => new Mod(x, true)).ToList();
+            var mapper = new TsMapper(settings.GameDir, mods);
             mapper.Parse();
 
-            //BaseExporter.ExportAll(mapper, exportFile);
+            BaseExporter.ExportAll(mapper, settings);
+
+            return 0;
         }
     }
 }

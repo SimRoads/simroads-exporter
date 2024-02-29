@@ -22,7 +22,8 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
         public override bool Skip(ExportSettings sett)
         {
-            return base.Skip(sett) || Prefab.Hidden || Prefab.IsSecret || !sett.ActiveDlcGuards.Contains(Prefab.DlcGuard) || Mapper.GetNodeByUid(Prefab.Nodes[0]) == null;
+            return base.Skip(sett) || Prefab.Hidden || Prefab.IsSecret ||
+                   !sett.ActiveDlcGuards.Contains(Prefab.DlcGuard) || Mapper.GetNodeByUid(Prefab.Nodes[0]) == null;
         }
 
         protected override Envelope CalculateEnvelope()
@@ -31,18 +32,21 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             var originNode = Mapper.GetNodeByUid(Prefab.Nodes[0]);
             if (originNode == null) return null;
             var mapPointOrigin = Prefab.Prefab.PrefabNodes[Prefab.Origin];
-            var rot = (float)(originNode.Rotation - Math.PI - Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) + Math.PI / 2);
+            var rot = (float)(originNode.Rotation - Math.PI - Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) +
+                              Math.PI / 2);
 
             var prefabStartX = originNode.X - mapPointOrigin.X;
             var prefabStartZ = originNode.Z - mapPointOrigin.Z;
             foreach (var mapPoint in Prefab.Prefab.MapPoints)
             {
-                var point = Mapper.MapSettings.Correct(RenderHelper.RotatePoint(prefabStartX + mapPoint.X, prefabStartZ + mapPoint.Z, rot, originNode.X, originNode.Z));
+                var point = Mapper.MapSettings.Correct(RenderHelper.RotatePoint(prefabStartX + mapPoint.X,
+                    prefabStartZ + mapPoint.Z, rot, originNode.X, originNode.Z));
                 minX = Math.Min(minX, point.X);
                 maxX = Math.Max(maxX, point.X);
                 minY = Math.Min(minY, point.Y);
                 maxY = Math.Max(maxY, point.Y);
             }
+
             return new Envelope(minX, maxX, minY, maxY);
         }
 
@@ -50,12 +54,16 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
         {
             var originNode = Mapper.GetNodeByUid(Prefab.Nodes[0]);
             var mapPointOrigin = Prefab.Prefab.PrefabNodes[Prefab.Origin];
-            var rot = (float)(originNode.Rotation - Math.PI - Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) + Math.PI / 2);
+            var rot = (float)(originNode.Rotation - Math.PI - Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) +
+                              Math.PI / 2);
             var prefabStartX = originNode.X - mapPointOrigin.X;
             var prefabStartZ = originNode.Z - mapPointOrigin.Z;
 
             List<int> pointsDrawn = new List<int>();
-            List<Feature> roads = new(), prefabs = new();
+            List<Feature> roads = new();
+            List<Tuple<int, Feature>> prefabs = new();
+            ulong countryId = Prefab.Nodes.Select(x => Mapper.GetNodeByUid(x).GetCountry())
+                .FirstOrDefault(x => x != null)?.GetId() ?? 0;
 
             for (var i = 0; i < Prefab.Prefab.MapPoints.Count; i++)
             {
@@ -85,6 +93,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                                 polyPoints.Add(nextPoint, new PointF(newPoint.X, newPoint.Y));
                                 break;
                             }
+
                             nextPoint = -1;
                         }
                     } while (nextPoint != -1);
@@ -117,21 +126,24 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                     for (int j = 0; j < points.Count; j++)
                     {
                         if (j == 1) geometry.Add(GenerateCommandInteger(MapboxCommandType.LineTo, points.Count - 1));
-                        geometry.AddRange(sett.GenerateDeltaFromGame(points[j].X, points[j].Y, ref cursorX, ref cursorY));
+                        geometry.AddRange(
+                            sett.GenerateDeltaFromGame(points[j].X, points[j].Y, ref cursorX, ref cursorY));
                     }
+
                     geometry.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
-                    prefabs.Add(new Feature
+                    prefabs.Add(new(zIndex, new Feature
                     {
                         Id = Prefab.GetId(i),
                         Type = GeomType.Polygon,
                         Geometry = { geometry },
-                        Tags = {
-                            layers.prefabs.GetOrCreateTag("area", areaType),
-                            layers.prefabs.GetOrCreateTag("zIndex", zIndex),
-                            layers.prefabs.GetOrCreateTag("prefab", Prefab.GetId())
+                        Tags =
+                        {
+                            layers.Prefabs.GetOrCreateTag("area", areaType),
+                            layers.Prefabs.GetOrCreateTag("prefab", Prefab.GetId()),
+                            layers.Roads.GetOrCreateTag("country", countryId),
                         }
-                    });
+                    }));
 
                     continue;
                 }
@@ -152,24 +164,34 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
                     var neighbourLaneCount = neighbourPoint.LaneCount;
                     var mapPointSize = (Consts.LaneWidth * mapPointLaneCount + mapPoint.LaneOffset) / 2f;
-                    var neighbourMapPointSize = (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f;
-                    int roundingSteps = Math.Max(mapPointSize, neighbourMapPointSize) / sett.Extent < sett.DiscretizationThreshold ? 2 : 4;
+                    var neighbourMapPointSize =
+                        (Consts.LaneWidth * neighbourLaneCount + neighbourPoint.LaneOffset) / 2f;
+                    int roundingSteps = Math.Max(mapPointSize, neighbourMapPointSize) / sett.Extent <
+                                        sett.DiscretizationThreshold
+                        ? 2
+                        : 4;
 
                     var cornerCoords = new List<PointF>();
 
-                    cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabStartX + mapPoint.X, prefabStartZ + mapPoint.Z,
+                    cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabStartX + mapPoint.X,
+                        prefabStartZ + mapPoint.Z,
                         mapPointSize, roadYaw + Math.PI - Math.PI / 2, roadYaw + Math.PI + Math.PI / 2, roundingSteps));
-                    cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabStartX + neighbourPoint.X, prefabStartZ + neighbourPoint.Z,
+                    cornerCoords.AddRange(RenderHelper.GetRoundedCornerCoords(prefabStartX + neighbourPoint.X,
+                        prefabStartZ + neighbourPoint.Z,
                         neighbourMapPointSize, roadYaw - Math.PI / 2, roadYaw + Math.PI / 2, roundingSteps));
 
-                    cornerCoords = Mapper.MapSettings.Correct(cornerCoords.Select(p => RenderHelper.RotatePoint(p.X, p.Y, rot, originNode.X, originNode.Z))).ToList();
+                    cornerCoords = Mapper.MapSettings.Correct(cornerCoords.Select(p =>
+                        RenderHelper.RotatePoint(p.X, p.Y, rot, originNode.X, originNode.Z))).ToList();
 
                     var points = new List<uint>() { GenerateCommandInteger(MapboxCommandType.MoveTo, 1) };
                     for (int j = 0; j < cornerCoords.Count; j++)
                     {
-                        if (j == 1) points.Add(GenerateCommandInteger(MapboxCommandType.LineTo, cornerCoords.Count - 1));
-                        points.AddRange(sett.GenerateDeltaFromGame(cornerCoords[j].X, cornerCoords[j].Y, ref cursorX, ref cursorY));
+                        if (j == 1)
+                            points.Add(GenerateCommandInteger(MapboxCommandType.LineTo, cornerCoords.Count - 1));
+                        points.AddRange(sett.GenerateDeltaFromGame(cornerCoords[j].X, cornerCoords[j].Y, ref cursorX,
+                            ref cursorY));
                     }
+
                     points.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
                     roads.Add(new Feature
@@ -177,16 +199,17 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                         Id = Prefab.GetId(i),
                         Type = GeomType.Polygon,
                         Geometry = { points },
-                        Tags = {
-                            layers.roads.GetOrCreateTag("prefab", Prefab.GetId()),
-                            layers.roads.GetOrCreateTag("country", Prefab.Nodes.Select(x => Mapper.GetNodeByUid(x).GetCountry()).FirstOrDefault(x => x != null)?.GetId() ?? 0),
+                        Tags =
+                        {
+                            layers.Roads.GetOrCreateTag("prefab", Prefab.GetId()),
+                            layers.Roads.GetOrCreateTag("country", countryId),
                         }
                     });
                 }
             }
 
-            layers.roads.Features.AddRange(roads);
-            layers.prefabs.Features.AddRange(prefabs);
+            layers.Roads.Features.AddRange(roads);
+            layers.Prefabs.Features.AddRange(prefabs.OrderBy(x => x.Item1).Select(x => x.Item2));
             return roads.Count > 0 || prefabs.Count > 0;
         }
     }

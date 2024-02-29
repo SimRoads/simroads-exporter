@@ -32,17 +32,17 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 Type = GeomType.Point,
                 Geometry = { GenerateCommandInteger(MapboxCommandType.MoveTo, 1), sett.GenerateDeltaFromGame(pos.X, pos.Y) },
                 Tags = {
-                    layers.overlays.GetOrCreateTag("overlay", Overlay.OverlayName),
-                    layers.overlays.GetOrCreateTag("prefab", Overlay.GetPrefabId())
+                    layers.Overlays.GetOrCreateTag("overlay", Overlay.OverlayName),
+                    layers.Overlays.GetOrCreateTag("prefab", Overlay.GetPrefabId())
                 }
             };
             if (Overlay.ReferenceObj is TsCountry country)
             {
                 foreach (var locale in Mapper.Localization.GetLocales()) feature.Tags.Add(
-                    layers.overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(country.LocalizationToken, locale) ?? country.Name));
+                    layers.Overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(country.LocalizationToken, locale) ?? country.Name));
             }
 
-            layers.overlays.Features.Add(feature);
+            layers.Overlays.Features.Add(feature);
 
             return true;
         }

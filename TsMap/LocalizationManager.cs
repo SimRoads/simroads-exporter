@@ -13,7 +13,6 @@ namespace TsMap.Helpers
 
         public LocalizationManager()
         {
-            _localization.Add("None", new Dictionary<string, string>());
         }
 
         public void LoadLocaleValues()

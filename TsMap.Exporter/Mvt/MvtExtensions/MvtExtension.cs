@@ -25,6 +25,11 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
         {
             return false;
         }
+        public virtual int Order()
+        {
+            return 0;
+        }
+        
         public abstract void AddTo(Quadtree<MvtExtension> container);
         protected abstract bool SaveMvtLayersInternal(ExportSettings sett, Layers layers);
     }

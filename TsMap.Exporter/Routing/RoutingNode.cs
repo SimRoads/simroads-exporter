@@ -19,69 +19,40 @@ namespace TsMap.Exporter.Routing
             StartNode = startNode;
             EndNode = endNode;
 
-            Length = (ushort)(Math.Sqrt(Math.Pow(startNode.Node.X - endNode.Node.X, 2) + Math.Pow(startNode.Node.Z - endNode.Node.Z, 2)) * 10);
+            Length = (ushort)(Math.Sqrt(Math.Pow(startNode.Node.X - endNode.Node.X, 2) +
+                                        Math.Pow(startNode.Node.Z - endNode.Node.Z, 2)) * 10);
             RoadSize = (byte)(road.LeftDriving ? road.RoadLook.LanesLeft.Count : road.RoadLook.LanesRight.Count);
             ElementsIds.Add(road.GetId());
         }
 
-        public RoutingLink(TsPrefabItem prefab, RoutingNode startNode, RoutingNode endNode)
+        public RoutingLink(RoutingNode startNode, RoutingNode endNode, List<ulong> elementsIds, ushort length,
+            byte roadSize)
         {
             StartNode = startNode;
             EndNode = endNode;
-
-            var (start, end) = (prefab.Nodes.IndexOf(startNode.Node.Uid), prefab.Nodes.IndexOf(endNode.Node.Uid));
-            var (startMapPoint, endMapPoint) = (prefab.Prefab.MapPoints.FindIndex(x => x.ControlNodeIndex == start), prefab.Prefab.MapPoints.FindIndex(x => x.ControlNodeIndex == end));
-            Stack<List<int>> q = new();
-            q.Push(new List<int>() { startMapPoint });
-            while (q.Count > 0)
-            {
-                var el = q.Pop();
-                if (el.Last() == endMapPoint)
-                {
-                    Length = 0;
-                    RoadSize = (byte)(prefab.Prefab.MapPoints[el[0]].LaneCount);
-                    ElementsIds.Add(prefab.GetId(el[0]));
-                    for (int i = 1; i < el.Count; i++)
-                    {
-                        var (prev, curr) = (prefab.Prefab.MapPoints[el[i - 1]], prefab.Prefab.MapPoints[el[i]]);
-                        Length += (ushort)(Math.Sqrt(Math.Pow(prev.X - curr.X, 2) + Math.Pow(prev.Z - curr.Z, 2)) * 10);
-                        RoadSize = (byte)Math.Min(RoadSize, curr.LaneCount);
-                        ElementsIds.Add(prefab.GetId(el[i]));
-                    }
-                    return;
-                }
-                else
-                {
-                    foreach (var next in prefab.Prefab.MapPoints[el.Last()].Neighbours)
-                    {
-                        if (!el.Contains(next) && (prefab.Prefab.MapPoints[el.Last()].DestinationNodes.Contains((sbyte)endMapPoint) || prefab.Prefab.MapPoints[el.Last()].Neighbours.Count == 1))
-                        {
-                            q.Push(new List<int>(el) { next });
-                        }
-                    }
-                }
-            }
+            ElementsIds = elementsIds;
+            Length = length;
+            RoadSize = roadSize;
         }
 
         public object[] Serialize()
         {
             return new object[] { StartNode.Id, EndNode.Id, ElementsIds, Length, RoadSize };
         }
-
     }
 
     public class RoutingNode
     {
-        public readonly ushort Id;
+        public readonly uint Id;
         public readonly TsNode Node;
 
-        private List<RoutingLink> Links = new();
-        private static ushort NextId = 0;
+        private List<RoutingLink> _links = new();
+        private static uint _nextId;
 
-        public RoutingNode(TsNode node)
+        private RoutingNode(TsNode node)
         {
             Node = node;
-            Id = NextId++;
+            Id = _nextId++;
         }
 
         public object[] Serialize()
@@ -97,24 +68,136 @@ namespace TsMap.Exporter.Routing
                 x.Value.ForwardItem is TsRoadItem ||
                 x.Value.ForwardItem is TsPrefabItem).ToDictionary(x => x.Key, x => new RoutingNode(x.Value));
 
-            foreach (var (uid, rNode) in nodes)
+            foreach (var (_, rNode) in nodes)
             {
                 var node = rNode.Node;
-                TsItem.TsItem[] items = new TsItem.TsItem[] { node.BackwardItem, node.ForwardItem };
+                TsItem.TsItem[] items = [node.BackwardItem, node.ForwardItem];
 
                 foreach (var item in items)
                 {
                     if (item is TsRoadItem road)
                     {
                         var (start, end) = (road.GetStartNode().Uid, road.GetEndNode().Uid);
-                        if (road.RoadLook.IsOneWay() && start != node.Uid) continue;
-                        if (start == node.Uid && !road.LeftDriving) rNode.Links.Add(new RoutingLink(road, rNode, nodes[end]));
-                        else if (end == node.Uid && road.LeftDriving) rNode.Links.Add(new RoutingLink(road, rNode, nodes[start]));
+                        if (start == node.Uid &&
+                            ((road.RoadLook.IsOneWay() && !road.LeftDriving) || !road.RoadLook.IsOneWay()))
+                            nodes[end]._links.Add(new RoutingLink(road, nodes[end], rNode));
+                        else if (end == node.Uid &&
+                                 ((road.RoadLook.IsOneWay() && road.LeftDriving) || !road.RoadLook.IsOneWay()))
+                            nodes[start]._links.Add(new RoutingLink(road, nodes[start], rNode));
                     }
-                    else if (item is TsPrefabItem prefab)
+                }
+            }
+
+            var linksToAdd = new Dictionary<ulong, List<RoutingLink>>();
+            foreach (var (_, rNode) in nodes)
+            {
+                var node = rNode.Node;
+                TsItem.TsItem[] items = [node.BackwardItem, node.ForwardItem];
+
+                foreach (var item in items)
+                {
+                    if (item is TsPrefabItem prefab)
                     {
-                        foreach (var n in prefab.Nodes.Where(x => x != node.Uid))
-                            rNode.Links.Add(new RoutingLink(prefab, rNode, nodes[n]));
+                        var pNodes = new List<ulong>(prefab.Nodes);
+                        for (var i = 0; i < prefab.Origin; i++)
+                        {
+                            var el = pNodes.Last();
+                            pNodes.RemoveAt(pNodes.Count - 1);
+                            pNodes.Insert(0, el);
+                        }
+
+                        var startNodeIndex = pNodes.IndexOf(rNode.Node.Uid);
+                        var endIndexes = new List<ushort>();
+                        Stack<List<int>> paths = [];
+                        paths.Push([
+                            prefab.Prefab.NavNodes.FindIndex(x =>
+                                x.ReferenceIndex == startNodeIndex && x.Type == TsNavNodeType.BorderNode)
+                        ]);
+                        while (paths.Count > 0)
+                        {
+                            var path = paths.Pop();
+                            var last = prefab.Prefab.NavNodes[path.Last()];
+                            if (path.Count > 1 && last.Type == TsNavNodeType.BorderNode)
+                            {
+                                endIndexes.Add(last.ReferenceIndex);
+                            }
+                            else
+                            {
+                                foreach (var conn in last.Connections)
+                                {
+                                    if (!path.Contains(conn.TargetNodeIndex))
+                                    {
+                                        paths.Push([..path, conn.TargetNodeIndex]);
+                                    }
+                                }
+                            }
+                        }
+
+                        var startMapPoint =
+                            prefab.Prefab.MapPoints.FindIndex(x => x.ControlNodeIndex == startNodeIndex);
+                        if (startMapPoint == -1)
+                        {
+                            foreach (var endIndex in endIndexes)
+                            {
+                                nodes[pNodes[endIndex]]._links.Add(new RoutingLink(nodes[pNodes[endIndex]], rNode,
+                                    [], 0, 1));
+                            }
+
+                            continue;
+                        }
+
+                        foreach (var endIndex in endIndexes)
+                        {
+                            Queue<List<int>> points = new();
+                            points.Enqueue([startMapPoint]);
+                            while (points.Count > 0)
+                            {
+                                var path = points.Dequeue();
+                                var last = prefab.Prefab.MapPoints[path.Last()];
+                                if (path.Count > 1 && last.ControlNodeIndex != -1)
+                                {
+                                    if (last.ControlNodeIndex != endIndex) continue;
+                                    ushort length = 0;
+                                    var roadSize = (byte)(prefab.Prefab.MapPoints[path[0]].LaneCount);
+                                    var elementsIds = new List<ulong> { prefab.GetId(path[0]) };
+                                    for (int i = 1; i < path.Count; i++)
+                                    {
+                                        var (prev, curr) = (prefab.Prefab.MapPoints[path[i - 1]],
+                                            prefab.Prefab.MapPoints[path[i]]);
+                                        length += (ushort)(Math.Sqrt(Math.Pow(prev.X - curr.X, 2) +
+                                                                     Math.Pow(prev.Z - curr.Z, 2)) * 10);
+                                        roadSize = (byte)Math.Min(roadSize, curr.LaneCount);
+                                        elementsIds.Add(prefab.GetId(path[i]));
+                                    }
+
+                                    //if (!linksToAdd.ContainsKey(rNode.Node.Uid)) linksToAdd[pNodes[endIndex]] = new();
+                                    nodes[pNodes[endIndex]]._links.Add(new RoutingLink(nodes[pNodes[endIndex]], rNode,
+                                        elementsIds,
+                                        length, roadSize));
+                                }
+                                else
+                                {
+                                    var neighbours = last.Neighbours.Except(path).ToArray();
+                                    foreach (var conn in neighbours)
+                                    {
+                                        var mp = prefab.Prefab.MapPoints[conn];
+                                        if (neighbours.Length == 1 || mp.DestinationNodes.Any(x => x == endIndex) ||
+                                            mp.ControlNodeIndex == endIndex)
+                                        {
+                                            points.Enqueue([..path, conn]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (var (startNodeUid, links) in linksToAdd)
+                {
+                    foreach (var link in links)
+                    {
+                        nodes[startNodeUid]._links.Add(link);
                     }
                 }
             }
@@ -124,7 +207,7 @@ namespace TsMap.Exporter.Routing
 
         public List<RoutingLink> GetLinks()
         {
-            return Links;
+            return _links;
         }
     }
 }

@@ -50,7 +50,11 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             var tanSz = Math.Sin(-(Math.PI * 0.5f - startNode.Rotation)) * Envelope.Diameter;
             var tanEz = Math.Sin(-(Math.PI * 0.5f - endNode.Rotation)) * Envelope.Diameter;
 
-            int hermiteSteps = Math.Max(2, (int)(8 * (Envelope.Diameter / sett.Extent)));
+            int hermiteSteps = Math.Max(2,
+                (int)(8 * (Envelope.Diameter +
+                           (sett.Envelope.MaxExtent - Envelope.Diameter) * (1 - (sett.DiscretizationThreshold /
+                               ExportSettings.MinDiscretizationThreshold))) /
+                      sett.Envelope.MaxExtent));
             var points = new List<uint>() { GenerateCommandInteger(MapboxCommandType.MoveTo, 1) };
 
             for (var i = 0; i < hermiteSteps; i++)
@@ -64,14 +68,15 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             }
 
             ulong country = Road.GetStartNode().GetCountry()?.GetId() ?? Road.GetEndNode().GetCountry()?.GetId() ?? 0;
-            layers.roads.Features.Add(new Feature
+            layers.Roads.Features.Add(new Feature
             {
                 Id = Road.GetId(),
                 Type = GeomType.Linestring,
                 Geometry = { points },
-                Tags = {
-                    layers.roads.GetOrCreateTag("size", Road.RoadLook.GetWidth()),
-                    layers.roads.GetOrCreateTag("country", country)
+                Tags =
+                {
+                    layers.Roads.GetOrCreateTag("size", Road.RoadLook.GetWidth()),
+                    layers.Roads.GetOrCreateTag("country", country)
                 }
             });
             return true;

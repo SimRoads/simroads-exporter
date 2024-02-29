@@ -10,7 +10,6 @@ namespace TsMap.Exporter.Data
 {
     public class ExpCity : ExpElement<TsCity>
     {
-
         public ExpCity(TsCity expObj, DataExporter exp) : base(expObj, exp)
         {
         }
@@ -31,8 +30,9 @@ namespace TsMap.Exporter.Data
             Envelope area = new();
             foreach (var c in mapper.Cities.Values.Where(x => x.City == expObj))
             {
-                area.ExpandToInclude(new Envelope(c.X, c.Z, c.X + c.Width, c.Z + c.Height));
+                area.ExpandToInclude(new Envelope(c.X, c.X + c.Width, c.Z, c.Z + c.Height));
             }
+
             return area;
         }
 
@@ -56,7 +56,7 @@ namespace TsMap.Exporter.Data
             Envelope all = new();
             object[] singles = mapper.Cities.Values.Where(x => x.City == expObj).Select(x =>
             {
-                var e = new Envelope(x.X, x.Z, x.X + x.Width, x.Z + x.Height);
+                var e = new Envelope(x.X, x.X + x.Width, x.Z, x.Z + x.Height);
                 all.ExpandToInclude(e);
                 return GetGeoJson(e);
             }).ToArray();
@@ -66,7 +66,10 @@ namespace TsMap.Exporter.Data
             {
                 ["areas"] = singles,
                 ["containedArea"] = GetGeoJson(all),
-                ["visibleArea"] = visibleCity != default(TsCityItem) ? GetGeoJson(new Envelope(visibleCity.X, visibleCity.Z, visibleCity.X + visibleCity.Width, visibleCity.Z + visibleCity.Height)) : null,
+                ["visibleArea"] = visibleCity != default(TsCityItem)
+                    ? GetGeoJson(new Envelope(visibleCity.X, visibleCity.X + visibleCity.Width, visibleCity.Z,
+                        visibleCity.Z + visibleCity.Height))
+                    : null,
             };
         }
 
@@ -74,6 +77,5 @@ namespace TsMap.Exporter.Data
         {
             return expObj.Token;
         }
-
     }
 }

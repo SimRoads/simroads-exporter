@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using System;
+using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using System.Linq;
 using TsMap.TsItem;
@@ -45,17 +46,18 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
                 if (j == 1) geometry.Add(GenerateCommandInteger(MapboxCommandType.LineTo, points.Length - 1));
                 geometry.AddRange(sett.GenerateDeltaFromGame((float)points[j].X, (float)points[j].Y, ref cursorX, ref cursorY));
             }
+
             geometry.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
             var feature = new Feature
             {
-                Id = City.GetId(),
+                Id = City.City.GetId(),
                 Type = GeomType.Polygon,
                 Geometry = { geometry }
             };
             foreach (var locale in Mapper.Localization.GetLocales()) feature.Tags.Add(
-                layers.overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(City.City.LocalizationToken, locale) ?? City.City.Name));
+                layers.Overlays.GetOrCreateTag($"name_{locale}", Mapper.Localization.GetLocaleValue(City.City.LocalizationToken, locale) ?? City.City.Name));
 
-            layers.overlays.Features.Add(feature);
+            layers.Overlays.Features.Add(feature);
             return true;
         }
     }

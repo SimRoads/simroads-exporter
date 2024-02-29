@@ -44,6 +44,7 @@ namespace TsMap.Exporter.Data
     public abstract class ExpOverlay<T> : ExpOverlay where T : class
     {
         protected T refObj;
+
         protected ExpOverlay(MapOverlay expObj, DataExporter exp) : base(expObj, exp)
         {
             refObj = expObj.ReferenceObj as T;
@@ -66,7 +67,7 @@ namespace TsMap.Exporter.Data
 
         public override Envelope GetEnvelope()
         {
-            return new Envelope(expObj.Position.X, expObj.Position.Y, expObj.Position.X, expObj.Position.Y);
+            return new Envelope(expObj.Position.X, expObj.Position.X, expObj.Position.Y, expObj.Position.Y);
         }
 
         public override TsCountry GetCountry()
@@ -77,16 +78,26 @@ namespace TsMap.Exporter.Data
             TsCountry country = null;
             if (refObj is TsItem.TsItem item)
             {
-                country = item.Nodes.Select(x => mapper.Nodes[x]).Select(x => x.GetCountry()).First(x => x != null);
+                var nodes = item.Nodes ?? [];
+                if (item.GetStartNode() != null) nodes.Add(item.GetStartNode().Uid);
+                if (item.GetEndNode() != null) nodes.Add(item.GetEndNode().Uid);
+                foreach (var n in nodes)
+                {
+                    country = mapper.Nodes[n]?.GetCountry();
+                    if (country != null) break;
+                }
             }
-            country ??= mapper.NodesIndex.NearestNeighbor(new Coordinate(expObj.Position.X, expObj.Position.Y)).Data.GetCountry();
+
+            country ??= mapper.NodesIndex.NearestNeighbor(new Coordinate(expObj.Position.X, expObj.Position.Y)).Data
+                .GetCountry();
             return country;
         }
 
         public override TsCity GetCity()
         {
             var env = GetEnvelope();
-            var city = exporter.cityTree.Query(env).First(x => (new Envelope(x.X, x.Z, x.X + x.Width, x.Z + x.Height)).Intersects(env)).City;
+            var city = exporter.CityTree.Query(env)
+                .FirstOrDefault(x => (new Envelope(x.X, x.X + x.Width, x.Z, x.Z + x.Height)).Intersects(env))?.City;
             return city;
         }
 
@@ -103,7 +114,7 @@ namespace TsMap.Exporter.Data
                 var originNode = mapper.GetNodeByUid(prefabItem.Nodes[0]);
                 var mapPointOrigin = prefabItem.Prefab.PrefabNodes[prefabItem.Origin];
                 var rot = (float)(originNode.Rotation - Math.PI -
-                                   Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) + Math.PI / 2);
+                    Math.Atan2(mapPointOrigin.RotZ, mapPointOrigin.RotX) + Math.PI / 2);
                 var prefabstartX = originNode.X - mapPointOrigin.X;
                 var prefabStartZ = originNode.Z - mapPointOrigin.Z;
                 for (var i = 0; i < prefabItem.Prefab.MapPoints.Count; i++)
@@ -121,7 +132,6 @@ namespace TsMap.Exporter.Data
 
             return data;
         }
-
     }
 
     public class ExpBusStop : ExpOverlay<TsBusStopItem>
@@ -154,7 +164,7 @@ namespace TsMap.Exporter.Data
 
         public override (string, string) GetTitle()
         {
-            return (null, refObj.Company.Name);
+            return (null, refObj.Company?.Name ?? "%Unknown Company%");
         }
 
         public override ulong GetGameId()
@@ -267,6 +277,7 @@ namespace TsMap.Exporter.Data
                     defaultName = "%Parking%";
                     break;
             }
+
             return (token, defaultName);
         }
 
@@ -294,6 +305,7 @@ namespace TsMap.Exporter.Data
                 case "parking_ico":
                     return "parking";
             }
+
             return "prefab_element";
         }
     }
@@ -314,6 +326,7 @@ namespace TsMap.Exporter.Data
                     defaultName = "%Parking%";
                     break;
             }
+
             return (token, defaultName);
         }
 
@@ -329,6 +342,7 @@ namespace TsMap.Exporter.Data
                 case "parking_ico":
                     return "parking";
             }
+
             return "trigger";
         }
     }
@@ -339,9 +353,12 @@ namespace TsMap.Exporter.Data
 
         public ExpOverlayItem(MapOverlay expObj, DataExporter exp) : base(expObj, exp)
         {
-            if (expObj.OverlayType == OverlayType.Road && !expObj.OverlayName.EndsWith("_ico") && expObj.OverlayName != "quarry")
+            if (expObj.OverlayType == OverlayType.Road && !expObj.OverlayName.EndsWith("_ico") &&
+                expObj.OverlayName != "quarry")
             {
-                roadNumber = (expObj.OverlayName.Contains('_') ? String.Join(' ', expObj.OverlayName.Split('_').Skip(1)) : expObj.OverlayName).ToUpper();
+                roadNumber = (expObj.OverlayName.Contains('_')
+                    ? String.Join(' ', expObj.OverlayName.Split('_').Skip(1))
+                    : expObj.OverlayName).ToUpper();
             }
         }
 
@@ -356,6 +373,7 @@ namespace TsMap.Exporter.Data
             {
                 return ("mapl_road_numbers", "%Road Numbers%");
             }
+
             return (null, null);
         }
 
@@ -372,6 +390,7 @@ namespace TsMap.Exporter.Data
                 case "weigh_ico":
                     return ("mapl_weighst", "%Weight Station%");
             }
+
             if (roadNumber != null)
             {
                 return (null, roadNumber);
@@ -395,6 +414,7 @@ namespace TsMap.Exporter.Data
                 case "weigh_ico":
                     return "weigh";
             }
+
             return "road_number";
         }
     }

@@ -17,6 +17,25 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             this.MapArea = mapArea;
         }
 
+        public override int Order()
+        {
+            int zIndex = MapArea.DrawOver ? 10 : 0;
+            if ((MapArea.ColorIndex & 0x03) == 3)
+            {
+                zIndex = MapArea.DrawOver ? 13 : 3;
+            }
+            else if ((MapArea.ColorIndex & 0x02) == 2)
+            {
+                zIndex = MapArea.DrawOver ? 12 : 2;
+            }
+            else if ((MapArea.ColorIndex & 0x01) == 1)
+            {
+                zIndex = MapArea.DrawOver ? 11 : 1;
+            }
+
+            return zIndex;
+        }
+
         protected override bool SaveMvtLayersInternal(ExportSettings sett, Layers layers)
         {
             uint cursorX = 0, cursorY = 0;
@@ -30,21 +49,17 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             }
 
             string areaType = "road";
-            int zIndex = MapArea.DrawOver ? 10 : 0;
             if ((MapArea.ColorIndex & 0x03) == 3)
             {
                 areaType = "grass";
-                zIndex = MapArea.DrawOver ? 13 : 3;
             }
             else if ((MapArea.ColorIndex & 0x02) == 2)
             {
                 areaType = "building";
-                zIndex = MapArea.DrawOver ? 12 : 2;
             }
             else if ((MapArea.ColorIndex & 0x01) == 1)
             {
                 areaType = "field";
-                zIndex = MapArea.DrawOver ? 11 : 1;
             }
 
             var geometry = new List<uint>() { GenerateCommandInteger(MapboxCommandType.MoveTo, 1) };
@@ -55,12 +70,12 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
             }
             geometry.Add(GenerateCommandInteger(MapboxCommandType.ClosePath, 1));
 
-            layers.prefabs.Features.Add(new Feature
+            layers.Prefabs.Features.Add(new Feature
             {
                 Id = MapArea.GetId(),
                 Type = GeomType.Polygon,
                 Geometry = { geometry },
-                Tags = { layers.prefabs.GetOrCreateTag("area", areaType), layers.prefabs.GetOrCreateTag("zIndex", zIndex) }
+                Tags = { layers.Prefabs.GetOrCreateTag("area", areaType) }
             });
             return true;
         }

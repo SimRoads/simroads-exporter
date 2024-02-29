@@ -56,6 +56,12 @@ namespace TsMap
             Load = false;
         }
 
+        public Mod(string path, bool load)
+        {
+            ModPath = path;
+            Load = load;
+        }
+
         public override string ToString()
         {
             return Path.GetFileName(ModPath);

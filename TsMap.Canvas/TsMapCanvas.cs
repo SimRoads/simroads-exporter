@@ -302,7 +302,7 @@ namespace TsMap.Canvas
             };
             if (fileDialog.ShowDialog(this) == DialogResult.Ok)
             {
-                BaseExporter.ExportAll((Exporter.TsMapper)_mapper, fileDialog.FileName);
+                //BaseExporter.ExportAll((Exporter.TsMapper)_mapper, fileDialog.FileName);
             }
         }
 

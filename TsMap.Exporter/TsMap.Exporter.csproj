@@ -1,16 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="NavExporter.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Google.Protobuf" Version="3.25.0" />
+    <PackageReference Include="K4os.Compression.LZ4.Streams" Version="1.3.7-beta" />
     <PackageReference Include="MessagePack" Version="2.5.140" />
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="4.0.0" />
@@ -28,7 +26,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="$(BuildTarget) == 'Windows'">
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>
     <UseWindowsForms>True</UseWindowsForms>
     <DefineConstants>WINDOWS</DefineConstants>
@@ -37,7 +35,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="$(BuildTarget) == 'Linux'">
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <DefineConstants>LINUX</DefineConstants>
   </PropertyGroup>

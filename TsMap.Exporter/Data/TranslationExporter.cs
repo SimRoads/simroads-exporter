@@ -1,40 +1,29 @@
-﻿using MessagePack;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 
 namespace TsMap.Exporter.Data
 {
-    public class TranslationExporter : BaseExporter
+    public class TranslationExporter(TsMapper mapper) : MsgPackExporter(mapper)
     {
-        public MessagePackSerializerOptions Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
-        public List<string> SelectedKeys = new();
-
-        public TranslationExporter(TsMapper mapper) : base(mapper)
-        {
-        }
+        public readonly HashSet<string> SelectedKeys = ["lang_name"];
 
         public override void Export(ZipArchive archive)
         {
-            var zipArchiveEntry = archive.CreateEntry(Path.Join("translations", "keys"), CompressionLevel.Fastest);
-            using (var stream = zipArchiveEntry.Open())
+            WriteMsgPack(archive, Path.Join("json", "translations", "keys.msgpack"), new
             {
-                stream.Write(MessagePackSerializer.Serialize(SelectedKeys, Options));
-            }
+                keys = SelectedKeys,
+                locales = Mapper.Localization.GetLocales().ToDictionary(loc => loc,
+                    loc => Mapper.Localization.GetLocaleValue("lang_name", loc))
+            });
 
-            foreach (var locale in mapper.Localization.GetLocales())
+            foreach (var locale in Mapper.Localization.GetLocales())
             {
-                zipArchiveEntry = archive.CreateEntry(Path.Join("translations", locale), CompressionLevel.Fastest);
-                var values = SelectedKeys.Select(key => mapper.Localization.GetLocaleValue(key, locale)).ToList();
-                using (var stream = zipArchiveEntry.Open())
-                {
-                    stream.Write(MessagePackSerializer.Serialize(values, Options));
-                }
+                if (locale != "None")
+                    WriteMsgPack(archive, Path.Join("json", "translations", "locales", locale + ".msgpack"),
+                        SelectedKeys.Select(key => Mapper.Localization.GetLocaleValue(key, locale)).ToList());
             }
-
         }
-
     }
-
 }
