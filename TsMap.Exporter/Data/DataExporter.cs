@@ -145,7 +145,6 @@ namespace TsMap.Exporter.Data
             for (i = 0; i < expCities.Count; i++)
             {
                 var c = expCities[i];
-                Console.WriteLine(c.GetTitle().Item1 + " "+ c.GetId());
                 WriteMsgPack(zipArchive, Path.Join("json", "overlays", c.GetId() + ".msgpack"), c.ExportDetail());
                 Logger.Instance.Info($"Exported city {i + 1}/{expCities.Count}");
             }

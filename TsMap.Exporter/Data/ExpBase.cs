@@ -107,9 +107,10 @@ namespace TsMap.Exporter.Data
 
         protected object GetGeoJson(object geometry)
         {
-            if (geometry is Envelope e && e.Area == 0)
+            if (geometry is Envelope e)
             {
-                geometry = new Point(e.MinX, e.MinY);
+                if (e.Area == 0) geometry = new Point(e.MinX, e.MinY);
+                else geometry = GeometryFactory.Default.ToGeometry(e);
             }
 
             using (var stringWriter = new StringWriter())

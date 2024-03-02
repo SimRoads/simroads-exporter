@@ -43,9 +43,10 @@ namespace TsMap.Exporter
             return getId(item, item.Uid);
         }
 
-        public static ulong GetId(this TsPrefabItem prefab, int mapPointIndex)
+        public static ulong GetId(this TsPrefabItem prefab, int mapPointStart,  int mapPointEnd)
         {
-            return getId(new Tuple<ulong, int>(prefab.Uid, mapPointIndex), prefab.Uid + (ulong)mapPointIndex + 1);
+            if (mapPointStart > mapPointEnd) (mapPointStart, mapPointEnd) = (mapPointEnd, mapPointStart);
+            return getId(new Tuple<ulong, int, int>(prefab.Uid, mapPointStart, mapPointEnd));
         }
 
         public static ulong GetId(this TsFerryConnection ferryConnection)

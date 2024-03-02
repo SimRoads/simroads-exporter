@@ -134,7 +134,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
                     prefabs.Add(new(zIndex, new Feature
                     {
-                        Id = Prefab.GetId(i),
+                        Id = Prefab.GetId(),
                         Type = GeomType.Polygon,
                         Geometry = { geometry },
                         Tags =
@@ -196,7 +196,7 @@ namespace TsMap.Exporter.Mvt.MvtExtensions
 
                     roads.Add(new Feature
                     {
-                        Id = Prefab.GetId(i),
+                        Id = Prefab.GetId(i, neighbourPointIndex),
                         Type = GeomType.Polygon,
                         Geometry = { points },
                         Tags =

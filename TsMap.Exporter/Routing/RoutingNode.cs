@@ -5,42 +5,6 @@ using TsMap.TsItem;
 
 namespace TsMap.Exporter.Routing
 {
-    public class RoutingLink
-    {
-        public readonly RoutingNode StartNode;
-        public readonly RoutingNode EndNode;
-        public readonly List<ulong> ElementsIds = new();
-
-        public readonly ushort Length;
-        public readonly byte RoadSize;
-
-        public RoutingLink(TsRoadItem road, RoutingNode startNode, RoutingNode endNode)
-        {
-            StartNode = startNode;
-            EndNode = endNode;
-
-            Length = (ushort)(Math.Sqrt(Math.Pow(startNode.Node.X - endNode.Node.X, 2) +
-                                        Math.Pow(startNode.Node.Z - endNode.Node.Z, 2)) * 10);
-            RoadSize = (byte)(road.LeftDriving ? road.RoadLook.LanesLeft.Count : road.RoadLook.LanesRight.Count);
-            ElementsIds.Add(road.GetId());
-        }
-
-        public RoutingLink(RoutingNode startNode, RoutingNode endNode, List<ulong> elementsIds, ushort length,
-            byte roadSize)
-        {
-            StartNode = startNode;
-            EndNode = endNode;
-            ElementsIds = elementsIds;
-            Length = length;
-            RoadSize = roadSize;
-        }
-
-        public object[] Serialize()
-        {
-            return new object[] { StartNode.Id, EndNode.Id, ElementsIds, Length, RoadSize };
-        }
-    }
-
     public class RoutingNode
     {
         public readonly uint Id;
@@ -57,7 +21,7 @@ namespace TsMap.Exporter.Routing
 
         public object[] Serialize()
         {
-            return new object[] { Id, Node.X, Node.Z };
+            return [Id, Node.X, Node.Z];
         }
 
         public static Dictionary<ulong, RoutingNode> GetNetwork(TsMapper mapper)
@@ -80,23 +44,12 @@ namespace TsMap.Exporter.Routing
                         var (start, end) = (road.GetStartNode().Uid, road.GetEndNode().Uid);
                         if (start == node.Uid &&
                             ((road.RoadLook.IsOneWay() && !road.LeftDriving) || !road.RoadLook.IsOneWay()))
-                            nodes[end]._links.Add(new RoutingLink(road, nodes[end], rNode));
+                            rNode._links.Add(new RoadRoutingLink(road, rNode, nodes[end]));
                         else if (end == node.Uid &&
                                  ((road.RoadLook.IsOneWay() && road.LeftDriving) || !road.RoadLook.IsOneWay()))
-                            nodes[start]._links.Add(new RoutingLink(road, nodes[start], rNode));
+                            rNode._links.Add(new RoadRoutingLink(road, rNode, nodes[start]));
                     }
-                }
-            }
-
-            var linksToAdd = new Dictionary<ulong, List<RoutingLink>>();
-            foreach (var (_, rNode) in nodes)
-            {
-                var node = rNode.Node;
-                TsItem.TsItem[] items = [node.BackwardItem, node.ForwardItem];
-
-                foreach (var item in items)
-                {
-                    if (item is TsPrefabItem prefab)
+                    else if (item is TsPrefabItem prefab)
                     {
                         var pNodes = new List<ulong>(prefab.Nodes);
                         for (var i = 0; i < prefab.Origin; i++)
@@ -133,74 +86,39 @@ namespace TsMap.Exporter.Routing
                             }
                         }
 
-                        var startMapPoint =
-                            prefab.Prefab.MapPoints.FindIndex(x => x.ControlNodeIndex == startNodeIndex);
-                        if (startMapPoint == -1)
-                        {
-                            foreach (var endIndex in endIndexes)
-                            {
-                                nodes[pNodes[endIndex]]._links.Add(new RoutingLink(nodes[pNodes[endIndex]], rNode,
-                                    [], 0, 1));
-                            }
-
-                            continue;
-                        }
 
                         foreach (var endIndex in endIndexes)
                         {
-                            Queue<List<int>> points = new();
-                            points.Enqueue([startMapPoint]);
-                            while (points.Count > 0)
-                            {
-                                var path = points.Dequeue();
-                                var last = prefab.Prefab.MapPoints[path.Last()];
-                                if (path.Count > 1 && last.ControlNodeIndex != -1)
-                                {
-                                    if (last.ControlNodeIndex != endIndex) continue;
-                                    ushort length = 0;
-                                    var roadSize = (byte)(prefab.Prefab.MapPoints[path[0]].LaneCount);
-                                    var elementsIds = new List<ulong> { prefab.GetId(path[0]) };
-                                    for (int i = 1; i < path.Count; i++)
-                                    {
-                                        var (prev, curr) = (prefab.Prefab.MapPoints[path[i - 1]],
-                                            prefab.Prefab.MapPoints[path[i]]);
-                                        length += (ushort)(Math.Sqrt(Math.Pow(prev.X - curr.X, 2) +
-                                                                     Math.Pow(prev.Z - curr.Z, 2)) * 10);
-                                        roadSize = (byte)Math.Min(roadSize, curr.LaneCount);
-                                        elementsIds.Add(prefab.GetId(path[i]));
-                                    }
-
-                                    //if (!linksToAdd.ContainsKey(rNode.Node.Uid)) linksToAdd[pNodes[endIndex]] = new();
-                                    nodes[pNodes[endIndex]]._links.Add(new RoutingLink(nodes[pNodes[endIndex]], rNode,
-                                        elementsIds,
-                                        length, roadSize));
-                                }
-                                else
-                                {
-                                    var neighbours = last.Neighbours.Except(path).ToArray();
-                                    foreach (var conn in neighbours)
-                                    {
-                                        var mp = prefab.Prefab.MapPoints[conn];
-                                        if (neighbours.Length == 1 || mp.DestinationNodes.Any(x => x == endIndex) ||
-                                            mp.ControlNodeIndex == endIndex)
-                                        {
-                                            points.Enqueue([..path, conn]);
-                                        }
-                                    }
-                                }
-                            }
+                            rNode._links.Add(new PrefabRoutingLink(prefab, rNode, nodes[pNodes[endIndex]]));
                         }
                     }
                 }
+            }
 
-                foreach (var (startNodeUid, links) in linksToAdd)
+            Dictionary<TsFerry, TsFerryItem> ferryToItem = new();
+            foreach (var f in mapper.FerryPorts.Values)
+            {
+                ferryToItem[f.Ferry] = f;
+            }
+
+            foreach (var (port, connection) in mapper.FerryPorts.Values.SelectMany(x =>
+                         x.Ferry.GetConnections().Where(ferry => ferry.StartPort.Token > ferry.EndPort.Token)
+                             .Select(conn => (x, conn))
+                     ))
+            {
+                var startNodes = port.PrefabItem.Nodes.Where(n => nodes[n].GetLinks().Count > 0).Select(x => nodes[x]);
+                var endNodes = ferryToItem[connection.EndPort].PrefabItem.Nodes
+                    .Where(n => nodes[n].GetLinks().Count > 0).Select(x => nodes[x]);
+                foreach (var start in startNodes)
                 {
-                    foreach (var link in links)
+                    foreach (var end in endNodes)
                     {
-                        nodes[startNodeUid]._links.Add(link);
+                        start._links.Add(new FerryRoutingLink(connection, start, end));
+                        end._links.Add(new FerryRoutingLink(connection, end, start));
                     }
                 }
             }
+
 
             return nodes;
         }
