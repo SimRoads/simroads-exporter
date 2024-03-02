@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
@@ -12,41 +13,50 @@ using Point = NetTopologySuite.Geometries.Point;
 
 namespace TsMap.Exporter.Data
 {
-    public abstract class ExpElement<T> where T : class
+    public abstract class ExpElement<T> : ExpElement where T : class
+    {
+        protected readonly T expObj;
+
+        public ExpElement(T expObj, DataExporter exp) : base(exp)
+        {
+            this.expObj = expObj;
+        }
+    }
+
+    public abstract class ExpElement
     {
         protected readonly DataExporter exporter;
         protected readonly TsMapper mapper;
-        protected readonly T expObj;
 
-        public ExpElement(T expObj, DataExporter exp)
+        public ExpElement(DataExporter exp)
         {
-            this.expObj = expObj;
             this.exporter = exp;
             this.mapper = exp.Mapper;
         }
 
         public abstract ulong GetId();
-        public abstract (string, string) GetTitle();
+        public abstract ulong GetRefId();
+        public abstract (string?, string?) GetTitle();
         public abstract Envelope GetEnvelope();
         public new abstract string GetType();
         public abstract ulong GetGameId();
 
-        public virtual (string, string) GetSubtitle()
+        public virtual (string?, string?) GetSubtitle()
         {
             return (null, null);
         }
 
-        public virtual Image GetIcon()
+        public virtual Image? GetIcon()
         {
             return null;
         }
 
-        public virtual TsCountry GetCountry()
+        public virtual TsCountry? GetCountry()
         {
             return null;
         }
 
-        public virtual TsCity GetCity()
+        public virtual TsCity? GetCity()
         {
             return null;
         }
@@ -56,43 +66,68 @@ namespace TsMap.Exporter.Data
             return new();
         }
 
+        private ExpCity? GetExpCity()
+        {
+            return (GetCity() is var city && city != null)
+                ? (new ExpCity(city, this.exporter))
+                : null;
+        }
+
+        private ExpCountry? GetExpCountry()
+        {
+            return (GetCountry() is var c && c != null)
+                ? (new ExpCountry(c, this.exporter))
+                : null;
+        }
+
         public Dictionary<string, object> ExportDetail()
         {
-            var (subtitleKey, subtitleDefault) = GetSubtitle();
             var e = ExportList().Concat(GetAdditionalData()).ToLookup(x => x.Key, x => x.Value)
                 .ToDictionary(x => x.Key, g => g.First());
             e["type"] = GetType();
-            e["subtitle"] = subtitleKey != null ? Localize(subtitleKey, subtitleDefault) : subtitleDefault;
-            e["country"] = (GetCountry() is var c && c != null)
-                ? (new ExpCountry(c, this.exporter)).ExportList()
-                : null;
-            e["city"] = (GetCity() is var city && city != null)
-                ? (new ExpCity(city, this.exporter)).ExportList()
-                : null;
-            e["icon"] = GetPng(GetIcon());
+            e["subtitle"] = Localize(GetSubtitle());
+            e["country"] = GetExpCountry()?.ExportList();
+            e["city"] = GetExpCity()?.ExportList();
+            e["icon"] = (GetIcon() is var i && i != null) ? GetPng(i) : null;
             return e;
         }
 
         public Dictionary<string, object> ExportList()
         {
-            var (titleKey, titleDefault) = GetTitle();
             return new()
             {
                 { "id", GetId() },
                 { "gameId", Tokenize(GetGameId()) },
-                { "title", titleKey != null ? Localize(titleKey, titleDefault) : titleDefault },
+                { "title", Localize(GetTitle()) },
                 { "envelope", GetGeoJson(GetEnvelope()) }
             };
         }
 
-        protected object Localize(string key, string defaultValue = "")
+        public Dictionary<string, object> ExportIndex()
         {
-            exporter.Translations.SelectedKeys.Add(key);
-            return new
+            return new()
             {
-                localeKey = key,
-                defaultValue = defaultValue == "" ? mapper.Localization.GetLocaleValue(key, "en_us") : defaultValue
+                { "id", GetId() },
+                { "refId", GetRefId() },
+                { "title", GetTitle() },
+                { "subtitle", GetSubtitle() },
+                { "city", GetExpCity()?.GetTitle() },
+                { "country", GetExpCountry()?.GetTitle() }
             };
+        }
+
+        protected object Localize((string?, string?) data)
+        {
+            var (key, defValue) = data;
+            if (key != null)
+            {
+                exporter.Translations.AddKey(key);
+                return new { localeKey = key, defaultValue = defValue };
+            }
+            else
+            {
+                return defValue;
+            }
         }
 
         protected object Tokenize(ulong token)

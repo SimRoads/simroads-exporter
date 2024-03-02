@@ -16,13 +16,18 @@ namespace TsMap.Exporter.Data
     public class DataExporter : MsgPackExporter
     {
         public readonly TranslationExporter Translations;
+        public readonly SearchExporter Search;
         public readonly Quadtree<TsCityItem> CityTree = new();
         public new readonly TsMapper Mapper;
         public readonly ExportSettings ExportSettings;
+        public Dictionary<ulong, List<ExpOverlay>> OverlaysByPrefab = new();
+        public List<ExpCity> Cities = new();
+        public List<ExpCountry> Countries = new();
 
         public DataExporter(TsMapper mapper, ExportSettings settings) : base(mapper)
         {
             Translations = new TranslationExporter(mapper);
+            Search = new SearchExporter(this);
             Mapper = mapper;
             ExportSettings = settings;
 
@@ -30,6 +35,25 @@ namespace TsMap.Exporter.Data
             {
                 CityTree.Insert(new Envelope(city.X, city.X + city.Width, city.Z, city.Z + city.Height), city);
             }
+
+            var activeDlcGuards =
+                Mapper.GetDlcGuardsForCurrentGame().Where(x => x.Enabled).Select(x => x.Index).ToList();
+            foreach (var overlay in Mapper.OverlayManager.GetOverlays())
+            {
+                if (!activeDlcGuards.Contains(overlay.DlcGuard)) continue;
+                var ov = ExpOverlay.Create(overlay, this);
+                if (ov == null) continue;
+                var prefabId = overlay.GetPrefabId();
+                if (!OverlaysByPrefab.ContainsKey(prefabId))
+                {
+                    OverlaysByPrefab[prefabId] = new();
+                }
+
+                OverlaysByPrefab[prefabId].Add(ov);
+            }
+
+            Countries = Mapper.GetCountries().Select(x => new ExpCountry(x, this)).ToList();
+            Cities = Mapper.GetCities().Select(x => new ExpCity(x, this)).ToList();
         }
 
         public Dictionary<string, object> ExportGameDetails()
@@ -102,63 +126,43 @@ namespace TsMap.Exporter.Data
 
         public override void Export(ZipArchive zipArchive)
         {
-            Dictionary<ulong, List<ExpOverlay>> overlaysToPrefab = new();
-
-            var activeDlcGuards =
-                Mapper.GetDlcGuardsForCurrentGame().Where(x => x.Enabled).Select(x => x.Index).ToList();
-            foreach (var overlay in Mapper.OverlayManager.GetOverlays())
-            {
-                if (!activeDlcGuards.Contains(overlay.DlcGuard)) continue;
-                var ov = ExpOverlay.Create(overlay, this);
-                if (ov == null) continue;
-                var prefabId = overlay.GetPrefabId();
-                if (!overlaysToPrefab.ContainsKey(prefabId))
-                {
-                    overlaysToPrefab[prefabId] = new();
-                }
-
-                overlaysToPrefab[prefabId].Add(ov);
-            }
-
-            List<ExpCountry> expCountries = Mapper.GetCountries().Select(x => new ExpCountry(x, this)).ToList();
-            List<ExpCity> expCities = Mapper.GetCities().Select(x => new ExpCity(x, this)).ToList();
-
             WriteMsgPack(zipArchive, Path.Join("json", "map.msgpack"), ExportGameDetails());
             Logger.Instance.Info($"Exported map file");
 
             WriteMsgPack(zipArchive, Path.Join("json", "countries.msgpack"),
-                expCountries.Select(x => x.ExportList()).ToList());
+                Countries.Select(x => x.ExportList()).ToList());
             Logger.Instance.Info($"Exported countries file");
 
             WriteMsgPack(zipArchive, Path.Join("json", "cities.msgpack"),
-                expCities.Select(x => x.ExportList()).ToList());
+                Cities.Select(x => x.ExportList()).ToList());
             Logger.Instance.Info($"Exported countries file");
 
             int i;
-            for (i = 0; i < expCountries.Count; i++)
+            for (i = 0; i < Countries.Count; i++)
             {
-                var c = expCountries[i];
+                var c = Countries[i];
                 WriteMsgPack(zipArchive, Path.Join("json", "overlays", c.GetId() + ".msgpack"), c.ExportDetail());
-                Logger.Instance.Info($"Exported country {i + 1}/{expCountries.Count}");
+                Logger.Instance.Info($"Exported country {i + 1}/{Countries.Count}");
             }
 
-            for (i = 0; i < expCities.Count; i++)
+            for (i = 0; i < Cities.Count; i++)
             {
-                var c = expCities[i];
+                var c = Cities[i];
                 WriteMsgPack(zipArchive, Path.Join("json", "overlays", c.GetId() + ".msgpack"), c.ExportDetail());
-                Logger.Instance.Info($"Exported city {i + 1}/{expCities.Count}");
+                Logger.Instance.Info($"Exported city {i + 1}/{Cities.Count}");
             }
 
             i = 0;
-            foreach (var (prefabId, overlay) in overlaysToPrefab)
+            foreach (var (prefabId, overlay) in OverlaysByPrefab)
             {
                 WriteMsgPack(zipArchive, Path.Join("json", "overlays", prefabId + ".msgpack"),
                     overlay.Select(x => x.ExportDetail()).ToList());
-                Logger.Instance.Info($"Exported overlay {i + 1}/{overlaysToPrefab.Count}");
+                Logger.Instance.Info($"Exported overlay {i + 1}/{OverlaysByPrefab.Count}");
                 i++;
             }
 
             Translations.Export(zipArchive);
+            Search.Export(zipArchive);
         }
     }
 }

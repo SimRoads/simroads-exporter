@@ -18,6 +18,11 @@ namespace TsMap.Exporter.Data
             return expObj.GetId();
         }
 
+        public override ulong GetRefId()
+        {
+            return expObj.GetId();
+        }
+
 
         public override (string, string) GetTitle()
         {

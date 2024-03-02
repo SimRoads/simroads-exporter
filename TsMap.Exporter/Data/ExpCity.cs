@@ -14,8 +14,12 @@ namespace TsMap.Exporter.Data
         {
         }
 
-
         public override ulong GetId()
+        {
+            return expObj.GetId();
+        }
+
+        public override ulong GetRefId()
         {
             return expObj.GetId();
         }

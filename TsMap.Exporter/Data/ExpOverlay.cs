@@ -50,6 +50,11 @@ namespace TsMap.Exporter.Data
             refObj = expObj.ReferenceObj as T;
         }
 
+        public override ulong GetRefId()
+        {
+            return expObj.GetPrefabId();
+        }
+
         public override Image GetIcon()
         {
             return expObj.OverlayImage.GetImage();
@@ -142,7 +147,7 @@ namespace TsMap.Exporter.Data
 
         public override (string, string) GetTitle()
         {
-            return (null, "%Bus Stop%");
+            return ("bus_stop", null);
         }
 
         public override ulong GetGameId()
@@ -164,7 +169,7 @@ namespace TsMap.Exporter.Data
 
         public override (string, string) GetTitle()
         {
-            return (null, refObj.Company?.Name ?? "%Unknown Company%");
+            return (refObj.Company != null ? null : "unknown_company" , refObj.Company?.Name);
         }
 
         public override ulong GetGameId()
@@ -179,7 +184,7 @@ namespace TsMap.Exporter.Data
 
         public override (string, string) GetSubtitle()
         {
-            return ("job_offer_title", "%Company%");
+            return ("job_offer_title", null);
         }
     }
 
@@ -196,7 +201,7 @@ namespace TsMap.Exporter.Data
 
         public override (string, string) GetSubtitle()
         {
-            return ("viewpoint_title", "%Landmark%");
+            return ("viewpoint_title", null);
         }
 
         public override ulong GetGameId()
@@ -218,7 +223,7 @@ namespace TsMap.Exporter.Data
 
         public override (string, string) GetSubtitle()
         {
-            return refObj.IsTrain ? ("mapl_train", "%EuroTunnel%") : ("mapl_port", "%Ferry Port%");
+            return refObj.IsTrain ? ("mapl_train", null) : ("mapl_port", null);
         }
 
         public override ulong GetGameId()
@@ -245,40 +250,33 @@ namespace TsMap.Exporter.Data
 
         public override (string, string) GetTitle()
         {
-            string token = null, defaultName = "Undefined prefab";
+            string token = "undefined_prefab";
             switch (expObj.OverlayName)
             {
                 case "gas_ico":
                     token = "mapl_gas";
-                    defaultName = "%Gas Station%";
                     break;
                 case "service_ico":
                     token = "mapl_service";
-                    defaultName = "%Service%";
                     break;
                 case "dealer_ico":
                     token = "mapl_dealer";
-                    defaultName = "%Dealer%";
                     break;
                 case "weigh_station_ico":
                     token = "mapl_weighst";
-                    defaultName = "%Weight Station%";
                     break;
                 case "garage_large_ico":
                     token = "mapl_garage";
-                    defaultName = "%Garage%";
                     break;
                 case "recruitment_ico":
                     token = "mapl_recruit";
-                    defaultName = "%Recruitment Agency%";
                     break;
                 case "parking_ico":
                     token = "mapl_parking";
-                    defaultName = "%Parking%";
                     break;
             }
 
-            return (token, defaultName);
+            return (token, null);
         }
 
         public override ulong GetGameId()
@@ -318,16 +316,15 @@ namespace TsMap.Exporter.Data
 
         public override (string, string) GetTitle()
         {
-            string token = null, defaultName = "Undefined trigger";
+            string token = "undefined_trigger";
             switch (expObj.OverlayName)
             {
                 case "parking_ico":
                     token = "mapl_parking";
-                    defaultName = "%Parking%";
                     break;
             }
 
-            return (token, defaultName);
+            return (token, null);
         }
 
         public override ulong GetGameId()
@@ -371,7 +368,7 @@ namespace TsMap.Exporter.Data
         {
             if (roadNumber != null)
             {
-                return ("mapl_road_numbers", "%Road Numbers%");
+                return ("mapl_road_numbers", null);
             }
 
             return (null, null);
@@ -382,13 +379,13 @@ namespace TsMap.Exporter.Data
             switch (expObj.OverlayName)
             {
                 case "quarry":
-                    return ("mapl_quarry", "%Quarry%");
+                    return ("mapl_quarry", null);
                 case "toll_ico":
-                    return ("mapl_toll", "%Toll Booth%");
+                    return ("mapl_toll", null);
                 case "border_ico":
-                    return ("mapl_border", "%Border Crossing%");
+                    return ("mapl_border", null);
                 case "weigh_ico":
-                    return ("mapl_weighst", "%Weight Station%");
+                    return ("mapl_weighst", null);
             }
 
             if (roadNumber != null)
@@ -397,7 +394,7 @@ namespace TsMap.Exporter.Data
             }
             else
             {
-                return (null, "Undefined overlay");
+                return ("undefined_overlay", null);
             }
         }
 
