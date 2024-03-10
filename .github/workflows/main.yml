@@ -1,4 +1,4 @@
-name: Builds
+name: Build & Publish
 
 on:
   push:
@@ -18,12 +18,9 @@ jobs:
     with:
       project_name: ${{ matrix.proj_name }}
   
-  export:
-    strategy:
-      matrix:
-        export_conf: ${{ vars.GAMES_EXPORT }}
+  publish:
     needs: build
-    uses: ./.github/workflows/export.yml
-    with:
-      game: ${{ matrix.export_conf.game}}
-      export_name: ${{ matrix.export_conf.export_name}}
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
+  
+  

@@ -61,7 +61,7 @@ namespace TsMap.Exporter.Data
             return null;
         }
 
-        public virtual Dictionary<string, object> GetAdditionalData()
+        public virtual Dictionary<string, object?> GetAdditionalData()
         {
             return new();
         }
@@ -80,9 +80,9 @@ namespace TsMap.Exporter.Data
                 : null;
         }
 
-        public Dictionary<string, object> ExportDetail()
+        public Dictionary<string, object?> ExportDetail()
         {
-            var e = ExportList().Concat(GetAdditionalData()).ToLookup(x => x.Key, x => x.Value)
+            Dictionary<string, object?> e = ExportList().Concat(GetAdditionalData()).ToLookup(x => x.Key, x => x.Value)
                 .ToDictionary(x => x.Key, g => g.First());
             e["type"] = GetType();
             e["subtitle"] = Localize(GetSubtitle());
@@ -92,7 +92,7 @@ namespace TsMap.Exporter.Data
             return e;
         }
 
-        public Dictionary<string, object> ExportList()
+        public Dictionary<string, object?> ExportList()
         {
             return new()
             {
@@ -103,20 +103,21 @@ namespace TsMap.Exporter.Data
             };
         }
 
-        public Dictionary<string, object> ExportIndex()
+        public Dictionary<string, object?> ExportIndex()
         {
             return new()
             {
                 { "id", GetId() },
                 { "refId", GetRefId() },
-                { "title", GetTitle() },
-                { "subtitle", GetSubtitle() },
-                { "city", GetExpCity()?.GetTitle() },
-                { "country", GetExpCountry()?.GetTitle() }
+                { "type", GetType() },
+                { "title", Localize(GetTitle()) },
+                { "subtitle", Localize(GetSubtitle()) },
+                { "city", (GetExpCity() is var c && c != null) ? Localize(c.GetTitle()) : null },
+                { "country", (GetExpCountry() is var cc && cc != null) ? Localize(cc.GetTitle()) : null }
             };
         }
 
-        protected object Localize((string?, string?) data)
+        protected object? Localize((string?, string?) data)
         {
             var (key, defValue) = data;
             if (key != null)
@@ -124,10 +125,8 @@ namespace TsMap.Exporter.Data
                 exporter.Translations.AddKey(key);
                 return new { localeKey = key, defaultValue = defValue };
             }
-            else
-            {
-                return defValue;
-            }
+
+            return defValue;
         }
 
         protected object Tokenize(ulong token)

@@ -1,0 +1,47 @@
+name: Publish
+
+on:
+  - workflow_call
+  - workflow_dispatch
+
+jobs:
+  export:
+    strategy:
+      matrix:
+        export_conf: ${{ fromJson(vars.GAMES_EXPORT) }}
+    uses: ./.github/workflows/export_single.yml
+    with:
+      game: ${{ matrix.export_conf.game}}
+      mods: ${{ matrix.export_conf.mods}}
+      map_name: ${{ matrix.export_conf.map_name}}
+      map_id: ${{ matrix.export_conf.map_id}}
+      
+  pack:
+    runs-on: ubuntu-latest
+    needs: export
+    steps:
+      - name: Download exports
+        uses: actions/download-artifact@v4
+        with:
+          path: export_artifacts
+          pattern: "*_export"
+          merge-multiple: true
+      
+      - name: Save configuration
+        env:
+          GAMES_EXPORT: ${{ vars.GAMES_EXPORT }}
+        run: echo $GAMES_EXPORT > export_artifacts/config.json
+      
+      - name: Pack exports
+        uses: actions/upload-artifact@v4
+        with:
+          name: all_games_export
+          path: export_artifacts
+          
+  create_ghp_dist:
+    needs: pack
+    uses: simroads/simroads-ui/.github/workflows/ghp_dists.yml@main
+    with:
+      export_run_id: ${{ github.run_id }}
+      prepend_path: ${{ github.ref != 'refs/heads/main' && github.ref || '' }}
+    secrets: inherit

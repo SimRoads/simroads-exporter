@@ -6,17 +6,12 @@ on:
       project_name:
         required: true
         type: string
-      only_linux:
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   build-windows:
     runs-on: windows-latest
-    if: ${{ !inputs.only_linux }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
@@ -29,7 +24,7 @@ jobs:
       - name: Publish
         run: dotnet publish ${{ inputs.project_name }} --configuration Release
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
             name: ${{ inputs.project_name }}-windows
             path: artifacts/publish/*
@@ -37,7 +32,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
@@ -53,7 +48,7 @@ jobs:
       - name: Permissions & Rename
         run: (for f in artifacts/publish/*.linux-x64;do mv $f $f.bin;done) && chmod u+x artifacts/publish/${{ inputs.project_name }}.linux-x64.bin
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
             name: ${{ inputs.project_name }}-linux
             path: artifacts/publish/*
