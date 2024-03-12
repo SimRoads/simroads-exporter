@@ -36,7 +36,7 @@ on:
 jobs:
   export:
     runs-on: exporter
-    steps:
+    steps:        
       - name: Download exporter
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -44,14 +44,25 @@ jobs:
           name: TsMap.Exporter-linux
           search_artifacts: true
           workflow_conclusion: ""
+
+      - name: Get mods option
+        id: get_mods
+        env:
+          mods_path: ${{ inputs.mods }}
+        run: |
+          python3 -c "import os; mods = '--mods ' + ','.join([os.path.join('/home/simroads/games/mods', mod) for mod in os.getenv('mods_path').split(',')]) if os.getenv('mods_path') else ''; print(f'::set-output name=mods::{mods}')"
+      
       - name: Export
         env:
-            mods_path: ${{ inputs.mods }}
+          DLC_GUARDS: ${{ inputs.game == 'ETS2' && vars.ETS2_DLC_GUARDS || inputs.game == 'ATS' && vars.ATS_DLC_GUARDS || null }}
         run: |
           chmod +x ./TsMap.Exporter.linux-x64.bin
-          python3 -c "import os; mods_path = '--mods ' + ','.join([os.path.join('/games/mods', mod) for mod in os.getenv('mods_path').split(',')]) if os.getenv('mods_path') else ''; os.system(f'./TsMap.Exporter.linux-x64.bin -g /games/${{inputs.game}} {mods_path} --map-name ${{inputs.map_name}} --zip-path ${{inputs.map_id}}_export.zip')"
+          ./TsMap.Exporter.linux-x64.bin -g /home/simroads/games/${{inputs.game}} ${{steps.get_mods.outputs.mods}} --map-name ${{inputs.map_name}} --zip-path ${{inputs.map_id}}_export.zip
+
       - name: Upload export
         uses: actions/upload-artifact@v4
         with:
             name: ${{ inputs.map_id}}_export
             path: ${{ inputs.map_id}}_export.zip
+      
+      - uses: eviden-actions/clean-self-hosted-runner@v1

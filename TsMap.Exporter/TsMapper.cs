@@ -46,6 +46,7 @@ namespace TsMap.Exporter
                     ccs.parent = p1;
                     p1.childs.Add(ccs);
                 }
+
                 p2.parent = p1;
                 p1.childs.Add(p2);
                 p1.MinY = Math.Min(p1.MinY, p2.MinY);
@@ -66,6 +67,7 @@ namespace TsMap.Exporter
                 {
                     parent.Borders.Add(new(x, y));
                 }
+
                 MinY = Math.Min(MinY, y);
                 MaxY = Math.Max(MaxY, y);
                 MinX = Math.Min(MinX, x);
@@ -77,12 +79,13 @@ namespace TsMap.Exporter
                 if (MaxX - MinX > 1 && MaxY - MinY > 1)
                 {
                     // Find concave hull
-                    var points = new MultiPoint(parent.Borders.Select(p => new NetTopologySuite.Geometries.Point(p.Item1, p.Item2)).ToArray());
+                    var points = new MultiPoint(parent.Borders
+                        .Select(p => new NetTopologySuite.Geometries.Point(p.Item1, p.Item2)).ToArray());
                     return (Polygon)ConcaveHull.ConcaveHullByLength(points, 5);
                 }
+
                 return null;
             }
-
         }
 
         public TsMapper(string gameDir, List<Mod> mods) : base(gameDir, mods)
@@ -96,9 +99,11 @@ namespace TsMap.Exporter
             {
                 image.Mutate(x => x.DrawImage(
                     Backgrounds[i].GetImage(),
-                    new SixLabors.ImageSharp.Point((int)Backgrounds[i].Width * (i / 2), (int)Backgrounds[i].Height * (i % 2)), 1)
+                    new SixLabors.ImageSharp.Point((int)Backgrounds[i].Width * (i / 2),
+                        (int)Backgrounds[i].Height * (i % 2)), 1)
                 );
             }
+
             image.Mutate(im => im.BackgroundColor(Color.White).BinaryThreshold(0.5f, BinaryThresholdMode.Luminance));
             //Find connected components
             CC[] ccLine = new CC[image.Width];
@@ -127,6 +132,7 @@ namespace TsMap.Exporter
                             ccLine[x] = new CC();
                             ccs.Add(ccLine[x]);
                         }
+
                         ccLine[x].Add(x, y, image);
                     }
                 }
@@ -139,17 +145,17 @@ namespace TsMap.Exporter
                     var polyImage = cc.GetPolygon();
                     if (polyImage != null)
                     {
-                        var poly = new Polygon(new LinearRing(polyImage.ExteriorRing.Coordinates.Select(p => new Coordinate(
-                            BackgroundPos.X + (p.X / (float)image.Width) * BackgroundPos.Width,
-                            BackgroundPos.Y + (p.Y / (float)image.Height) * BackgroundPos.Height
-                        )).ToArray()));
+                        var poly = new Polygon(new LinearRing(polyImage.ExteriorRing.Coordinates.Select(p =>
+                            new Coordinate(
+                                BackgroundPos.X + (p.X / (float)image.Width) * BackgroundPos.Width,
+                                BackgroundPos.Y + (p.Y / (float)image.Height) * BackgroundPos.Height
+                            )).ToArray()));
                         var country = NodesIndex.NearestNeighbor(poly.Centroid.Coordinate).Data.GetCountry();
                         if (!Boundaries.ContainsKey(country)) Boundaries.Add(country, new List<Polygon>());
                         Boundaries[country].Add(poly);
                     }
                 }
             }
-
         }
 
         protected virtual void PopulateIndexes()
@@ -170,10 +176,10 @@ namespace TsMap.Exporter
 
         public override List<DlcGuard> GetDlcGuardsForCurrentGame()
         {
-            return Environment.GetEnvironmentVariable("DLC_GUARDS")?.Split(";").Select(x =>
+            return Environment.GetEnvironmentVariable("DLC_GUARDS")?.Split("\n").Where(x => x.Contains(',')).Select(x =>
             {
                 var dlc_data = x.Split(",");
-                return new DlcGuard(dlc_data[0], (byte)int.Parse(dlc_data[1]), dlc_data.Length > 2 ? bool.Parse(dlc_data[2]) : true);
+                return new DlcGuard(dlc_data[0], (byte)int.Parse(dlc_data[1]), true);
             }).ToList() ?? base.GetDlcGuardsForCurrentGame();
         }
 

@@ -1,0 +1,56 @@
+name: Download game
+
+on:
+  workflow_dispatch:
+    inputs:
+      game:
+        required: true
+        type: choice
+        options:
+          - ETS2
+          - ATS
+
+
+jobs:
+  download-game:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSHFS_PRIVATE_KEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.SSHFS_KNOWN_HOSTS }}
+          config: ${{ secrets.SSHFS_CONFIG }}
+          if_key_exists: fail
+    
+      - name: Mount remote directory
+        run: |
+          sudo apt-get install -y sshfs
+          mkdir simroads && sshfs -o Ciphers=chacha20-poly1305@openssh.com,compression=no,reconnect,cache=yes,kernel_cache simroads_sshfs:/home/simroads/games ./simroads
+
+      - uses: CyberAndrii/setup-steamcmd@v1
+      - uses: CyberAndrii/steam-totp@v1
+        id: steam-totp
+        with:
+          shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
+
+      - name: Install Game
+        env:
+          STEAMCMD_USER: ${{ secrets.STEAM_USER }}
+          STEAMCMD_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+          STEAMCMD_TOTP: ${{ steps.steam-totp.outputs.code }}
+          INPUT_GAME: ${{ inputs.game }}
+        run: |
+          import os
+          user = os.getenv("STEAMCMD_USER")
+          password = os.getenv("STEAMCMD_PASSWORD")
+          totp = os.getenv("STEAMCMD_TOTP")
+          game = os.getenv("INPUT_GAME")
+          app_id = 227300 if game == "ETS2" else 270880
+          dir = "ETS2" if game == "ETS2" else "ATS"
+          print(f"ls {os.getcwd()}/simroads/{dir}")
+          os.system(f"ls {os.getcwd()}/simroads/{dir}")
+          os.system(f"steamcmd +force_install_dir {os.getcwd()}/simroads/{dir} +login {user} {password} {totp} +app_update {app_id} +quit")
+        shell: python
+      

@@ -52,6 +52,7 @@ namespace TsMap.Common
         public static readonly List<DlcGuard> DefaultEts2DlcGuards = new List<DlcGuard>()
         {
             new DlcGuard("No Guard", 0),
+            new DlcGuard("No Guard", 0),
             new DlcGuard("dlc_east", 1),
             new DlcGuard("dlc_north", 2),
             new DlcGuard("dlc_fr", 3),
@@ -67,9 +68,9 @@ namespace TsMap.Common
             new DlcGuard("dlc_russia", 13, false),
             new DlcGuard("dlc_balt_and_russia", 14, false),
             new DlcGuard("dlc_krone", 15),
-            new DlcGuard("dlc_blkw", 16, false),
-            new DlcGuard("dlc_blkw_and_east", 17, false),
-            new DlcGuard("dlc_blkw_and_blke", 18, false),
+            new DlcGuard("dlc_blkw", 16),
+            new DlcGuard("dlc_blkw_and_east", 17),
+            new DlcGuard("dlc_blkw_and_blke", 18),
             new DlcGuard("dlc_feldbinder", 19),
         };
 

@@ -15,6 +15,7 @@ jobs:
       mods: ${{ matrix.export_conf.mods}}
       map_name: ${{ matrix.export_conf.map_name}}
       map_id: ${{ matrix.export_conf.map_id}}
+    secrets: inherit
       
   pack:
     runs-on: ubuntu-latest
