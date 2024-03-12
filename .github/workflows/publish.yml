@@ -44,5 +44,4 @@ jobs:
     uses: simroads/simroads-ui/.github/workflows/ghp_dists.yml@main
     with:
       export_run_id: ${{ github.run_id }}
-      prepend_path: ${{ github.ref != 'refs/heads/main' && github.ref || '' }}
     secrets: inherit
